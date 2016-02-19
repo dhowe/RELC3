@@ -33,10 +33,8 @@ public class PoeticCaptionMulti extends MultiPageApplet
   
   public void setup() 
   {
-    // server setup
     //enableServer("rednoise.org");
 
-    // font setup
     FONT = "Baskerville"; // Baskerville (22), Perpetua (24); MinionPro-Regular(20)
     FONT_VLW = FONT + "-26" + ".vlw";
     RiText.defaultFont(loadFont(FONT_VLW));
