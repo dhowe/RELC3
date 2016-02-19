@@ -1,6 +1,8 @@
 #!/bin/sh
 
+
 cd bin
+rm -rf ../p5/PoeticCaption/application.*
 jar cvf ../p5/PoeticCaption/code/PoeticCaption.jar trp data
 cp -r ../rita.jar ../p5/PoeticCaption/code/
 echo
