@@ -93,7 +93,7 @@ public class PoeticCaptionMulti extends MultiPageApplet
   public static void main(String[] args)
   {
     info("Running " + PoeticCaptionMulti.class.getName());
-    String[] options = {  "--hide-stop", PoeticCaptionMulti.class.getName() };
+    String[] options = { "--hide-stop", PoeticCaptionMulti.class.getName() };
     PApplet.main(options);
   }
 

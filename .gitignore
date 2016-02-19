@@ -1,6 +1,6 @@
 p5/PoeticCaption/code/PoeticCaption.jar
 p5/PoeticCaption/application*
-p5/PoeticCaption[0-9]
+p5/PoeticCaption[0-9]*
 rita-1.0.38.jar
 core-old.jar
 bin
