@@ -1,20 +1,14 @@
 package trp.layout;
 
-import static trp.util.Direction.N;
-import static trp.util.Direction.NE;
-import static trp.util.Direction.NW;
-import static trp.util.Direction.S;
-import static trp.util.Direction.SE;
+import static trp.util.Direction.*;
+
+import java.awt.Image;
 
 import processing.core.PApplet;
+import processing.core.PImage;
 import rita.RiText;
-import trp.behavior.DefaultVisuals;
-import trp.behavior.NeighborFadingVisual;
-import trp.behavior.ReaderBehavior;
-import trp.behavior.SpawnDirectionalPRs;
-import trp.reader.MachineReader;
-import trp.reader.PerigramReader;
-import trp.reader.SimpleReader;
+import trp.behavior.*;
+import trp.reader.*;
 import trp.util.PerigramLookup;
 
 public class PoeticCaptionMulti extends MultiPageApplet
@@ -34,6 +28,9 @@ public class PoeticCaptionMulti extends MultiPageApplet
   public void setup() 
   {
     //enableServer("rednoise.org");
+
+  	surface.setTitle("PoeticCaption"); // setup frame
+  	surface.setIcon(loadImage("sketch1024.png"));
 
     FONT = "Baskerville"; // Baskerville (22), Perpetua (24); MinionPro-Regular(20)
     FONT_VLW = FONT + "-26" + ".vlw";
@@ -96,7 +93,7 @@ public class PoeticCaptionMulti extends MultiPageApplet
   public static void main(String[] args)
   {
     info("Running " + PoeticCaptionMulti.class.getName());
-    String[] options = { "--present", "--hide-stop", PoeticCaptionMulti.class.getName() };
+    String[] options = {  "--hide-stop", PoeticCaptionMulti.class.getName() };
     PApplet.main(options);
   }
 

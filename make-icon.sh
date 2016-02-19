@@ -13,4 +13,4 @@ sips -z 512 512   sketch1024.png --out sketch.iconset/icon_256x256@2x.png
 sips -z 512 512   sketch1024.png --out sketch.iconset/icon_512x512.png
 cp sketch1024.png sketch.iconset/icon_512x512@2x.png
 iconutil -c icns sketch.iconset
-rm -R sketch.iconset
+#rm -R sketch.iconset
