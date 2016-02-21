@@ -47,7 +47,7 @@ public class DefaultVisuals extends ReaderBehavior
 
     fadeCell(word, getReaderColor(), getDelayBeforeFadeIn(), getFadeInTime());
     // word.fill(getColor());
-    word.showBounds(mr.testMode);
+    // word.showBounds(mr.testMode);
     
     fadeCell(word, grid.template().fill(), getDelayBeforeFadeBack() + getDelayBeforeFadeIn(), getFadeOutTime());
   }

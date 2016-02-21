@@ -476,6 +476,7 @@ public abstract class MachineReader implements ReaderConstants
     this.currentCell = rt;
   }
 
+  @SuppressWarnings("unused")
   private static void getReadersOnCell(List result, RiTextGrid theGrid, int xVal, int yVal)
   {
     for (Iterator it = instances.iterator(); it.hasNext();)

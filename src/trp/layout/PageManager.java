@@ -47,6 +47,7 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
   private PFont font;
   private RiText[] allWords;
   
+  @SuppressWarnings("unused")
   private boolean showPageNumbers=true, disablePageFlips, drawMidLine=false;
   protected boolean flipping, is3D, useGLGraphics, doServerFocus = false;
   
@@ -673,6 +674,7 @@ System.out.println("remainingText:"+remainingText);
   }
 
   // not used at moment
+  @SuppressWarnings("unused")
   private void addSpotlight(PImage p, MachineReader ... readers)
   {
     if (readers == null || readers.length<1) return;

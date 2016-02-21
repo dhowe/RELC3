@@ -188,6 +188,7 @@ public class DigramReader extends SimpleReader// implements Digrammable
     conText = conText + "<br>";
   }
 
+  @SuppressWarnings("unused")
   private void buildConTextForServer(Direction wayToGo, String NEConText, String SEConText, RiText[] neighbors)
   {
     if (neighbors == null || neighbors[C.toInt()] == null || neighbors[E.toInt()] == null)
@@ -238,6 +239,7 @@ public class DigramReader extends SimpleReader// implements Digrammable
     return result;
   }
 
+  @SuppressWarnings("unused")
   private boolean isDigram(RiText current, RiText[] neighbors, Direction direction, boolean addToConsoleString)
   {
     boolean result = isDigram(current, neighbors[direction.toInt()]);

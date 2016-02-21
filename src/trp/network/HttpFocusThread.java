@@ -81,7 +81,6 @@ public class HttpFocusThread extends Thread implements ReaderConstants
       Readers.warn("Unexpected message from focus-server: "+response);
   }
   
-  @SuppressWarnings("unused")
   public void getServerFocus()
   { 
     //Readers.info(" got: '"+response.trim()+"'");

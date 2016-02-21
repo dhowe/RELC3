@@ -1480,6 +1480,7 @@ public class RiTextGrid
     return rtg.originalWordAt(p.x, p.y);
   }
 
+  @SuppressWarnings("unused")
   private RiText getClosestCell(RiText rt)
   {
     if (rt == null)

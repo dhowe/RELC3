@@ -193,6 +193,7 @@ public class PerigramLookup implements ReaderConstants
   }
 
   // never-called
+  @SuppressWarnings("unused")
   private boolean isAlsoDigram(RiText r0, RiText r1, RiText r2)
   {
     return isPerigram(r0, r1, r2) && (bigramMap.containsKey(r0.text() + " " + r1.text()));

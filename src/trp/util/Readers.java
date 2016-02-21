@@ -225,7 +225,8 @@ public class Readers implements ReaderConstants
 		return result;
 	}
 
-	private static Map loadPrefs(String url) {
+	@SuppressWarnings("unused")
+  private static Map loadPrefs(String url) {
 		Map m = new HashMap();
 		try {
 			URL destURL = new URL(url);

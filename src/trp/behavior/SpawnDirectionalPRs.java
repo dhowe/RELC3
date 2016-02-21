@@ -17,7 +17,6 @@ public class SpawnDirectionalPRs extends Spawning
   private Direction[] spawningDirections;
   private RiText prevCell, currCell, spurCell;
   private ReaderBehavior spawnedVB;
-  private float spawnSpeed;
 
   public SpawnDirectionalPRs(PerigramLookup pl, ReaderBehavior vb, Direction... d)
   {
