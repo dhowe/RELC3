@@ -261,8 +261,8 @@ public class RiTextGrid
       template = new RiText(_pApplet);
     }
     template.fill(DEFAULT_COLOR);
-    template.position(Float.MAX_VALUE, Float.MAX_VALUE);
-    template.alpha(0); // invisible
+    template.position(Float.MAX_VALUE, Float.MAX_VALUE); // this makes it invisible
+    // template.alpha(0); // don't do this: messes with fades back to DEFAULT_COLOUR
   }
 
   public void showBoundingBoxes(boolean b)
