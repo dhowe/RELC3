@@ -1,7 +1,12 @@
 package trp.layout;
 
 import static trp.util.Direction.*;
+
+import java.security.KeyStore.CallbackHandlerProtection;
+
 import processing.core.PApplet;
+import processing.core.PFont;
+import rita.RiString;
 import rita.RiText;
 import trp.behavior.*;
 import trp.reader.*;
@@ -14,10 +19,13 @@ public class ELC3Multi extends MultiPageApplet
   public static int[] COLORS = { 0xFA0027, 0x0095FF, 0xFFB01C, 0x00D107 };
   public static float[] READER_MONOCOLOR = BLACK;
 
-  protected static String TEXT = "textual/image.txt";
-  protected static String TEXT2 = "textual/image.txt";
+  protected static String TEXT = "textual/poeticCaption.txt";
+  protected static String TEXT2 = "textual/poeticCaption.txt";
   protected static final String MESOSTIC = "reading through writing through"; // not
   protected static String APP_ID = "pbtest";
+  
+  // TODO: variables for button mockup only:
+  PFont buttonsFont;
 
   public void settings()
   {
@@ -40,6 +48,9 @@ public class ELC3Multi extends MultiPageApplet
     // MinionPro-Regular(20)
     FONT_VLW = FONT + "-25" + ".vlw"; // was 26
     RiText.defaultFont(loadFont(FONT_VLW));
+    
+    // TODO: button mockup code
+    buttonsFont = loadFont("StoneSans-Semi-14.vlw");
 
     // grid color setup
     LAYOUT_BACKGROUND_COLOR = BLACK_INT; // CHANGE THIS TO INVERT; > 127 dark on light
@@ -135,6 +146,19 @@ public class ELC3Multi extends MultiPageApplet
     // rdr5.start();
 
     pManager.onUpdateFocusedReader(rdr1);
+  }
+
+  public void draw()
+  {
+    background(LAYOUT_BACKGROUND_COLOR);
+    
+    // TODO: for mockup only:
+    g.textFont(buttonsFont);
+    g.text("Text: Poetic Caption", 80, 710);
+    g.text("Reader 1: Perigram Reader", 300, 710);
+    
+    pManager.draw(g);
+    
   }
 
   public static void main(String[] args)
