@@ -1,12 +1,8 @@
 package trp.layout;
 
 import static trp.util.Direction.*;
-
-import java.security.KeyStore.CallbackHandlerProtection;
-
 import processing.core.PApplet;
 import processing.core.PFont;
-import rita.RiString;
 import rita.RiText;
 import trp.behavior.*;
 import trp.reader.*;
@@ -14,9 +10,6 @@ import trp.util.PerigramLookup;
 
 public class ELC3Multi extends MultiPageApplet
 {
-  // colors are Megan's Red[0], Blue[1], Yellow[2], Green[3]
-
-  public static int[] COLORS = { 0xFA0027, 0x0095FF, 0xFFB01C, 0x00D107 };
   public static float[] READER_MONOCOLOR = BLACK;
 
   protected static String TEXT = "textual/poeticCaption.txt";
@@ -164,7 +157,8 @@ public class ELC3Multi extends MultiPageApplet
   public static void main(String[] args)
   {
     info("Running " + ELC3Multi.class.getName());
-    String[] options = { "--present", "--hide-stop","--bgcolor=#000000",
+    //String[] options = { "--present", "--hide-stop","--bgcolor=#000000",
+    String[] options = { "--hide-stop","--bgcolor=#000000",
         ELC3Multi.class.getName() };
     PApplet.main(options);
   }

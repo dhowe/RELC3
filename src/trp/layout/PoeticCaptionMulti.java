@@ -29,6 +29,7 @@ public class PoeticCaptionMulti extends MultiPageApplet
   {
     //enableServer("rednoise.org");
 
+  	frame.setBackground( new  java.awt.Color( 255 , 0 , 0 ));
   	surface.setTitle("PoeticCaption"); // setup frame
   	surface.setIcon(loadImage("sketch1024.png"));
 
@@ -93,7 +94,8 @@ public class PoeticCaptionMulti extends MultiPageApplet
   public static void main(String[] args)
   {
     info("Running " + PoeticCaptionMulti.class.getName());
-    String[] options = { "--hide-stop", PoeticCaptionMulti.class.getName() };
+    String[] options = { "--present", "--hide-stop", 
+    		"--window-color=#ff0000", PoeticCaptionMulti.class.getName() };
     PApplet.main(options);
   }
 
