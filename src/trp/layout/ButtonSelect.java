@@ -108,16 +108,12 @@ public class ButtonSelect implements ReaderConstants
     if (contains(mx, my))
     {
       p.fill(hoverFill[0], hoverFill[1], hoverFill[2], hoverFill[3]);
-      p.cursor();
-      ; // show cursor on hover
     }
     else if (fill != null)
     {
       p.fill(fill[0], fill[1], fill[2], fill[3]);
-      p.noCursor(); // no cursor when not hovering
     }
-    else
-      p.noCursor(); // no cursor when not hovering
+
     p.noStroke();
     p.rect(x - strokeWeight, y - strokeWeight, width + strokeWeight * 2, height + strokeWeight * 2);
   }

@@ -159,6 +159,11 @@ public class ELC3Multi extends MultiPageApplet
     background(LAYOUT_BACKGROUND_COLOR);
     
     // TODO: buttons drawing
+    if (mouseY > 694)
+      cursor();
+    else
+      noCursor();
+    
     ButtonSelect.drawAll(mouseX, mouseY);
     
     pManager.draw(g);
