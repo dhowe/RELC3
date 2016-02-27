@@ -16,20 +16,21 @@ public class ELC3Multi extends MultiPageApplet
   protected static String TEXT2 = "textual/misspeltLandings.txt";
   protected static final String MESOSTIC = "reading through writing through"; // not
   protected static String APP_ID = "pbtest";
-  
+  protected static int BUTTONS_Y = 695;
+
   // TODO: for buttons:
   PFont buttonsFont;
-  ButtonSelect textSelect;
+  ButtonSelect textSelect, readerSelect;
 
   public void settings()
   {
     // fullScreen();
-    size(1280, 720/*, GLConstants.GLGRAPHICS*/);
+    size(1280, 720/* , GLConstants.GLGRAPHICS */);
   }
-  
+
   public void setup()
   {
-    
+
     // server setup
     if (false && APP_ID.startsWith("PoetryBeyondText"))
     {
@@ -42,13 +43,17 @@ public class ELC3Multi extends MultiPageApplet
     // MinionPro-Regular(20)
     FONT_VLW = FONT + "-25" + ".vlw"; // was 26
     RiText.defaultFont(loadFont(FONT_VLW));
-    
+
     // TODO: buttons code
     buttonsFont = loadFont("StoneSans-Semi-14.vlw");
-    textSelect = new ButtonSelect(this, 200, 695, "Text",
-        new String[]{ "Misspelt Landings", "Poetic Caption", "The Image" });
+    textSelect = new ButtonSelect(this, 200, BUTTONS_Y, "Text", new String[] { "Misspelt Landings",
+        "Poetic Caption", "The Image" });
+    textSelect.textFill = BLACK;
     textSelect.strokeWeight = 0;
-
+    readerSelect = new ButtonSelect(this, 800, BUTTONS_Y, "Reader", new String[] { "Perigram",
+        "Mesostic Jumper", "Spawning" });
+    readerSelect.textFill = BLACK;
+    readerSelect.strokeWeight = 0;
 
     // grid color setup
     LAYOUT_BACKGROUND_COLOR = BLACK_INT; // CHANGE THIS TO INVERT; > 127 dark on light
@@ -70,7 +75,7 @@ public class ELC3Multi extends MultiPageApplet
     // add readers
     addReaders();
 
-    noCursor();
+    if (PRESENTATION_MODE) noCursor(); // only hide cursor in a configurable PRESENTATION mode
   }
 
   protected MachineReader rdr1, rdr2, rdr3, rdr4, rdr5;
@@ -146,36 +151,44 @@ public class ELC3Multi extends MultiPageApplet
     pManager.onUpdateFocusedReader(rdr1);
   }
 
-  public void mouseClicked() {
-    
+  public void mouseClicked()
+  {
+
     ButtonSelect clicked = ButtonSelect.click(mouseX, mouseY);
-    if (clicked != null)  {
-      System.out.println(clicked.label+ "="+clicked.value());
+    if (clicked != null)
+    {
+      System.out.println(clicked.label + "=" + clicked.value());
     }
   }
-  
+
   public void draw()
   {
     background(LAYOUT_BACKGROUND_COLOR);
-    
+
     // TODO: buttons drawing
-    if (mouseY > 694)
-      cursor();
+    if (mouseY >= BUTTONS_Y)
+    {
+      textSelect.textFill = WHITE;
+      readerSelect.textFill = WHITE;
+      if (PRESENTATION_MODE) cursor();
+    }
     else
-      noCursor();
-    
+    {
+      textSelect.textFill = BLACK;
+      readerSelect.textFill = BLACK;
+      if (PRESENTATION_MODE) noCursor();
+    }
     ButtonSelect.drawAll(mouseX, mouseY);
-    
+
     pManager.draw(g);
-    
+
   }
 
   public static void main(String[] args)
   {
     info("Running " + ELC3Multi.class.getName());
-    //String[] options = { "--present", "--hide-stop","--bgcolor=#000000",
-    String[] options = { "--hide-stop","--bgcolor=#000000",
-        ELC3Multi.class.getName() };
+    // String[] options = { "--present", "--hide-stop","--bgcolor=#000000",
+    String[] options = { "--hide-stop", "--bgcolor=#000000", ELC3Multi.class.getName() };
     PApplet.main(options);
   }
 

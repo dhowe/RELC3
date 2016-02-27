@@ -19,6 +19,7 @@ import trp.util.Readers;
 
 public class MultiPageApplet extends ReadersPApplet
 {
+  public static boolean PRESENTATION_MODE = false;
   public static String MESOSTIC = "its over its done ive had the image";
   public static int[] COLORS = { 0xFA0027, 0x0095FF, 0xFFB01C, 0x00D107 };
   public static boolean TURN_PAGES = false, LOADSAMPLES = false;
