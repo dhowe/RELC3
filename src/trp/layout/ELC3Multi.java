@@ -20,7 +20,7 @@ public class ELC3Multi extends MultiPageApplet
   public static float[] READER_MONOCOLOR = BLACK;
 
   protected static String TEXT = "textual/poeticCaption.txt";
-  protected static String TEXT2 = "textual/poeticCaption.txt";
+  protected static String TEXT2 = "textual/image.txt";
   protected static final String MESOSTIC = "reading through writing through"; // not
   protected static String APP_ID = "pbtest";
   
