@@ -12,13 +12,14 @@ public class ELC3Multi extends MultiPageApplet
 {
   public static float[] READER_MONOCOLOR = BLACK;
 
-  protected static String TEXT = "textual/poeticCaption.txt";
-  protected static String TEXT2 = "textual/image.txt";
+  protected static String TEXT = "textual/misspeltLandings.txt";
+  protected static String TEXT2 = "textual/misspeltLandings.txt";
   protected static final String MESOSTIC = "reading through writing through"; // not
   protected static String APP_ID = "pbtest";
   
-  // TODO: variables for button mockup only:
+  // TODO: for buttons:
   PFont buttonsFont;
+  ButtonSelect textSelect;
 
   public void settings()
   {
@@ -42,8 +43,12 @@ public class ELC3Multi extends MultiPageApplet
     FONT_VLW = FONT + "-25" + ".vlw"; // was 26
     RiText.defaultFont(loadFont(FONT_VLW));
     
-    // TODO: button mockup code
+    // TODO: buttons code
     buttonsFont = loadFont("StoneSans-Semi-14.vlw");
+    textSelect = new ButtonSelect(this, 200, 695, "Text",
+        new String[]{ "Misspelt Landings", "Poetic Caption", "The Image" });
+    textSelect.strokeWeight = 0;
+
 
     // grid color setup
     LAYOUT_BACKGROUND_COLOR = BLACK_INT; // CHANGE THIS TO INVERT; > 127 dark on light
@@ -141,14 +146,20 @@ public class ELC3Multi extends MultiPageApplet
     pManager.onUpdateFocusedReader(rdr1);
   }
 
+  public void mouseClicked() {
+    
+    ButtonSelect clicked = ButtonSelect.click(mouseX, mouseY);
+    if (clicked != null)  {
+      System.out.println(clicked.label+ "="+clicked.value());
+    }
+  }
+  
   public void draw()
   {
     background(LAYOUT_BACKGROUND_COLOR);
     
-    // TODO: for mockup only:
-    g.textFont(buttonsFont);
-    g.text("Text: Poetic Caption", 80, 710);
-    g.text("Reader 1: Perigram Reader", 300, 710);
+    // TODO: buttons drawing
+    ButtonSelect.drawAll(mouseX, mouseY);
     
     pManager.draw(g);
     
