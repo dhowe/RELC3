@@ -11,8 +11,12 @@ public class ButtonSelect implements ReaderConstants
 
   protected static ArrayList<ButtonSelect> instances = new ArrayList<ButtonSelect>();
 
-  // these can be set directly to manipulate appearance
-  public float[] stroke = WHITE, textFill = WHITE, fill, hoverFill = { 255, 255, 255, 64f };
+  // these can be set directly (before creation) to manipulate appearance of all buttons
+  public static float[] STROKE = WHITE, TEXT_FILL = WHITE, FILL, HOVERFILL = { 255, 255, 255, 64f };
+  public static int PADDING = 4, STROKE_WEIGHT = 2, TEXT_SIZE;
+  
+  // these can be set directly (after creation) to manipulate appearance of one button
+  public float[] stroke, textFill = WHITE, fill, hoverFill = { 255, 255, 255, 64f };
   public int x, y, width, height, padding = 4, strokeWeight = 2, textSize, selectedIndex;
   public String options[], label;
   public boolean hidden;
@@ -22,19 +26,17 @@ public class ButtonSelect implements ReaderConstants
 
   public ButtonSelect(PApplet p, int x, int y, String label, String[] options)
   {
-
     this(p, x, y, label, options, 0);
   }
 
   public ButtonSelect(PApplet p, int x, int y, String label, String[] options, int selectedIndex)
   {
-
     this(p, x, y, null, label, options, selectedIndex);
   }
 
   public ButtonSelect(PApplet p, int x, int y, PFont font, String label, String[] options, int selectedIndex)
   {
-
+  	defaults();
     this.p = p;
     this.x = x;
     this.y = y;
@@ -44,6 +46,16 @@ public class ButtonSelect implements ReaderConstants
     this.font = (font == null) ? p.loadFont("StoneSans-Semi-14.vlw") : font;
     instances.add(this);
   }
+
+	private void defaults() {
+		this.stroke = STROKE;
+  	this.fill = FILL;
+  	this.textFill = TEXT_FILL;
+  	this.hoverFill = HOVERFILL;
+  	this.padding = PADDING;
+  	this.strokeWeight = STROKE_WEIGHT;
+  	this.textSize = TEXT_SIZE;
+	}
 
   public boolean contains(float mx, float my)
   {

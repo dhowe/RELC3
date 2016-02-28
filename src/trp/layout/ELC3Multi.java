@@ -2,7 +2,6 @@ package trp.layout;
 
 import static trp.util.Direction.*;
 import processing.core.PApplet;
-import processing.core.PFont;
 import rita.RiText;
 import trp.behavior.*;
 import trp.reader.*;
@@ -10,7 +9,10 @@ import trp.util.PerigramLookup;
 
 public class ELC3Multi extends MultiPageApplet
 {
-  public static float[] READER_MONOCOLOR = BLACK;
+  static final String[] TEXTNAMES = { "Misspelt Landings", "Poetic Caption", "The Image" };
+  static final String[] READERNAMES = { "Perigram", "Mesostic Jumper", "Spawning" };
+
+	public static float[] READER_MONOCOLOR = BLACK;
 
   protected static String TEXT = "textual/misspeltLandings.txt";
   protected static String TEXT2 = "textual/misspeltLandings.txt";
@@ -18,14 +20,12 @@ public class ELC3Multi extends MultiPageApplet
   protected static String APP_ID = "pbtest";
   protected static int BUTTONS_Y = 695;
 
-  // TODO: for buttons:
-  PFont buttonsFont;
   ButtonSelect textSelect, readerSelect;
 
   public void settings()
   {
     // fullScreen();
-    size(1280, 720/* , GLConstants.GLGRAPHICS */);
+    size(1280, 720);
   }
 
   public void setup()
@@ -45,15 +45,10 @@ public class ELC3Multi extends MultiPageApplet
     RiText.defaultFont(loadFont(FONT_VLW));
 
     // TODO: buttons code
-    buttonsFont = loadFont("StoneSans-Semi-14.vlw");
-    textSelect = new ButtonSelect(this, 200, BUTTONS_Y, "Text", new String[] { "Misspelt Landings",
-        "Poetic Caption", "The Image" });
-    textSelect.textFill = BLACK;
-    textSelect.strokeWeight = 0;
-    readerSelect = new ButtonSelect(this, 800, BUTTONS_Y, "Reader", new String[] { "Perigram",
-        "Mesostic Jumper", "Spawning" });
-    readerSelect.textFill = BLACK;
-    readerSelect.strokeWeight = 0;
+		ButtonSelect.TEXT_FILL = BLACK;
+		ButtonSelect.STROKE_WEIGHT = 0;
+		textSelect = new ButtonSelect(this, 200, BUTTONS_Y, "Text",  TEXTNAMES);
+		readerSelect = new ButtonSelect(this, 800, BUTTONS_Y, "Reader", READERNAMES);
 
     // grid color setup
     LAYOUT_BACKGROUND_COLOR = BLACK_INT; // CHANGE THIS TO INVERT; > 127 dark on light
