@@ -331,10 +331,12 @@ public class RiTextGrid
     instances.remove(this);
     if (layout != null)
       layout = null;
-    for (Iterator it = iterator(); it.hasNext();)
-      RiText.dispose((RiText) it.next());
+    for (Iterator it = iterator(); it.hasNext();) {
+    	RiText rt = (RiText) it.next();
+    	rt.text("");
+      RiText.dispose(rt);
+    }
     RiText.dispose(template);
-    this.dispose();
   }
 
   public void visible(boolean b)
