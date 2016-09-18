@@ -1,6 +1,10 @@
 package trp.layout;
 
 import static trp.util.Direction.*;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import processing.core.PApplet;
 import rita.RiText;
 import trp.behavior.*;
@@ -9,18 +13,44 @@ import trp.util.PerigramLookup;
 
 public class ELC3Multi extends MultiPageApplet
 {
-  static final String[] TEXTNAMES = { "Misspelt Landings", "Poetic Caption", "The Image" };
-  static final String[] READERNAMES = { "Perigram", "Mesostic Jumper", "Spawning" };
+  static final String[] TEXTNAMES = { "Poetic Caption", "Misspelt Landings", "The Image" };
+  static final String[] READERNAMES = { "Perigram", "Simple Spawner", "Perigram Spawner" };
+  static final String[] SPEEDNAMES = { "Fast", "Per-second", "Slow", "Slower", "Slowest", "Very fast" };
+  static final String[] VISUALNAMES = { "Default visuals", "Haloed" };
+  static final String[] COLORNAMES = { "White", "Ochre", "Brown", "Yellow" };
 
-	public static float[] READER_MONOCOLOR = BLACK;
+  static MachineReader[] READERS;
+  static Map READER_MAP = new HashMap();
+  static Map SPEED_MAP = new HashMap();
+  static Map COLOR_MAP = new HashMap();
 
-  protected static String TEXT = "textual/misspeltLandings.txt";
-  protected static String TEXT2 = "textual/misspeltLandings.txt";
-  protected static final String MESOSTIC = "reading through writing through"; // not
-  protected static String APP_ID = "pbtest";
-  protected static int BUTTONS_Y = 695;
+  static
+  {
+    SPEED_MAP.put("Fast", 0.5f);
+    SPEED_MAP.put("Per-second", 1.0f);
+    SPEED_MAP.put("Slow", 1.5f);
+    SPEED_MAP.put("Slower", 2.0f);
+    SPEED_MAP.put("Slowest", 2.5f);
+    SPEED_MAP.put("Very fast", 0.25f);
+  }
 
-  ButtonSelect textSelect, readerSelect;
+  static
+  {
+    COLOR_MAP.put("Oatmeal", OATMEAL);
+    COLOR_MAP.put("Ochre", MOCHRE);
+    COLOR_MAP.put("Brown", MBROWN);
+    COLOR_MAP.put("Yellow", MYELLOW);
+  }
+
+  public static float[] READER_MONOCOLOR = BLACK;
+
+  protected static String TEXT = "textual/poeticCaption.txt";
+  protected static final String MESOSTIC = "reading as writing through";
+  protected static String APP_ID = "elc3";
+  protected static int BUTTONS_Y = 691;
+
+  ButtonSelect textSelect, readerSelect, speedSelect, visualSelect;
+  RiTextGrid verso, recto;
 
   public void settings()
   {
@@ -32,23 +62,22 @@ public class ELC3Multi extends MultiPageApplet
   {
 
     // server setup
-    if (false && APP_ID.startsWith("PoetryBeyondText"))
-    {
-      System.out.println("Sending to server: " + APP_ID);
-      enableServer("rednoise.org");
-    }
+    // if (false && APP_ID.startsWith("PoetryBeyondText"))
+    // {
+    // System.out.println("Sending to server: " + APP_ID);
+    // enableServer("rednoise.org");
+    // }
 
     // font setup
-    FONT = "Baskerville"; // Baskerville (22), Perpetua (24);
-    // MinionPro-Regular(20)
-    FONT_VLW = FONT + "-25" + ".vlw"; // was 26
-    RiText.defaultFont(loadFont(FONT_VLW));
+    fontSetup();
 
     // TODO: buttons code
-		ButtonSelect.TEXT_FILL = BLACK;
-		ButtonSelect.STROKE_WEIGHT = 0;
-		textSelect = new ButtonSelect(this, 200, BUTTONS_Y, "Text",  TEXTNAMES);
-		readerSelect = new ButtonSelect(this, 800, BUTTONS_Y, "Reader", READERNAMES);
+    ButtonSelect.TEXT_FILL = BLACK;
+    ButtonSelect.STROKE_WEIGHT = 0;
+    textSelect = new ButtonSelect(this, 200, BUTTONS_Y, "Text", TEXTNAMES);
+    readerSelect = new ButtonSelect(this, 500, BUTTONS_Y, "Reader", READERNAMES);
+    speedSelect = new ButtonSelect(this, 700, BUTTONS_Y, "Speed", SPEEDNAMES);
+    visualSelect = new ButtonSelect(this, 900, BUTTONS_Y, "Visual", VISUALNAMES);
 
     // grid color setup
     LAYOUT_BACKGROUND_COLOR = BLACK_INT; // CHANGE THIS TO INVERT; > 127 dark on light
@@ -57,33 +86,47 @@ public class ELC3Multi extends MultiPageApplet
     GRID_ALPHA = 40; // EDIT could also be set from preferences in production
     RiTextGrid.defaultColor(gridcol, gridcol, gridcol - GRID_ALPHA, GRID_ALPHA);
 
+    // do layout
+    doLayout(TEXT);
+
+    // add readers
+    addReaders();
+
+    if (PRESENTATION_MODE)
+      noCursor(); // only hide cursor in a configurable PRESENTATION mode
+  }
+
+  public void fontSetup()
+  {
+    FONT = "Baskerville"; // cf: Baskerville (22), Perpetua (24), MinionPro-Regular(20);
+    FONT_VLW = FONT + "-25" + ".vlw"; // was 26
+    RiText.defaultFont(loadFont(FONT_VLW));
+  }
+
+  public void doLayout(String text)
+  {
     pManager = PageManager.create(this, 40, 40, 38, 30);
     pManager.showPageNumbers(false);
-    pManager.addTextsFromFile(new String[] { TEXT2, TEXT });
+    pManager.addTextsFromFile(new String[] { text });
     pManager.setApplicationId(APP_ID);
     pManager.decreaseGutterBy(20);
     pManager.setVersoHeader("");
     pManager.setRectoHeader("");
     pManager.setLeading(12);
     pManager.doLayout();
-
-    // add readers
-    addReaders();
-
-    if (PRESENTATION_MODE) noCursor(); // only hide cursor in a configurable PRESENTATION mode
   }
 
   protected MachineReader rdr1, rdr2, rdr3, rdr4, rdr5;
-  protected ReaderBehavior vb1, vb2, vb3, vb4, vb5;
+  protected ReaderBehavior nbFadeOatmeal, tendrilsDGray, nbFadeMBrown, haloYellow, vb5;
 
   public void addReaders()
   {
-    RiTextGrid verso = pManager.getVerso();
-    RiTextGrid recto = pManager.getRecto();
+    verso = pManager.getVerso();
+    recto = pManager.getRecto();
 
-    PerigramLookup allPerigrams = new PerigramLookup(this, new String[] { TEXT, TEXT2 });
-    PerigramLookup pcPerigrams = new PerigramLookup(this, new String[] { TEXT });
-    PerigramLookup misspeltPerigrams = new PerigramLookup(this, new String[] { TEXT2 });
+    PerigramLookup allPerigrams = new PerigramLookup(this, new String[] { TEXT });
+    // PerigramLookup pcPerigrams = new PerigramLookup(this, new String[] { TEXT });
+    // PerigramLookup misspeltPerigrams = new PerigramLookup(this, new String[] { TEXT });
 
     // rdr1 = new PerigramDirectionalReader(verso, perigrams, W);
     // rdr1.setGridPosition(5, 12);
@@ -93,57 +136,46 @@ public class ELC3Multi extends MultiPageApplet
 
     // (1) PERIGRAM THAT KNOWS BOTH NEIGHBORHOODS
     rdr1 = new PerigramReader(verso, allPerigrams);
-    rdr1.setGridPosition(0, 0); // was 1, 0 because of page turn!
-    rdr1.setSpeed(0.5f);
-    vb1 = new NeighborFadingVisual(OATMEAL, verso.template().fill(), rdr1.getSpeed());
-    ((NeighborFadingVisual) vb1).setFadeLeadingNeighbors(true);
-    ((NeighborFadingVisual) vb1).setFadeTrailingNeighbors(true);
-    rdr1.setBehavior(vb1);
+    rdr1.setGridPosition(1, 0); // was 1, 0 because of page turn!
+    rdr1.setSpeed((float) SPEED_MAP.get("Fast")); // was 0.5f
+    nbFadeOatmeal = new NeighborFadingVisual(OATMEAL, verso.template().fill(), rdr1.getSpeed());
+    ((NeighborFadingVisual) nbFadeOatmeal).setFadeLeadingNeighbors(true);
+    ((NeighborFadingVisual) nbFadeOatmeal).setFadeTrailingNeighbors(true);
+    rdr1.setBehavior(nbFadeOatmeal);
     rdr1.start();
 
-    // (2) X SIMPLE SPAWNER THAT KNOWS POETIC CAPTION
+    // (2) SIMPLE SPAWNER
     rdr2 = new SimpleReader(verso);
-    rdr2.setGridPosition(5, 10); // was 5, 20
-    rdr2.setSpeed(1.7f);
+    rdr2.setGridPosition(1, 0); // was 5, 20
+    rdr2.setSpeed((float) SPEED_MAP.get("Slow")); // was 1.7f
     rdr2.setBehavior(new DefaultVisuals(MOCHRE, rdr2.getSpeed()));
-    vb2 = new DefaultVisuals(DGRAY, .5f, rdr2.getSpeed()/* * 1.7f */);
-    rdr2.addBehavior(new SpawnDirectionalPRs(pcPerigrams, vb2, NE, N, NW, SW, S, SE));
+    tendrilsDGray = new DefaultVisuals(DGRAY, .5f, rdr2.getSpeed()/* * 1.7f */);
+    rdr2.addBehavior(new SpawnDirectionalPRs(allPerigrams, tendrilsDGray, NE, N, NW, SW, S, SE));
     rdr2.setTestMode(false);
-    // rdr2.start();
+    rdr2.start();
+    rdr2.pause(true);
 
-    // (3) SIMPLE SPAWNER THAT KNOWS MISSPELT
-    rdr3 = new SimpleReader(recto);
-    rdr3.setGridPosition(0, 4); // was 5, 20
-    rdr3.setSpeed(0.7f);
-    rdr3.setBehavior(new DefaultVisuals(MOCHRE, rdr3.getSpeed()));
-    vb3 = new DefaultVisuals(DGRAY, .5f, rdr3.getSpeed()/* * 1.7f */);
-    rdr3.addBehavior(new SpawnDirectionalPRs(misspeltPerigrams, vb3, NE, N, NW, SW, S, SE));
-    rdr3.setTestMode(false);
+    // (3) PERIGRAM SPAWNER
+    rdr3 = new PerigramReader(verso, allPerigrams);
+    rdr3.setGridPosition(1, 0); // was 1, 0 because of page turn!
+    rdr3.setSpeed((float) SPEED_MAP.get("Fast")); // was 0.6f
+    nbFadeMBrown = new NeighborFadingVisual(MBROWN, verso.template().fill(), rdr3.getSpeed());
+    ((NeighborFadingVisual) nbFadeMBrown).setFadeLeadingNeighbors(false);
+    ((NeighborFadingVisual) nbFadeMBrown).setFadeTrailingNeighbors(false);
+    rdr3.setBehavior(nbFadeMBrown);
+    rdr3.addBehavior(new SpawnDirectionalPRs(allPerigrams, tendrilsDGray, NE, N, NW, SW, S, SE));
     rdr3.start();
+    rdr3.pause(true);
 
-    // (4) PERIGRAM SPAWNER THAT KNOWS POETIC CAPTION
-    rdr4 = new PerigramReader(recto, pcPerigrams);
-    rdr4.setGridPosition(9, 20); // was 1, 0 because of page turn!
-    rdr4.setSpeed(0.6f);
-    vb4 = new NeighborFadingVisual(MBROWN, verso.template().fill(), rdr4.getSpeed());
-    ((NeighborFadingVisual) vb4).setFadeLeadingNeighbors(false);
-    ((NeighborFadingVisual) vb4).setFadeTrailingNeighbors(false);
-    rdr4.setBehavior(vb4);
-    rdr4.addBehavior(new SpawnDirectionalPRs(pcPerigrams, vb3, NE, N, NW, SW, S, SE));
-    rdr4.start();
+    currentReader = rdr1;
 
-    // (5) X PERIGRAM SPAWNER THAT KNOWS MISSPELT
-    rdr5 = new PerigramReader(recto, misspeltPerigrams);
-    rdr5.setGridPosition(3, 15); // was 1, 0 because of page turn!
-    rdr5.setSpeed(2.7f);
-    vb5 = new NeighborFadingVisual(MBROWN, recto.template().fill(), rdr5.getSpeed());
-    ((NeighborFadingVisual) vb5).setFadeLeadingNeighbors(false);
-    ((NeighborFadingVisual) vb5).setFadeTrailingNeighbors(false);
-    rdr5.setBehavior(vb5);
-    rdr5.addBehavior(new SpawnDirectionalPRs(misspeltPerigrams, vb3, NE, N, NW, SW, S, SE));
-    // rdr5.start();
+    pManager.onUpdateFocusedReader(currentReader);
 
-    pManager.onUpdateFocusedReader(rdr1);
+    READERS = new MachineReader[] { rdr1, rdr2, rdr3 };
+    for (int i = 0; i < READERNAMES.length; i++)
+    {
+      READER_MAP.put(READERNAMES[i], READERS[i]);
+    }
   }
 
   public void mouseClicked()
@@ -153,6 +185,51 @@ public class ELC3Multi extends MultiPageApplet
     if (clicked != null)
     {
       System.out.println(clicked.label + "=" + clicked.value());
+      if (clicked == textSelect)
+      {
+        switch (clicked.value())
+        {
+          case "Poetic Caption":
+            doLayout("textual/poeticCaption.txt");
+            break;
+
+          case "Misspelt Landings":
+            fontSetup();
+            doLayout("textual/misspeltLandings.txt");            
+            break;
+            
+          case "The Image":
+            doLayout("textual/image.txt");            
+            break;
+
+          default:
+            break;
+        }
+        RiText rt = verso.cellAt(0,0);
+        currentReader.setCurrentCell(rt);
+      }
+      else if (clicked == readerSelect)
+      {
+        currentReader.pause(true);
+        RiText rt = currentReader.getCurrentCell();
+        currentReader = (MachineReader) READER_MAP.get(clicked.value());
+        currentReader.setSpeed((float) SPEED_MAP.get(speedSelect.value()));
+        currentReader.setCurrentCell(rt);
+        currentReader.pause(false);
+        // pManager.onUpdateFocusedReader(currentReader); TODO: problem with focus!
+      }
+      else if (clicked == speedSelect)
+      {
+        currentReader.setSpeed((float) SPEED_MAP.get(clicked.value()));
+      }
+      else if (clicked == visualSelect)
+      {
+        if ((clicked.value()).equals("Haloed"))
+        {
+          haloYellow = new ClearHaloingVisual(MYELLOW, verso.template().fill(), currentReader.getSpeed());
+          currentReader.setBehavior(haloYellow);
+        }
+      }
     }
   }
 
@@ -161,17 +238,23 @@ public class ELC3Multi extends MultiPageApplet
     background(LAYOUT_BACKGROUND_COLOR);
 
     // TODO: buttons drawing
-    if (mouseY >= BUTTONS_Y)
+    if (mouseY >= BUTTONS_Y && mouseY < (BUTTONS_Y + textSelect.height))
     {
       textSelect.textFill = WHITE;
       readerSelect.textFill = WHITE;
-      if (PRESENTATION_MODE) cursor();
+      speedSelect.textFill = WHITE;
+      visualSelect.textFill = WHITE;
+      if (PRESENTATION_MODE)
+        cursor();
     }
     else
     {
       textSelect.textFill = BLACK;
       readerSelect.textFill = BLACK;
-      if (PRESENTATION_MODE) noCursor();
+      speedSelect.textFill = BLACK;
+      visualSelect.textFill = BLACK;
+      if (PRESENTATION_MODE)
+        noCursor();
     }
     ButtonSelect.drawAll(mouseX, mouseY);
 

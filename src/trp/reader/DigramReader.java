@@ -75,6 +75,11 @@ public class DigramReader extends SimpleReader// implements Digrammable
       return null;
 
     RiText rt = determineReadingPath(neighbors);
+    
+    // TODO: attempt to vary speed slightly depending on number of syllables in selected word
+    // not sure of: when the time get adjusted relative to the highlighting of the current cell
+    String s = rt.SYLLABLES;
+    System.out.println(s);
 
     return rt;
   }

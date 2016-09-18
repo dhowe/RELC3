@@ -12,12 +12,12 @@ public class ButtonSelect implements ReaderConstants
   protected static ArrayList<ButtonSelect> instances = new ArrayList<ButtonSelect>();
 
   // these can be set directly (before creation) to manipulate appearance of all buttons
-  public static float[] STROKE = WHITE, TEXT_FILL = WHITE, FILL, HOVERFILL = { 255, 255, 255, 64f };
-  public static int PADDING = 4, STROKE_WEIGHT = 2, TEXT_SIZE;
+  public static float[] STROKE = BLACK, TEXT_FILL = WHITE, FILL, HOVERFILL = { 255, 255, 255, 64f };
+  public static int PADDING = 6, STROKE_WEIGHT = 0, TEXT_SIZE;
   
   // these can be set directly (after creation) to manipulate appearance of one button
   public float[] stroke, textFill = WHITE, fill, hoverFill = { 255, 255, 255, 64f };
-  public int x, y, width, height, padding = 4, strokeWeight = 2, textSize, selectedIndex;
+  public int x, y, width, height, padding = 6, strokeWeight = 0, textSize, selectedIndex;
   public String options[], label;
   public boolean hidden;
   public PFont font;

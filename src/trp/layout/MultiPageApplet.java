@@ -32,6 +32,7 @@ public class MultiPageApplet extends ReadersPApplet
 
   protected PageManager pManager;
   protected String[] phrases;
+  protected MachineReader currentReader;
 
   public void setup()
   {
@@ -138,6 +139,13 @@ public class MultiPageApplet extends ReadersPApplet
       {
         Readers.NO_VISUALS = !Readers.NO_VISUALS;
       }  
+      else if (key == ' ')
+      {
+        // assumes only one 'current' reader
+        pause = !pause;
+        currentReader.pause(pause);
+        return; // super.keyPressed() will not be called (because it would pause or start all readers)
+      }
     }
     
     super.keyPressed();
