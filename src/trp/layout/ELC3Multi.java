@@ -49,8 +49,9 @@ public class ELC3Multi extends MultiPageApplet
   protected static String APP_ID = "elc3";
   protected static int BUTTONS_Y = 691;
 
-  ButtonSelect textSelect, readerSelect, speedSelect, visualSelect;
+  ButtonSelect textSelect, readerSelect, speedSelect, visualSelect, colorSelect;
   RiTextGrid verso, recto;
+  float[] readerColor = OATMEAL;
 
   public void settings()
   {
@@ -78,6 +79,7 @@ public class ELC3Multi extends MultiPageApplet
     readerSelect = new ButtonSelect(this, 500, BUTTONS_Y, "Reader", READERNAMES);
     speedSelect = new ButtonSelect(this, 700, BUTTONS_Y, "Speed", SPEEDNAMES);
     visualSelect = new ButtonSelect(this, 900, BUTTONS_Y, "Visual", VISUALNAMES);
+    colorSelect = new ButtonSelect(this, 1100, BUTTONS_Y, "Color", COLORNAMES);
 
     // grid color setup
     LAYOUT_BACKGROUND_COLOR = BLACK_INT; // CHANGE THIS TO INVERT; > 127 dark on light
@@ -229,6 +231,11 @@ public class ELC3Multi extends MultiPageApplet
           haloYellow = new ClearHaloingVisual(MYELLOW, verso.template().fill(), currentReader.getSpeed());
           currentReader.setBehavior(haloYellow);
         }
+      }
+      else if (clicked == colorSelect)
+      {
+        readerColor = (float[]) COLOR_MAP.get(clicked.value());
+        // TODO: update visual behaviors
       }
     }
   }
