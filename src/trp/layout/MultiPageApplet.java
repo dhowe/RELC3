@@ -126,17 +126,18 @@ public class MultiPageApplet extends ReadersPApplet
       if (keyCode < 58 && keyCode > 47)
       {
         // number keys (0-9)
-        int idx = keyCode - 48;
-        if (idx < MachineReader.instances.size())
-        {
-          pManager.onUpdateFocusedReader((MachineReader) (MachineReader.instances.get(idx)));
-        }
-        else
-        {
-          Readers.warn("No reader corresponding to key #" + idx);
-        }
+        // COMMENTED OUT FOR ELC3
+        // int idx = keyCode - 48;
+        // if (idx < MachineReader.instances.size())
+        // {
+        // pManager.onUpdateFocusedReader((MachineReader) (MachineReader.instances.get(idx)));
+        // }
+        // else
+        // {
+        // Readers.warn("No reader corresponding to key #" + idx);
+        // }
       }
-      else if (key == 'n')
+      else if (key == 'n' || key == 'N' || keyCode == 39)
       {
         pManager.nextPage();
       }
@@ -146,10 +147,10 @@ public class MultiPageApplet extends ReadersPApplet
       }  
       else if (key == ' ')
       {
-        // assumes only one 'current' reader
+        // assuming only one 'current' reader for ELC3 ...
         pause = !pause;
         currentReader().pause(pause);
-        return; // super.keyPressed() will not be called (because it would pause or start all readers)
+        return; // ... super.keyPressed() will not be called (because it would pause or start all readers)
       }
     }
     
