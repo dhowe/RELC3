@@ -27,12 +27,13 @@ public class MultiPageApplet extends ReadersPApplet
   public static String[] DIGRAMS = { "beckett/imagePerigrams.txt" };
   protected static int PR_VOICE = 0, MPJ_VOICE = 1, UPR_VOICE = 2, LPR_VOICE = 3;
   protected static String[] AUDIOSETS = { "up15", "down05", "up20", "root" };
+  protected static MachineReader[] READERS;
+  protected static int currentReaderIdx = 0;
 
   protected Map sampleMap = new HashMap();
 
   protected PageManager pManager;
   protected String[] phrases;
-  protected MachineReader currentReader;
 
   public void setup()
   {
@@ -68,6 +69,10 @@ public class MultiPageApplet extends ReadersPApplet
     addReaders();
   }
 
+  public MachineReader currentReader() {
+  	return READERS[currentReaderIdx];
+  }
+  
   public void addReaders()
   {
     PerigramLookup perigrams = PerigramLookup.getInstance(this, TEXTS);
@@ -143,7 +148,7 @@ public class MultiPageApplet extends ReadersPApplet
       {
         // assumes only one 'current' reader
         pause = !pause;
-        currentReader.pause(pause);
+        currentReader().pause(pause);
         return; // super.keyPressed() will not be called (because it would pause or start all readers)
       }
     }
