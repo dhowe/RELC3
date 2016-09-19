@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import processing.core.PApplet;
+import rita.RiTa;
 import rita.RiText;
 import trp.behavior.*;
 import trp.reader.*;
@@ -15,7 +16,7 @@ import trp.util.Readers;
 public class ELC3Multi extends MultiPageApplet
 {
   static final int SKETCH_WIDTH = 1280;
-  static final String[] TEXTNAMES = { "Poetic Caption", "Misspelt Landings", "The Image" };
+  static final String[] TEXTNAMES = { "POETIC CAPTION", "MISSPELT LANDINGS", "THE IMAGE" };
   static final String[] READERNAMES = { "Perigram", "Simple Spawner", "Perigram Spawner", "Mesostic Jumper" };
   static final String[] SPEEDNAMES = { "Fast", "Per-second", "Slow", "Slower", "Slowest", "Very fast" };
   static final String[] VISUALNAMES = { "Default visuals", "Haloed" };
@@ -48,11 +49,12 @@ public class ELC3Multi extends MultiPageApplet
   protected static String APP_ID = "elc3";
   protected static int BUTTONS_Y = 691;
 
-  ButtonSelect textSelect, readerSelect, speedSelect, visualSelect, colorSelect;
+  ButtonSelect textSelect, wordMonitor, readerSelect, speedSelect, visualSelect, colorSelect;
   RiTextGrid verso, recto;
   float[] readerColor = OATMEAL;
   float readerSpeed = 0.5f;
   RiText currentCell;
+  String currentWord = "",lastWord = "";
 
   public void settings()
   {
@@ -64,16 +66,17 @@ public class ELC3Multi extends MultiPageApplet
   {
     fontSetup();
 
-    // TODO: buttons code
+    // BUTTONS
     ButtonSelect.TEXT_FILL = BLACK;
     ButtonSelect.STROKE_WEIGHT = 0;
-    textSelect = new ButtonSelect(this, 200, BUTTONS_Y, "Text", TEXTNAMES);
-    readerSelect = new ButtonSelect(this, 500, BUTTONS_Y, "Reader", READERNAMES);
-    speedSelect = new ButtonSelect(this, 700, BUTTONS_Y, "Speed", SPEEDNAMES);
-    visualSelect = new ButtonSelect(this, 900, BUTTONS_Y, "Visual", VISUALNAMES);
-    colorSelect = new ButtonSelect(this, 1100, BUTTONS_Y, "Color", COLORNAMES);
+    textSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Text", TEXTNAMES);
+    wordMonitor = new ButtonSelect(this, 0, BUTTONS_Y, "Monitor", new String[] {"This monitors the current word"});
+    readerSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Reader", READERNAMES);
+    speedSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Speed", SPEEDNAMES);
+    visualSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Visual", VISUALNAMES);
+    colorSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Color", COLORNAMES);
     
-    BUTTONS = new ButtonSelect[] {textSelect, readerSelect, speedSelect, visualSelect,colorSelect};
+    BUTTONS = new ButtonSelect[] {textSelect, wordMonitor, readerSelect, speedSelect, visualSelect,colorSelect};
     int totalWidth = 0;
     for (int i = 0; i < BUTTONS.length; i++)
     {
@@ -126,14 +129,19 @@ public class ELC3Multi extends MultiPageApplet
     pauseReaders();
     pManager.clear();
     pManager.setLeading(30);
-    // pManager.setFont(loadFont(FONT_VLW));
+    if (fileName.contains("misspelt"))
+    {
+      RiText.defaultFont(loadFont("GillSansMT-24.vlw"));
+    }
+    else
+    {
+      RiText.defaultFont(loadFont(FONT_VLW));
+    }
     pManager.addTextFromFile(fileName);
     pManager.doLayout();
 
     currentCell = pManager.getVerso().cellAt(0, 0);
     readerSpeed = (float) SPEED_MAP.get("Fast");
-
-    // TODO: we should reset buttons and labels at this point
 
     constructReadersFor(fileName);
   }
@@ -168,7 +176,7 @@ public class ELC3Multi extends MultiPageApplet
     perigramReader.setSpeed(readerSpeed); // was 0.5f
     perigramReader.setBehavior(neighborFading);
 
-    // SIMPLE READING SPAWNER - TODO: has different default speed
+    // SIMPLE READING SPAWNER - nb: has different default speed
     if (simpleReadingSpawner != null)
       MachineReader.delete(simpleReadingSpawner);
     simpleReadingSpawner = new SimpleReader(verso);
@@ -187,7 +195,7 @@ public class ELC3Multi extends MultiPageApplet
     perigramReadingSpawner.setBehavior(neighborFadingNoTrails);
     perigramReadingSpawner.addBehavior(spawningVB);
 
-    // MESOSTIC JUMPER - TODO: has different default speed
+    // MESOSTIC JUMPER - nb: has different default speed
     if (mesosticJumper != null)
       MachineReader.delete(mesosticJumper);
     mesosticJumper = new MesoPerigramJumper(verso, MESOSTIC, perigrams);
@@ -237,20 +245,20 @@ public class ELC3Multi extends MultiPageApplet
     ButtonSelect clicked = ButtonSelect.click(mouseX, mouseY);
     if (clicked != null)
     {
-      // System.out.println(clicked.label + "=" + clicked.value());
+      // TEXT
       if (clicked == textSelect)
       {
         switch (clicked.value())
         {
-          case "Poetic Caption":
+          case "POETIC CAPTION":
             doLayout("textual/poeticCaption.txt");
             break;
 
-          case "Misspelt Landings":
+          case "MISSPELT LANDINGS":
             doLayout("textual/misspeltLandings.txt");
             break;
 
-          case "The Image":
+          case "THE IMAGE":
             doLayout("textual/image.txt");
             break;
 
@@ -262,35 +270,39 @@ public class ELC3Multi extends MultiPageApplet
         visualSelect.advanceTo("Default visuals");
         // no need to do this - colorSelect.advanceTo("Oatmeal"); - perigram reader will stay as set
       }
+      // READER
       else if (clicked == readerSelect)
       {
-        MachineReader current = currentReader();
-        current.pause(true);
-        RiText rt = current.getCurrentCell();
+        currentReader().pause(true);
+        RiText rt = currentReader().getCurrentCell();
         currentReaderIdx = (int) READER_MAP.get(clicked.value());
-        current = READERS[currentReaderIdx];
-        current.setSpeed((float) SPEED_MAP.get(speedSelect.value()));
-        current.setCurrentCell(rt);
-        current.pause(false);
+        currentReader().setSpeed((float) SPEED_MAP.get(speedSelect.value()));
+        currentReader().setCurrentCell(rt);
+        currentReader().pause(false);
 
         setVisuals(visualSelect.value(), readerColor);
 
-        pManager.onUpdateFocusedReader(current); // TODO: ? problem with focus!
+        pManager.onUpdateFocusedReader(currentReader());
       }
+      // SPEED
       else if (clicked == speedSelect)
       {
-        currentReader().setSpeed((float) SPEED_MAP.get(clicked.value()));
+        readerSpeed = (float) SPEED_MAP.get(clicked.value());
+        currentReader().setSpeed(readerSpeed);
       }
+      // VISUALS
       else if (clicked == visualSelect)
       {
         setVisuals(clicked.value(), readerColor);
       }
+      // COLOR - of reader
       else if (clicked == colorSelect)
       {
         readerColor = (float[]) COLOR_MAP.get(clicked.value());
         if (visualSelect.value().equals("Haloed"))
         {
-          haloing.setReaderColor(readerColor);
+          haloing = new ClearHaloingVisual(readerColor, verso.template().fill(), readerSpeed);
+          currentReader().setBehavior(haloing);
         }
         else
         {
@@ -314,7 +326,6 @@ public class ELC3Multi extends MultiPageApplet
           }
 
         }
-        // currentReader().setC
       }
     }
   }
@@ -323,9 +334,8 @@ public class ELC3Multi extends MultiPageApplet
   {
     if (visuals.equals("Haloed"))
     {
-      MachineReader current = currentReader();
       haloing = new ClearHaloingVisual(color, verso.template().fill(), readerSpeed);
-      current.setBehavior(haloing);
+      currentReader().setBehavior(haloing);
     }
     else
     {
@@ -335,7 +345,6 @@ public class ELC3Multi extends MultiPageApplet
         case 0: // perigram
           currentReader().setBehavior(neighborFading);
           neighborFading.setReaderColor(color);
-          speedSelect.advanceTo("Fast");
           break;
         case 1: // simple spawner
           currentReader().setSpeed((float) SPEED_MAP.get("Slow"));
@@ -345,11 +354,9 @@ public class ELC3Multi extends MultiPageApplet
           speedSelect.advanceTo("Slow");
           break;
         case 2: // perigram spawner
-          currentReader().setSpeed((float) SPEED_MAP.get("Fast"));
           currentReader().setBehavior(neighborFadingNoTrails);
           currentReader().addBehavior(spawningVB);
           neighborFadingNoTrails.setReaderColor(color);
-          speedSelect.advanceTo("Fast");
           break;
         case 3: // mesostic
           currentReader().setSpeed((float) SPEED_MAP.get("Slow"), true);
@@ -368,40 +375,57 @@ public class ELC3Multi extends MultiPageApplet
   {
     background(LAYOUT_BACKGROUND_COLOR);
 
+    // BUTTONS drawn only if page is not flipping
     if (!pManager.flipping)
     {
-      // TODO: buttons drawing
       if (mouseY >= BUTTONS_Y && mouseY < (BUTTONS_Y + textSelect.height))
       {
-        textSelect.textFill = WHITE;
-        readerSelect.textFill = WHITE;
-        speedSelect.textFill = WHITE;
-        visualSelect.textFill = WHITE;
-        colorSelect.textFill = WHITE;
+        for (int i = 0; i < BUTTONS.length; i++)
+        {
+          BUTTONS[i].textFill = WHITE;
+        }
         if (PRESENTATION_MODE)
           cursor();
       }
       else
       {
-        textSelect.textFill = BLACK;
-        readerSelect.textFill = BLACK;
-        speedSelect.textFill = BLACK;
-        visualSelect.textFill = BLACK;
-        colorSelect.textFill = BLACK;
+        for (int i = 0; i < BUTTONS.length; i++)
+        {
+          BUTTONS[i].textFill = BLACK;
+        }
         if (PRESENTATION_MODE)
           noCursor();
       }
+      
+      // 
+      currentWord = currentReader().getCurrentCell().text();
+      currentWord = RiTa.stripPunctuation(currentWord);
+      if (!currentWord.equals(lastWord))
+      {
+        int numOfSyllables = countSyllables(RiTa.getSyllables(currentWord));
+        
+        // currentReader().adjustSpeed(1f + (numOfSyllables * 2f)); TODO: how to adjust speed per-step properly??
+        
+        wordMonitor.setValue(currentWord);
+        lastWord = currentWord;
+      }
+      
       ButtonSelect.drawAll(mouseX, mouseY);
     }
     pManager.draw(g);
 
-    // TODO: ugly workaround
+    // TODO: part of ugly workaround to allow new readers to begin at 0,0 on verso without page flip/turn
     if (MachineReader.OK_TO_FOCUS)
     {
       pManager.onUpdateFocusedReader(currentReader());
       MachineReader.OK_TO_FOCUS = false;
     }
 
+  }
+
+  private int countSyllables(String syllables)
+  {
+    return syllables.length() - syllables.replace("/", "").length() + 1;
   }
 
   public static void main(String[] args)
