@@ -10,6 +10,7 @@ import rita.RiText;
 import trp.behavior.*;
 import trp.reader.*;
 import trp.util.PerigramLookup;
+import trp.util.Readers;
 
 public class ELC3Multi extends MultiPageApplet
 {
@@ -113,11 +114,11 @@ public class ELC3Multi extends MultiPageApplet
     pManager.addTextFromFile(fileName);
     pManager.doLayout();
 
-    currentCell = pManager.getVerso().cellAt(0,1);
+    currentCell = pManager.getVerso().cellAt(0, 0);
     readerSpeed = (float) SPEED_MAP.get("Fast");
 
     // TODO: we should reset buttons and labels at this point
-    
+
     constructReadersFor(fileName);
   }
 
@@ -130,12 +131,13 @@ public class ELC3Multi extends MultiPageApplet
   }
 
   protected MachineReader perigramReader, simpleReadingSpawner, perigramReadingSpawner, mesosticJumper;
-  protected ReaderBehavior neighborFading, spawningVB, defaultVisuals, tendrilsDGray, neighborFadingNoTrails, haloing;
-  protected PerigramLookup allPerigrams;
+  protected ReaderBehavior neighborFading, spawningVB, defaultVisuals, tendrilsDGray, neighborFadingNoTrails,
+      haloing, mesostic;
+  protected PerigramLookup perigrams;
 
   public void constructVBsFor(String text) // call by constructReaders()
   {
-    allPerigrams = new PerigramLookup(this, new String[] { text });
+    perigrams = new PerigramLookup(this, new String[] { text });
 
     neighborFading = new NeighborFadingVisual(readerColor, verso.template().fill(), readerSpeed);
     ((NeighborFadingVisual) neighborFading).setFadeLeadingNeighbors(true);
@@ -144,19 +146,23 @@ public class ELC3Multi extends MultiPageApplet
     neighborFadingNoTrails = new NeighborFadingVisual(readerColor, verso.template().fill(), readerSpeed);
     ((NeighborFadingVisual) neighborFadingNoTrails).setFadeLeadingNeighbors(false);
     ((NeighborFadingVisual) neighborFadingNoTrails).setFadeTrailingNeighbors(false);
-    
+
     defaultVisuals = new DefaultVisuals(MOCHRE, (float) SPEED_MAP.get("Slow"));
-    
+
     tendrilsDGray = new DefaultVisuals(DGRAY, .5f, (float) SPEED_MAP.get("Slow"));
     // earlier failed? attempt to make tendrils faster by multiplying speed by 1.7
 
     // NB ugh: tendrilsDGray has to be non-null at this point:
-    spawningVB = new SpawnDirectionalPRs(allPerigrams, tendrilsDGray, NE, N, NW, SW, S, SE);
+    spawningVB = new SpawnDirectionalPRs(perigrams, tendrilsDGray, NE, N, NW, SW, S, SE);
+    
+    mesostic = new MesosticDefault(10f, MYELLOW);
 
   }
 
   public void constructReadersFor(String text)
   {
+    currentReaderIdx = 0;
+    
     verso = pManager.getVerso();
     recto = pManager.getRecto();
 
@@ -165,7 +171,7 @@ public class ELC3Multi extends MultiPageApplet
     // PERIGRAM
     if (perigramReader != null)
       MachineReader.delete(perigramReader);
-    perigramReader = new PerigramReader(verso, allPerigrams);
+    perigramReader = new PerigramReader(verso, perigrams);
     perigramReader.setCurrentCell(currentCell); // was setGridPosition(1, 0) because of page turn!
     perigramReader.setSpeed(readerSpeed); // was 0.5f
     perigramReader.setBehavior(neighborFading);
@@ -183,20 +189,28 @@ public class ELC3Multi extends MultiPageApplet
     // PERIGRAM SPAWNER
     if (perigramReadingSpawner != null)
       MachineReader.delete(perigramReadingSpawner);
-    perigramReadingSpawner = new PerigramReader(verso, allPerigrams);
+    perigramReadingSpawner = new PerigramReader(verso, perigrams);
     perigramReadingSpawner.setCurrentCell(currentCell);
     perigramReadingSpawner.setSpeed((float) readerSpeed); // was 0.6f
     perigramReadingSpawner.setBehavior(neighborFadingNoTrails);
     perigramReadingSpawner.addBehavior(spawningVB);
 
-    READERS = new MachineReader[] { perigramReader, simpleReadingSpawner, perigramReadingSpawner };
+    // MESOSTIC JUMPER - TODO: has different default speed
+    if (mesosticJumper != null)
+      MachineReader.delete(mesosticJumper);
+    mesosticJumper = new MesoPerigramJumper(verso, MESOSTIC, perigrams);
+    mesosticJumper.setBehavior(mesostic);
+    mesosticJumper.setCurrentCell(currentCell);
+    mesosticJumper.setSpeed((float) SPEED_MAP.get("Slow"), true);
+
+    READERS = new MachineReader[] { perigramReader, simpleReadingSpawner, perigramReadingSpawner, mesosticJumper };
     for (int i = 0; i < READERS.length; i++)
     {
       READERS[i].start();
       READERS[i].pause(currentReaderIdx != i);
     }
 
-    pManager.onUpdateFocusedReader(currentReader());
+    // TODO: workaround, see draw method: pManager.onUpdateFocusedReader(currentReader());
   }
 
   public void mouseClicked()
@@ -231,11 +245,12 @@ public class ELC3Multi extends MultiPageApplet
         current.pause(true);
         RiText rt = current.getCurrentCell();
         currentReaderIdx = (int) READER_MAP.get(clicked.value());
+        current = READERS[currentReaderIdx];
         current.setSpeed((float) SPEED_MAP.get(speedSelect.value()));
         current.setCurrentCell(rt);
         current.pause(false);
 
-        // pManager.onUpdateFocusedReader(currentReader); TODO: problem with focus!
+        pManager.onUpdateFocusedReader(current); // TODO: ? problem with focus!
       }
       else if (clicked == speedSelect)
       {
@@ -286,6 +301,13 @@ public class ELC3Multi extends MultiPageApplet
     ButtonSelect.drawAll(mouseX, mouseY);
 
     pManager.draw(g);
+
+    // TODO: ugly workaround
+    if (MachineReader.OK_TO_FOCUS)
+    {
+      pManager.onUpdateFocusedReader(currentReader());
+      MachineReader.OK_TO_FOCUS = false;
+    }
 
   }
 

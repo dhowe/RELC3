@@ -28,6 +28,8 @@ public abstract class MachineReader implements ReaderConstants
 
   // Statics --------------------------------------
 
+  public static boolean OK_TO_FOCUS = false; // TODO: for a workaround
+
   public static List instances = new ArrayList();
   private static boolean firstUpdate = true;
 
@@ -230,6 +232,8 @@ public abstract class MachineReader implements ReaderConstants
 
       if (!hasMoved)
       {
+        // TODO: part of ugly workaround
+        OK_TO_FOCUS = true;
         currentCell = grid.previousCell(currentCell);
         this.grid = RiTextGrid.getGridFor(currentCell);
       }
