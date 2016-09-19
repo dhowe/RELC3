@@ -14,6 +14,7 @@ import trp.util.Readers;
 
 public class ELC3Multi extends MultiPageApplet
 {
+  static final int SKETCH_WIDTH = 1280;
   static final String[] TEXTNAMES = { "Poetic Caption", "Misspelt Landings", "The Image" };
   static final String[] READERNAMES = { "Perigram", "Simple Spawner", "Perigram Spawner", "Mesostic Jumper" };
   static final String[] SPEEDNAMES = { "Fast", "Per-second", "Slow", "Slower", "Slowest", "Very fast" };
@@ -23,6 +24,7 @@ public class ELC3Multi extends MultiPageApplet
   static Map READER_MAP = new HashMap();
   static Map SPEED_MAP = new HashMap();
   static Map COLOR_MAP = new HashMap();
+  static ButtonSelect[] BUTTONS;
 
   static
   {
@@ -70,7 +72,21 @@ public class ELC3Multi extends MultiPageApplet
     speedSelect = new ButtonSelect(this, 700, BUTTONS_Y, "Speed", SPEEDNAMES);
     visualSelect = new ButtonSelect(this, 900, BUTTONS_Y, "Visual", VISUALNAMES);
     colorSelect = new ButtonSelect(this, 1100, BUTTONS_Y, "Color", COLORNAMES);
-
+    
+    BUTTONS = new ButtonSelect[] {textSelect, readerSelect, speedSelect, visualSelect,colorSelect};
+    int totalWidth = 0;
+    for (int i = 0; i < BUTTONS.length; i++)
+    {
+      totalWidth += BUTTONS[i].getWidth();
+    }
+    System.out.println(totalWidth);
+    int nextX = (SKETCH_WIDTH - totalWidth) / 2;
+    for (int i = 0; i < BUTTONS.length; i++)
+    {
+      BUTTONS[i].x = nextX;
+      nextX += BUTTONS[i].getWidth();
+    }
+    
     // grid color setup
     LAYOUT_BACKGROUND_COLOR = BLACK_INT; // CHANGE THIS TO INVERT; > 127 dark on light
     int gridcol = (LAYOUT_BACKGROUND_COLOR > 127) ? 0 : 255;
@@ -135,34 +151,10 @@ public class ELC3Multi extends MultiPageApplet
       haloing, mesostic;
   protected PerigramLookup perigrams;
 
-  public void constructVBsFor(String text) // call by constructReaders()
-  {
-    perigrams = new PerigramLookup(this, new String[] { text });
-
-    neighborFading = new NeighborFadingVisual(readerColor, verso.template().fill(), readerSpeed);
-    ((NeighborFadingVisual) neighborFading).setFadeLeadingNeighbors(true);
-    ((NeighborFadingVisual) neighborFading).setFadeTrailingNeighbors(true);
-
-    neighborFadingNoTrails = new NeighborFadingVisual(MOCHRE, verso.template().fill(), readerSpeed);
-    ((NeighborFadingVisual) neighborFadingNoTrails).setFadeLeadingNeighbors(false);
-    ((NeighborFadingVisual) neighborFadingNoTrails).setFadeTrailingNeighbors(false);
-
-    defaultVisuals = new DefaultVisuals(MOCHRE, (float) SPEED_MAP.get("Slow"));
-
-    tendrilsDGray = new DefaultVisuals(DGRAY, .5f, (float) SPEED_MAP.get("Slow"));
-    // earlier failed? attempt to make tendrils faster by multiplying speed by 1.7
-
-    // NB ugh: tendrilsDGray has to be non-null at this point:
-    spawningVB = new SpawnDirectionalPRs(perigrams, tendrilsDGray, NE, N, NW, SW, S, SE);
-    
-    mesostic = new MesosticDefault(10f, MYELLOW);
-
-  }
-
   public void constructReadersFor(String text)
   {
     currentReaderIdx = 0;
-    
+
     verso = pManager.getVerso();
     recto = pManager.getRecto();
 
@@ -203,18 +195,45 @@ public class ELC3Multi extends MultiPageApplet
     mesosticJumper.setSpeed((float) SPEED_MAP.get("Slow"), true);
     mesosticJumper.setBehavior(mesostic);
 
-    READERS = new MachineReader[] { perigramReader, simpleReadingSpawner, perigramReadingSpawner, mesosticJumper };
+    READERS = new MachineReader[] { perigramReader, simpleReadingSpawner, perigramReadingSpawner,
+        mesosticJumper };
     for (int i = 0; i < READERS.length; i++)
     {
       READERS[i].start();
       READERS[i].pause(currentReaderIdx != i);
     }
 
-    // TODO: workaround, see draw method: pManager.onUpdateFocusedReader(currentReader());
+    // TODO: workaround! see draw method where this is done: pManager.onUpdateFocusedReader(currentReader());
+  }
+
+  public void constructVBsFor(String text) // call by constructReaders()
+  {
+    perigrams = new PerigramLookup(this, new String[] { text });
+
+    neighborFading = new NeighborFadingVisual(readerColor, verso.template().fill(), readerSpeed);
+    ((NeighborFadingVisual) neighborFading).setFadeLeadingNeighbors(true);
+    ((NeighborFadingVisual) neighborFading).setFadeTrailingNeighbors(true);
+
+    neighborFadingNoTrails = new NeighborFadingVisual(MOCHRE, verso.template().fill(), readerSpeed);
+    ((NeighborFadingVisual) neighborFadingNoTrails).setFadeLeadingNeighbors(false);
+    ((NeighborFadingVisual) neighborFadingNoTrails).setFadeTrailingNeighbors(false);
+
+    defaultVisuals = new DefaultVisuals(MOCHRE, (float) SPEED_MAP.get("Slow"));
+
+    tendrilsDGray = new DefaultVisuals(DGRAY, .5f, (float) SPEED_MAP.get("Slow"));
+    // earlier failed? attempt to make tendrils faster by multiplying speed by 1.7
+
+    // NB ugh: tendrilsDGray has to be non-null at this point:
+    spawningVB = new SpawnDirectionalPRs(perigrams, tendrilsDGray, NE, N, NW, SW, S, SE);
+
+    mesostic = new MesosticDefault(10f, MYELLOW);
+
   }
 
   public void mouseClicked()
   {
+    if (pManager.flipping)
+      return;
     ButtonSelect clicked = ButtonSelect.click(mouseX, mouseY);
     if (clicked != null)
     {
@@ -241,7 +260,7 @@ public class ELC3Multi extends MultiPageApplet
         readerSelect.advanceTo("Perigram");
         speedSelect.advanceTo("Fast");
         visualSelect.advanceTo("Default visuals");
-        colorSelect.advanceTo("Oatmeal");
+        // no need to do this - colorSelect.advanceTo("Oatmeal"); - perigram reader will stay as set
       }
       else if (clicked == readerSelect)
       {
@@ -254,6 +273,8 @@ public class ELC3Multi extends MultiPageApplet
         current.setCurrentCell(rt);
         current.pause(false);
 
+        setVisuals(visualSelect.value(), readerColor);
+
         pManager.onUpdateFocusedReader(current); // TODO: ? problem with focus!
       }
       else if (clicked == speedSelect)
@@ -262,51 +283,83 @@ public class ELC3Multi extends MultiPageApplet
       }
       else if (clicked == visualSelect)
       {
-        if ((clicked.value()).equals("Haloed"))
+        setVisuals(clicked.value(), readerColor);
+      }
+      else if (clicked == colorSelect)
+      {
+        readerColor = (float[]) COLOR_MAP.get(clicked.value());
+        if (visualSelect.value().equals("Haloed"))
         {
-          MachineReader current = currentReader();
-          haloing = new ClearHaloingVisual(readerColor, verso.template().fill(), readerSpeed);
-          current.setBehavior(haloing);
+          haloing.setReaderColor(readerColor);
         }
         else
         {
           switch (currentReaderIdx)
           {
             case 0: // perigram
-              currentReader().setBehavior(neighborFading);
-              colorSelect.advanceTo("Oatmeal");
-              speedSelect.advanceTo("Fast");
+              neighborFading.setReaderColor(readerColor);
               break;
             case 1: // simple spawner
-              currentReader().setSpeed((float) SPEED_MAP.get("Slow"));
-              currentReader().setBehavior(defaultVisuals);
-              currentReader().addBehavior(spawningVB);
-              colorSelect.advanceTo("Ochre");
-              speedSelect.advanceTo("Slow");
+              defaultVisuals.setReaderColor(readerColor);
               break;
             case 2: // perigram spawner
-              currentReader().setSpeed((float) SPEED_MAP.get("Fast"));
-              currentReader().setBehavior(neighborFadingNoTrails);
-              currentReader().addBehavior(spawningVB);
-              colorSelect.advanceTo("Ochre");
-              speedSelect.advanceTo("Fast");
+              neighborFadingNoTrails.setReaderColor(readerColor);
               break;
             case 3: // mesostic
-              currentReader().setSpeed((float) SPEED_MAP.get("Slow"), true);
-              currentReader().setBehavior(mesostic);
-              colorSelect.advanceTo("Yellow");
-              speedSelect.advanceTo("Slow");
+              mesostic.setReaderColor(readerColor);
               break;
 
             default:
               break;
           }
+
         }
-      }
-      else if (clicked == colorSelect)
-      {
-        readerColor = (float[]) COLOR_MAP.get(clicked.value());
         // currentReader().setC
+      }
+    }
+  }
+
+  protected void setVisuals(String visuals, float[] color)
+  {
+    if (visuals.equals("Haloed"))
+    {
+      MachineReader current = currentReader();
+      haloing = new ClearHaloingVisual(color, verso.template().fill(), readerSpeed);
+      current.setBehavior(haloing);
+    }
+    else
+    {
+      readerColor = color;
+      switch (currentReaderIdx)
+      {
+        case 0: // perigram
+          currentReader().setBehavior(neighborFading);
+          neighborFading.setReaderColor(color);
+          speedSelect.advanceTo("Fast");
+          break;
+        case 1: // simple spawner
+          currentReader().setSpeed((float) SPEED_MAP.get("Slow"));
+          currentReader().setBehavior(defaultVisuals);
+          currentReader().addBehavior(spawningVB);
+          defaultVisuals.setReaderColor(color);
+          speedSelect.advanceTo("Slow");
+          break;
+        case 2: // perigram spawner
+          currentReader().setSpeed((float) SPEED_MAP.get("Fast"));
+          currentReader().setBehavior(neighborFadingNoTrails);
+          currentReader().addBehavior(spawningVB);
+          neighborFadingNoTrails.setReaderColor(color);
+          speedSelect.advanceTo("Fast");
+          break;
+        case 3: // mesostic
+          currentReader().setSpeed((float) SPEED_MAP.get("Slow"), true);
+          currentReader().setBehavior(mesostic);
+          mesostic.setReaderColor(color);
+          speedSelect.advanceTo("Slow");
+          break;
+
+        default:
+          break;
       }
     }
   }
@@ -315,29 +368,31 @@ public class ELC3Multi extends MultiPageApplet
   {
     background(LAYOUT_BACKGROUND_COLOR);
 
-    // TODO: buttons drawing
-    if (mouseY >= BUTTONS_Y && mouseY < (BUTTONS_Y + textSelect.height))
+    if (!pManager.flipping)
     {
-      textSelect.textFill = WHITE;
-      readerSelect.textFill = WHITE;
-      speedSelect.textFill = WHITE;
-      visualSelect.textFill = WHITE;
-      colorSelect.textFill = WHITE;
-      if (PRESENTATION_MODE)
-        cursor();
+      // TODO: buttons drawing
+      if (mouseY >= BUTTONS_Y && mouseY < (BUTTONS_Y + textSelect.height))
+      {
+        textSelect.textFill = WHITE;
+        readerSelect.textFill = WHITE;
+        speedSelect.textFill = WHITE;
+        visualSelect.textFill = WHITE;
+        colorSelect.textFill = WHITE;
+        if (PRESENTATION_MODE)
+          cursor();
+      }
+      else
+      {
+        textSelect.textFill = BLACK;
+        readerSelect.textFill = BLACK;
+        speedSelect.textFill = BLACK;
+        visualSelect.textFill = BLACK;
+        colorSelect.textFill = BLACK;
+        if (PRESENTATION_MODE)
+          noCursor();
+      }
+      ButtonSelect.drawAll(mouseX, mouseY);
     }
-    else
-    {
-      textSelect.textFill = BLACK;
-      readerSelect.textFill = BLACK;
-      speedSelect.textFill = BLACK;
-      visualSelect.textFill = BLACK;
-      colorSelect.textFill = BLACK;
-      if (PRESENTATION_MODE)
-        noCursor();
-    }
-    ButtonSelect.drawAll(mouseX, mouseY);
-
     pManager.draw(g);
 
     // TODO: ugly workaround

@@ -108,6 +108,12 @@ public class ButtonSelect implements ReaderConstants
     }
   }
 
+  public int getWidth()
+  {
+    setProps();
+    return width;
+  }
+  
   private void drawRects(int mx, int my)
   {
 
