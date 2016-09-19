@@ -173,6 +173,14 @@ public class ButtonSelect implements ReaderConstants
     return this;
   }
 
+  public ButtonSelect setValue(String valueString)
+  // kludge to make a button act as a monitor
+  {
+    options[0] = valueString;
+    this.selectedIndex = 0;
+    return this;
+  }
+
   //////////////////////////////////// statics //////////////////////////////////////////
 
   public static ButtonSelect click(int mx, int my)
