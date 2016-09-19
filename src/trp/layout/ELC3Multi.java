@@ -143,7 +143,7 @@ public class ELC3Multi extends MultiPageApplet
     ((NeighborFadingVisual) neighborFading).setFadeLeadingNeighbors(true);
     ((NeighborFadingVisual) neighborFading).setFadeTrailingNeighbors(true);
 
-    neighborFadingNoTrails = new NeighborFadingVisual(readerColor, verso.template().fill(), readerSpeed);
+    neighborFadingNoTrails = new NeighborFadingVisual(MOCHRE, verso.template().fill(), readerSpeed);
     ((NeighborFadingVisual) neighborFadingNoTrails).setFadeLeadingNeighbors(false);
     ((NeighborFadingVisual) neighborFadingNoTrails).setFadeTrailingNeighbors(false);
 
@@ -191,7 +191,7 @@ public class ELC3Multi extends MultiPageApplet
       MachineReader.delete(perigramReadingSpawner);
     perigramReadingSpawner = new PerigramReader(verso, perigrams);
     perigramReadingSpawner.setCurrentCell(currentCell);
-    perigramReadingSpawner.setSpeed((float) readerSpeed); // was 0.6f
+    perigramReadingSpawner.setSpeed(readerSpeed); // was 0.6f
     perigramReadingSpawner.setBehavior(neighborFadingNoTrails);
     perigramReadingSpawner.addBehavior(spawningVB);
 
@@ -199,9 +199,9 @@ public class ELC3Multi extends MultiPageApplet
     if (mesosticJumper != null)
       MachineReader.delete(mesosticJumper);
     mesosticJumper = new MesoPerigramJumper(verso, MESOSTIC, perigrams);
-    mesosticJumper.setBehavior(mesostic);
     mesosticJumper.setCurrentCell(currentCell);
     mesosticJumper.setSpeed((float) SPEED_MAP.get("Slow"), true);
+    mesosticJumper.setBehavior(mesostic);
 
     READERS = new MachineReader[] { perigramReader, simpleReadingSpawner, perigramReadingSpawner, mesosticJumper };
     for (int i = 0; i < READERS.length; i++)
@@ -238,6 +238,10 @@ public class ELC3Multi extends MultiPageApplet
           default:
             break;
         }
+        readerSelect.advanceTo("Perigram");
+        speedSelect.advanceTo("Fast");
+        visualSelect.advanceTo("Default visuals");
+        colorSelect.advanceTo("Oatmeal");
       }
       else if (clicked == readerSelect)
       {
@@ -261,14 +265,48 @@ public class ELC3Multi extends MultiPageApplet
         if ((clicked.value()).equals("Haloed"))
         {
           MachineReader current = currentReader();
-          haloing = new ClearHaloingVisual(MYELLOW, verso.template().fill(), current.getSpeed());
+          haloing = new ClearHaloingVisual(readerColor, verso.template().fill(), readerSpeed);
           current.setBehavior(haloing);
+        }
+        else
+        {
+          switch (currentReaderIdx)
+          {
+            case 0: // perigram
+              currentReader().setBehavior(neighborFading);
+              colorSelect.advanceTo("Oatmeal");
+              speedSelect.advanceTo("Fast");
+              break;
+            case 1: // simple spawner
+              currentReader().setSpeed((float) SPEED_MAP.get("Slow"));
+              currentReader().setBehavior(defaultVisuals);
+              currentReader().addBehavior(spawningVB);
+              colorSelect.advanceTo("Ochre");
+              speedSelect.advanceTo("Slow");
+              break;
+            case 2: // perigram spawner
+              currentReader().setSpeed((float) SPEED_MAP.get("Fast"));
+              currentReader().setBehavior(neighborFadingNoTrails);
+              currentReader().addBehavior(spawningVB);
+              colorSelect.advanceTo("Ochre");
+              speedSelect.advanceTo("Fast");
+              break;
+            case 3: // mesostic
+              currentReader().setSpeed((float) SPEED_MAP.get("Slow"), true);
+              currentReader().setBehavior(mesostic);
+              colorSelect.advanceTo("Yellow");
+              speedSelect.advanceTo("Slow");
+              break;
+
+            default:
+              break;
+          }
         }
       }
       else if (clicked == colorSelect)
       {
         readerColor = (float[]) COLOR_MAP.get(clicked.value());
-        // TODO: update visual behaviors
+        // currentReader().setC
       }
     }
   }

@@ -14,7 +14,7 @@ public class ButtonSelect implements ReaderConstants
   // these can be set directly (before creation) to manipulate appearance of all buttons
   public static float[] STROKE = BLACK, TEXT_FILL = WHITE, FILL, HOVERFILL = { 255, 255, 255, 64f };
   public static int PADDING = 6, STROKE_WEIGHT = 0, TEXT_SIZE;
-  
+
   // these can be set directly (after creation) to manipulate appearance of one button
   public float[] stroke, textFill = WHITE, fill, hoverFill = { 255, 255, 255, 64f };
   public int x, y, width, height, padding = 6, strokeWeight = 0, textSize, selectedIndex;
@@ -36,7 +36,7 @@ public class ButtonSelect implements ReaderConstants
 
   public ButtonSelect(PApplet p, int x, int y, PFont font, String label, String[] options, int selectedIndex)
   {
-  	defaults();
+    defaults();
     this.p = p;
     this.x = x;
     this.y = y;
@@ -47,15 +47,16 @@ public class ButtonSelect implements ReaderConstants
     instances.add(this);
   }
 
-	private void defaults() {
-		this.stroke = STROKE;
-  	this.fill = FILL;
-  	this.textFill = TEXT_FILL;
-  	this.hoverFill = HOVERFILL;
-  	this.padding = PADDING;
-  	this.strokeWeight = STROKE_WEIGHT;
-  	this.textSize = TEXT_SIZE;
-	}
+  private void defaults()
+  {
+    this.stroke = STROKE;
+    this.fill = FILL;
+    this.textFill = TEXT_FILL;
+    this.hoverFill = HOVERFILL;
+    this.padding = PADDING;
+    this.strokeWeight = STROKE_WEIGHT;
+    this.textSize = TEXT_SIZE;
+  }
 
   public boolean contains(float mx, float my)
   {
@@ -135,6 +136,22 @@ public class ButtonSelect implements ReaderConstants
 
     selectedIndex = (selectedIndex + 1) % options.length;
     return this;
+  }
+
+  public ButtonSelect advanceTo(String s) // returns null if s is not an option
+  {
+    boolean foundIt = false;
+    for (int i = 0; i < options.length; i++)
+    {
+      if (options[selectedIndex].equals(s))
+      {
+        foundIt = true;
+        break;
+      }
+      else
+        advance();
+    }
+    return foundIt ? this : null;
   }
 
   public String value()
