@@ -4,10 +4,8 @@ import java.awt.Point;
 import java.util.*;
 
 import processing.core.*;
-
 import rita.*;
 import rita.render.PageLayout;
-
 import trp.reader.MachineReader;
 import trp.util.Readers;
 
@@ -437,9 +435,10 @@ public class RiTextGrid
         return g;
     }
 
-    Readers.error("Illegal state in RiTextGrid.getGridFor(), no grid for RiText: " + rt);
+    //Readers.error("Illegal state in RiTextGrid.getGridFor(), no grid for RiText: " + rt);
+    throw new RuntimeException("Illegal state in RiTextGrid.getGridFor(), no grid for RiText: " + rt);
 
-    return null;
+    //return null;
   }
 
   /** Returns true if the RiText exists on this grid */

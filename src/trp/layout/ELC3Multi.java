@@ -182,7 +182,8 @@ public class ELC3Multi extends MultiPageApplet {
 		if (perigramReadingSpawner != null)
 			MachineReader.delete(perigramReadingSpawner);
 		perigramReadingSpawner = new PerigramReader(verso, perigrams);
-		perigramReadingSpawner.setCurrentCell(currentCell);
+		//perigramReadingSpawner.setCurrentCell(currentCell);
+		perigramReadingSpawner.setGridPosition(0, 0);
 		perigramReadingSpawner.setSpeed(readerSpeed); // was 0.6f
 		perigramReadingSpawner.setBehavior(neighborFadingNoTrails);
 		perigramReadingSpawner.addBehavior(spawningVB);
@@ -191,7 +192,8 @@ public class ELC3Multi extends MultiPageApplet {
 		if (mesosticJumper != null)
 			MachineReader.delete(mesosticJumper);
 		mesosticJumper = new MesoPerigramJumper(verso, MESOSTIC, perigrams);
-		mesosticJumper.setCurrentCell(currentCell);
+		//mesosticJumper.setCurrentCell(currentCell);
+		mesosticJumper.setGridPosition(0, 0);
 		mesosticJumper.setSpeed((float) SPEED_MAP.get("Slow"), true);
 		mesosticJumper.setBehavior(mesostic);
 
