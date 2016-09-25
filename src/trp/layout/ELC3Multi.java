@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import processing.core.PApplet;
+import processing.core.PFont;
 import rita.RiTa;
 import rita.RiText;
 import trp.behavior.*;
@@ -19,6 +20,7 @@ public class ELC3Multi extends MultiPageApplet {
 	static final String[] SPEEDNAMES = { "Fast", "Per-second", "Slow", "Slower", "Slowest", "Very fast" };
 	static final String[] VISUALNAMES = { "Default visuals", "Haloed" };
 	static final String[] COLORNAMES = { "Oatmeal", "Ochre", "Brown", "Yellow" };
+	static final PFont[] FONTS = new PFont[TEXTNAMES.length];
 
 	//static Map READER_MAP = new HashMap();
 	static Map SPEED_MAP = new HashMap();

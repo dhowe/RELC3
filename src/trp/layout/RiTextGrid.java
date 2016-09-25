@@ -435,10 +435,10 @@ public class RiTextGrid
         return g;
     }
 
-    //Readers.error("Illegal state in RiTextGrid.getGridFor(), no grid for RiText: " + rt);
-    throw new RuntimeException("Illegal state in RiTextGrid.getGridFor(), no grid for RiText: " + rt);
+    Readers.warn("Illegal state in RiTextGrid.getGridFor(), no grid for RiText: " + rt);
+    //throw new RuntimeException("Illegal state in RiTextGrid.getGridFor(), no grid for RiText: " + rt);
 
-    //return null;
+    return null;
   }
 
   /** Returns true if the RiText exists on this grid */
@@ -759,6 +759,12 @@ public class RiTextGrid
 
     RiTextGrid rtg = getGridFor(center);
 
+    if (rtg == null)
+    {
+      Readers.warn("Null grid in RiTextGrid.neighborhood()");
+      return new RiText[9];
+    }
+    
     Readers.verify(rtg.contains(center), "Grid does not contain center: " + center
         + "\n\ncoords(" + center + ") returns " + rtg.coords(center) + "\n" + this);
 
