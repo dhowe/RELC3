@@ -1,20 +1,13 @@
 package trp.layout;
 
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
-import processing.core.PApplet;
-import processing.core.PConstants;
-import processing.core.PFont;
-import processing.core.PGraphics;
-import processing.core.PImage;
-import rita.RiTa;
-import rita.RiText;
+import processing.core.*;
+import rita.*;
 import rita.render.*;
 import rita.support.BehaviorListener;
+
 import trp.network.HttpFocusThread;
 import trp.reader.MachineReader;
 import trp.util.ReaderConstants;

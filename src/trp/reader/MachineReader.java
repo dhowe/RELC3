@@ -395,8 +395,8 @@ public abstract class MachineReader implements ReaderConstants
   public static void delete(MachineReader reader)
   {
     // Readers.info(RiTa.shortName(reader)+" expired at: " +RiTa.elapsed());
-
-    reader.dead = true;
+  	if (reader != null)
+  		reader.dead = true;
     instances.remove(reader);
     if (reader != null)
     {

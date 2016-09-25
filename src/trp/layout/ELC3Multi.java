@@ -2,13 +2,11 @@ package trp.layout;
 
 import static trp.util.Direction.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import rita.*;
 
-import processing.core.PApplet;
-import processing.core.PFont;
-import rita.RiTa;
-import rita.RiText;
+import java.util.*;
+
+import processing.core.*;
 import trp.behavior.*;
 import trp.reader.*;
 import trp.util.PerigramLookup;
@@ -23,27 +21,9 @@ public class ELC3Multi extends MultiPageApplet {
 	static Map SPEED_MAP, COLOR_MAP;
 	static PFont[] FONTS;
 
-	static {
-		SPEED_MAP = new HashMap();
-		SPEED_MAP.put("Fast", 0.5f);
-		SPEED_MAP.put("Per-second", 1.0f);
-		SPEED_MAP.put("Slow", 1.5f);
-		SPEED_MAP.put("Slower", 2.0f);
-		SPEED_MAP.put("Slowest", 2.5f);
-		SPEED_MAP.put("Very fast", 0.25f);
-
-		COLOR_MAP = new HashMap();
-		COLOR_MAP.put("Oatmeal", OATMEAL);
-		COLOR_MAP.put("Ochre", MOCHRE);
-		COLOR_MAP.put("Brown", MBROWN);
-		COLOR_MAP.put("Yellow", MYELLOW);
-	}
-
-	protected MachineReader perigramReader, simpleReadingSpawner, perigramReadingSpawner, mesosticJumper;
-	protected ReaderBehavior neighborFading, spawningVB, defaultVisuals, tendrilsDGray, neighborFadingNoTrails, haloing, mesostic;
-
-	float readerColor[] = OATMEAL, readerSpeed = 0.5f;
+	ReaderBehavior neighborFading, spawningVB, defaultVisuals, tendrilsDGray, neighborFadingNoTrails, haloing, mesostic;
 	ButtonSelect textSelect, wordMonitor, readerSelect, speedSelect, visualSelect, colorSelect;
+	float readerColor[] = OATMEAL, readerSpeed = 0.5f;
 	String currentWord = "", lastWord = "";
 	RiTextGrid verso, recto;
 	RiText currentCell;
@@ -57,8 +37,8 @@ public class ELC3Multi extends MultiPageApplet {
 	public void setup() {
 		
 		fontSetup();
-		buttonSetup();
 		colorSetup();
+		buttonSetup();
 
 		pManager = PageManager.create(this, 40, 40, 38, 30);
 		pManager.showPageNumbers(false);
@@ -129,6 +109,7 @@ public class ELC3Multi extends MultiPageApplet {
 			
 			// VISUALS
 			else if (clicked == visualSelect) {
+				
 				setVisuals(clicked.value(), readerColor);
 			}
 			
@@ -151,13 +132,21 @@ public class ELC3Multi extends MultiPageApplet {
 			}
 		}
 	}
+	
 	public void fontSetup() {
+		
 		PFont bask = loadFont("Baskerville-25.vlw");
 		PFont gill = loadFont("GillSansMT-24.vlw");
 		FONTS = new PFont[]{ bask, gill, bask };
 	}
 	
 	private void colorSetup() {
+		
+		COLOR_MAP = new HashMap();
+		COLOR_MAP.put("Oatmeal", OATMEAL);
+		COLOR_MAP.put("Ochre", MOCHRE);
+		COLOR_MAP.put("Brown", MBROWN);
+		COLOR_MAP.put("Yellow", MYELLOW);
 		
 		// grid color setup
 		LAYOUT_BACKGROUND_COLOR = BLACK_INT; // CHANGE THIS TO INVERT; > 127 dark on light
@@ -167,17 +156,25 @@ public class ELC3Multi extends MultiPageApplet {
 	}
 
 	private void buttonSetup() {
-
+		
+		SPEED_MAP = new HashMap();
+		SPEED_MAP.put("Fast", 0.5f);
+		SPEED_MAP.put("Per-second", 1.0f);
+		SPEED_MAP.put("Slow", 1.5f);
+		SPEED_MAP.put("Slower", 2.0f);
+		SPEED_MAP.put("Slowest", 2.5f);
+		SPEED_MAP.put("Very fast", 0.25f);
+		
 		ButtonSelect.TEXT_FILL = BLACK;
 		ButtonSelect.STROKE_WEIGHT = 0;
 
-		int BUTTONS_Y = 691;
-		textSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Text", TEXT_NAMES);
-		wordMonitor = new ButtonSelect(this, 0, BUTTONS_Y, "Monitor", new String[] { "This monitors the current word" });
-		readerSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Reader", READER_NAMES);
-		speedSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Speed", (String[]) SPEED_MAP.keySet().toArray(new String[0]));
-		visualSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Visual", VISUAL_NAMES);
-		colorSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Color", (String[]) COLOR_MAP.keySet().toArray(new String[0]));
+		int buttonY = 691;
+		textSelect = new ButtonSelect(this, 0, buttonY, "Text", TEXT_NAMES);
+		wordMonitor = new ButtonSelect(this, 0, buttonY, "Monitor", new String[] { "This monitors the current word" });
+		readerSelect = new ButtonSelect(this, 0, buttonY, "Reader", READER_NAMES);
+		speedSelect = new ButtonSelect(this, 0, buttonY, "Speed", (String[]) SPEED_MAP.keySet().toArray(new String[0]));
+		visualSelect = new ButtonSelect(this, 0, buttonY, "Visual", VISUAL_NAMES);
+		colorSelect = new ButtonSelect(this, 0, buttonY, "Color", (String[]) COLOR_MAP.keySet().toArray(new String[0]));
 
 		int totalWidth = 0;
 		for (int i = 0; i < ButtonSelect.instances.size(); i++) {
@@ -192,12 +189,6 @@ public class ELC3Multi extends MultiPageApplet {
 		}
 	}
 
-	private void pauseReaders() {
-		for (int i = 0; READERS != null && i < READERS.length; i++) {
-			READERS[i].pause(true);
-		}
-	}
-
 	public void constructReadersFor(PerigramLookup perigrams) {
 		
 		currentReaderIdx = 0; // reset back to first reader
@@ -207,35 +198,36 @@ public class ELC3Multi extends MultiPageApplet {
 		recto = pManager.getRecto();
 		
 		constructBehaviorsFor(perigrams);
-
+		
+		if (READERS == null) READERS = new MachineReader[READER_NAMES.length];
+		
 		// PERIGRAM
-		if (perigramReader != null) MachineReader.delete(perigramReader);
-		perigramReader = new PerigramReader(verso, perigrams);
-		perigramReader.setSpeed(readerSpeed); // was 0.5f
-		perigramReader.setBehavior(neighborFading);
+		MachineReader.delete(READERS[0]);
+		READERS[0] = new PerigramReader(verso, perigrams);
+		READERS[0].setSpeed(readerSpeed); // was 0.5f
+		READERS[0].setBehavior(neighborFading);
 
 		// SIMPLE READING SPAWNER - nb: has different default speed
-		if (simpleReadingSpawner != null) MachineReader.delete(simpleReadingSpawner);
-		simpleReadingSpawner = new SimpleReader(verso);
-		simpleReadingSpawner.setSpeed((float) SPEED_MAP.get("Slow")); // was 1.7f
-		simpleReadingSpawner.setBehavior(defaultVisuals);
-		simpleReadingSpawner.addBehavior(spawningVB);
-		simpleReadingSpawner.setTestMode(false);
+		MachineReader.delete(READERS[1]);
+		READERS[1] = new SimpleReader(verso);
+		READERS[1].setSpeed((float) SPEED_MAP.get("Slow")); // was 1.7f
+		READERS[1].setBehavior(defaultVisuals);
+		READERS[1].addBehavior(spawningVB);
 
 		// PERIGRAM SPAWNER
-		if (perigramReadingSpawner != null) MachineReader.delete(perigramReadingSpawner);
-		perigramReadingSpawner = new PerigramReader(verso, perigrams);
-		perigramReadingSpawner.setSpeed(readerSpeed); // was 0.6f
-		perigramReadingSpawner.setBehavior(neighborFadingNoTrails);
-		perigramReadingSpawner.addBehavior(spawningVB);
+		MachineReader.delete(READERS[2]);
+
+		READERS[2] = new PerigramReader(verso, perigrams);
+		READERS[2].setSpeed(readerSpeed); // was 0.6f
+		READERS[2].setBehavior(neighborFadingNoTrails);
+		READERS[2].addBehavior(spawningVB);
 
 		// MESOSTIC JUMPER - nb: has different default speed
-		if (mesosticJumper != null) MachineReader.delete(mesosticJumper);
-		mesosticJumper = new MesoPerigramJumper(verso, "reading as writing through", perigrams);
-		mesosticJumper.setSpeed((float) SPEED_MAP.get("Slow"), true);
-		mesosticJumper.setBehavior(mesostic);
+		MachineReader.delete(READERS[3]);
+		READERS[3] = new MesoPerigramJumper(verso, "reading as writing through", perigrams);
+		READERS[3].setSpeed((float) SPEED_MAP.get("Slow"), true);
+		READERS[3].setBehavior(mesostic);
 
-		READERS = new MachineReader[] { perigramReader, simpleReadingSpawner, perigramReadingSpawner, mesosticJumper };
 		for (int i = 0; i < READERS.length; i++) {
 			READERS[i].start();
 			READERS[i].pause(currentReaderIdx != i);
@@ -358,6 +350,7 @@ public class ELC3Multi extends MultiPageApplet {
 	}
 
 	public int readerIdxFromName(String name) {
+		
 		for (int i = 0; i < READER_NAMES.length; i++)
 				if (READER_NAMES[i].equals(name))
 						return i;
@@ -365,6 +358,7 @@ public class ELC3Multi extends MultiPageApplet {
 	}
 	
 	public int textIdxFromName(String name) {
+		
 		for (int i = 0; i < TEXT_NAMES.length; i++)
 				if (TEXT_NAMES[i].equals(name))
 						return i;
@@ -376,6 +370,13 @@ public class ELC3Multi extends MultiPageApplet {
 		speedSelect.advanceTo("Fast");
 		readerSelect.advanceTo("Perigram");
 		visualSelect.advanceTo("Default visuals");
+	}
+	
+	private static void pauseReaders() {
+		
+		for (int i = 0; READERS != null && i < READERS.length; i++) {
+			READERS[i].pause(true);
+		}
 	}
 	
 	private static int countSyllables(String syllables) {
