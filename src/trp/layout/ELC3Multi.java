@@ -60,7 +60,6 @@ public class ELC3Multi extends MultiPageApplet {
 		buttonSetup();
 		colorSetup();
 
-		// do layout
 		pManager = PageManager.create(this, 40, 40, 38, 30);
 		pManager.showPageNumbers(false);
 		pManager.setApplicationId("elc3");
@@ -81,7 +80,7 @@ public class ELC3Multi extends MultiPageApplet {
 		
 		pManager.clear();
 		pManager.setLeading(30);
-		RiText.defaultFont(FONTS[i]);
+		pManager.setFont(FONTS[i]);
 		pManager.addTextFromFile(TEXTS[i]);
 		pManager.doLayout();
 
@@ -344,6 +343,9 @@ public class ELC3Multi extends MultiPageApplet {
 
 				// currentReader().adjustSpeed(1f + (numOfSyllables * 2f)); TODO: how to
 				// adjust speed per-step properly??
+				
+				// DH: what behavior do you want? adjustSpeed takes a multiplier,
+				// so you can pass 1.1 to speed up by 10% or .9 to slow down by 10%
 
 				wordMonitor.setValue(currentWord);
 				lastWord = currentWord;
@@ -351,15 +353,8 @@ public class ELC3Multi extends MultiPageApplet {
 
 			ButtonSelect.drawAll(mouseX, mouseY);
 		}
+		
 		pManager.draw(g);
-
-		// TODO: part of ugly workaround to allow new readers to begin at 0,0 on
-		// verso without page flip/turn
-//		if (MachineReader.OK_TO_FOCUS) {
-//			pManager.onUpdateFocusedReader(currentReader());
-//			MachineReader.OK_TO_FOCUS = false;
-//		}
-
 	}
 
 	public int readerIdxFromName(String name) {
