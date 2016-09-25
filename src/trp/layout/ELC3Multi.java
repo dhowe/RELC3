@@ -19,6 +19,7 @@ public class ELC3Multi extends MultiPageApplet {
 	static final String[] VISUAL_NAMES = { "Default visuals", "Haloed" };
 	
 	static Map SPEED_MAP, COLOR_MAP;
+	static ReaderBehavior[] BEHAVIORS;
 	static PFont[] FONTS;
 
 	ReaderBehavior neighborFading, spawningVB, defaultVisuals, tendrilsDGray, neighborFadingNoTrails, haloing, mesostic;
@@ -124,10 +125,8 @@ public class ELC3Multi extends MultiPageApplet {
 					currentReader().setBehavior(haloing);
 					
 				} else {
-					ReaderBehavior[] rbs = new ReaderBehavior[] {
-							neighborFading, defaultVisuals, neighborFadingNoTrails, mesostic
-					};
-					rbs[currentReaderIdx].setReaderColor(readerColor);
+					
+					BEHAVIORS[currentReaderIdx].setReaderColor(readerColor);
 				}
 			}
 		}
@@ -256,6 +255,12 @@ public class ELC3Multi extends MultiPageApplet {
 		spawningVB = new SpawnDirectionalPRs(perigrams, tendrilsDGray, NE, N, NW, SW, S, SE);
 
 		mesostic = new MesosticDefault(10f, MYELLOW);
+		
+		// these appear to be the default behaviors, at least when not haloing? 
+		// (not sure if we need to keep recreating them over and over)
+		BEHAVIORS = new ReaderBehavior[] {
+				neighborFading, defaultVisuals, neighborFadingNoTrails, mesostic
+		};
 	}
 
 	protected void setVisuals(String visuals, float[] color) {
