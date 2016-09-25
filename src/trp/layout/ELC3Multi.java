@@ -16,19 +16,15 @@ import trp.util.PerigramLookup;
 public class ELC3Multi extends MultiPageApplet {
 	
 	static final String[] TEXTS = { "textual/poeticCaption.txt", "textual/misspeltLandings.txt", "textual/image.txt" };
-	static final String[] TEXTNAMES = { "POETIC CAPTION", "MISSPELT LANDINGS", "THE IMAGE" };
-	static final String[] READERNAMES = { "Perigram", "Simple Spawner", "Perigram Spawner", "Mesostic Jumper" };
-	static final String[] SPEEDNAMES = { "Fast", "Per-second", "Slow", "Slower", "Slowest", "Very fast" };
-	static final String[] VISUALNAMES = { "Default visuals", "Haloed" };
-	//static final String[] COLORNAMES = { "Oatmeal", "Ochre", "Brown", "Yellow" };
-	static final PFont[] FONTS = new PFont[TEXTNAMES.length];
-
-	//static Map READER_MAP = new HashMap();
-	static Map SPEED_MAP = new HashMap();
-	static Map COLOR_MAP = new HashMap();
-	//static ButtonSelect[] BUTTONS;
+	static final String[] READER_NAMES = { "Perigram", "Simple Spawner", "Perigram Spawner", "Mesostic Jumper" };
+	static final String[] TEXT_NAMES = { "POETIC CAPTION", "MISSPELT LANDINGS", "THE IMAGE" };
+	static final String[] VISUAL_NAMES = { "Default visuals", "Haloed" };
+	
+	static Map SPEED_MAP, COLOR_MAP;
+	static PFont[] FONTS;
 
 	static {
+		SPEED_MAP = new HashMap();
 		SPEED_MAP.put("Fast", 0.5f);
 		SPEED_MAP.put("Per-second", 1.0f);
 		SPEED_MAP.put("Slow", 1.5f);
@@ -36,6 +32,7 @@ public class ELC3Multi extends MultiPageApplet {
 		SPEED_MAP.put("Slowest", 2.5f);
 		SPEED_MAP.put("Very fast", 0.25f);
 
+		COLOR_MAP = new HashMap();
 		COLOR_MAP.put("Oatmeal", OATMEAL);
 		COLOR_MAP.put("Ochre", MOCHRE);
 		COLOR_MAP.put("Brown", MBROWN);
@@ -46,9 +43,6 @@ public class ELC3Multi extends MultiPageApplet {
 	protected ReaderBehavior neighborFading, spawningVB, defaultVisuals, tendrilsDGray,
 		neighborFadingNoTrails, haloing, mesostic;
 	protected PerigramLookup perigrams;
-	protected static String TEXT = "textual/poeticCaption.txt";
-	protected static final String MESOSTIC = "reading as writing through";
-	protected static String APP_ID = "elc3";
 	protected static int BUTTONS_Y = 691;
 
 	float readerColor[] = OATMEAL, readerSpeed = 0.5f;
@@ -72,7 +66,7 @@ public class ELC3Multi extends MultiPageApplet {
 		// do layout
 		pManager = PageManager.create(this, 40, 40, 38, 30);
 		pManager.showPageNumbers(false);
-		pManager.setApplicationId(APP_ID);
+		pManager.setApplicationId("elc3");
 		pManager.decreaseGutterBy(20);
 		pManager.setVersoHeader("");
 		pManager.setRectoHeader("");
@@ -178,7 +172,8 @@ public class ELC3Multi extends MultiPageApplet {
 	}
 	public void fontSetup() {
 		PFont bask = loadFont("Baskerville-25.vlw");
-		PFont bask = loadFont("Baskerville-25.vlw");
+		PFont gill = loadFont("GillSansMT-24.vlw");
+		FONTS = new PFont[]{ bask, gill, bask };
 	}
 	
 	private void colorSetup() {
@@ -195,11 +190,11 @@ public class ELC3Multi extends MultiPageApplet {
 		ButtonSelect.TEXT_FILL = BLACK;
 		ButtonSelect.STROKE_WEIGHT = 0;
 
-		textSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Text", TEXTNAMES);
+		textSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Text", TEXT_NAMES);
 		wordMonitor = new ButtonSelect(this, 0, BUTTONS_Y, "Monitor", new String[] { "This monitors the current word" });
-		readerSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Reader", READERNAMES);
-		speedSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Speed", SPEEDNAMES);
-		visualSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Visual", VISUALNAMES);
+		readerSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Reader", READER_NAMES);
+		speedSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Speed", (String[]) SPEED_MAP.keySet().toArray(new String[0]));
+		visualSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Visual", VISUAL_NAMES);
 		colorSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Color", (String[]) COLOR_MAP.keySet().toArray(new String[0]));
 
 		int totalWidth = 0;
@@ -304,14 +299,14 @@ public class ELC3Multi extends MultiPageApplet {
 	}
 
 	public int readerIdxFromName(String name) {
-		for (int i = 0; i < READERNAMES.length; i++)
-				if (READERNAMES[i].equals(name))
+		for (int i = 0; i < READER_NAMES.length; i++)
+				if (READER_NAMES[i].equals(name))
 						return i;
 		return -1;
 	}
 	public int textIdxFromName(String name) {
-		for (int i = 0; i < TEXTNAMES.length; i++)
-				if (TEXTNAMES[i].equals(name))
+		for (int i = 0; i < TEXT_NAMES.length; i++)
+				if (TEXT_NAMES[i].equals(name))
 						return i;
 		return -1;
 	}
