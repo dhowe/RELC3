@@ -15,11 +15,12 @@ import trp.util.PerigramLookup;
 
 public class ELC3Multi extends MultiPageApplet {
 	
+	static final String[] TEXTS = { "textual/poeticCaption.txt", "textual/misspeltLandings.txt", "textual/image.txt" };
 	static final String[] TEXTNAMES = { "POETIC CAPTION", "MISSPELT LANDINGS", "THE IMAGE" };
 	static final String[] READERNAMES = { "Perigram", "Simple Spawner", "Perigram Spawner", "Mesostic Jumper" };
 	static final String[] SPEEDNAMES = { "Fast", "Per-second", "Slow", "Slower", "Slowest", "Very fast" };
 	static final String[] VISUALNAMES = { "Default visuals", "Haloed" };
-	static final String[] COLORNAMES = { "Oatmeal", "Ochre", "Brown", "Yellow" };
+	//static final String[] COLORNAMES = { "Oatmeal", "Ochre", "Brown", "Yellow" };
 	static final PFont[] FONTS = new PFont[TEXTNAMES.length];
 
 	//static Map READER_MAP = new HashMap();
@@ -40,8 +41,6 @@ public class ELC3Multi extends MultiPageApplet {
 		COLOR_MAP.put("Brown", MBROWN);
 		COLOR_MAP.put("Yellow", MYELLOW);
 	}
-
-	public static float[] READER_MONOCOLOR = BLACK;
 
 	protected MachineReader perigramReader, simpleReadingSpawner, perigramReadingSpawner, mesosticJumper;
 	protected ReaderBehavior neighborFading, spawningVB, defaultVisuals, tendrilsDGray,
@@ -78,36 +77,108 @@ public class ELC3Multi extends MultiPageApplet {
 		pManager.setVersoHeader("");
 		pManager.setRectoHeader("");
 
-		doLayout(TEXT);
+		doLayout(0);
 
 		if (PRESENTATION_MODE)
 			noCursor(); // only hide cursor in a configurable PRESENTATION mode
 	}
 	
-	private void doLayout(String fileName) {
+	private void doLayout(int i) {
 		
 		pauseReaders();
+		
+		speedSelect.advanceTo("Fast");
+		readerSelect.advanceTo("Perigram");
+		visualSelect.advanceTo("Default visuals");
+		
 		pManager.clear();
 		pManager.setLeading(30);
-		if (fileName.contains("misspelt")) {
-			RiText.defaultFont(loadFont("GillSansMT-24.vlw"));
-		} else {
-			RiText.defaultFont(loadFont(FONT_VLW));
-		}
-		pManager.addTextFromFile(fileName);
+		RiText.defaultFont(FONTS[i]);
+		pManager.addTextFromFile(TEXTS[i]);
 		pManager.doLayout();
 
 		currentCell = pManager.getVerso().cellAt(0, 0);
 		readerSpeed = (float) SPEED_MAP.get("Fast");
 
-		constructReadersFor(fileName);
+		constructReadersFor(TEXTS[i]);
 	}
+	
+	public void mouseClicked() {
+		
+		if (pManager.flipping) return;
+		
+		ButtonSelect clicked = ButtonSelect.click(mouseX, mouseY);
+		if (clicked != null) {
+			
+			// TEXT
+			if (clicked == textSelect) {
+				
+				doLayout(textIdxFromName(clicked.value()));
+			}
+			
+			// READER
+			else if (clicked == readerSelect) {
+				
+				MachineReader rd = currentReader();
+				RiText rt = rd.getCurrentCell();
+				rd.pause(true);
+				
+				currentReaderIdx = readerIdxFromName(clicked.value());
+				
+				rd = currentReader();
+				//System.out.println("click: "+clicked.value()+", "+currentReaderIdx);
+				rd.setSpeed((float) SPEED_MAP.get(speedSelect.value()));
+				rd.setCurrentCell(rt);
+				rd.pause(false);
 
+				setVisuals(visualSelect.value(), readerColor);
+
+				pManager.onUpdateFocusedReader(rd);
+			}
+			
+			// SPEED
+			else if (clicked == speedSelect) {
+				readerSpeed = (float) SPEED_MAP.get(clicked.value());
+				currentReader().setSpeed(readerSpeed);
+			}
+			
+			// VISUALS
+			else if (clicked == visualSelect) {
+				setVisuals(clicked.value(), readerColor);
+			}
+			
+			// COLOR - of reader
+			else if (clicked == colorSelect) {
+				readerColor = (float[]) COLOR_MAP.get(clicked.value());
+				if (visualSelect.value().equals("Haloed")) {
+					haloing = new ClearHaloingVisual(readerColor, verso.template().fill(), readerSpeed);
+					currentReader().setBehavior(haloing);
+				} else {
+					switch (currentReaderIdx) {
+					case 0: // perigram
+						neighborFading.setReaderColor(readerColor);
+						break;
+					case 1: // simple spawner
+						defaultVisuals.setReaderColor(readerColor);
+						break;
+					case 2: // perigram spawner
+						neighborFadingNoTrails.setReaderColor(readerColor);
+						break;
+					case 3: // mesostic
+						mesostic.setReaderColor(readerColor);
+						break;
+
+					default:
+						break;
+					}
+
+				}
+			}
+		}
+	}
 	public void fontSetup() {
-		FONT = "Baskerville"; // cf: Baskerville (22), Perpetua (24),
-													// MinionPro-Regular(20);
-		FONT_VLW = FONT + "-25" + ".vlw"; // was 26
-		RiText.defaultFont(loadFont(FONT_VLW));
+		PFont bask = loadFont("Baskerville-25.vlw");
+		PFont bask = loadFont("Baskerville-25.vlw");
 	}
 	
 	private void colorSetup() {
@@ -115,7 +186,6 @@ public class ELC3Multi extends MultiPageApplet {
 		// grid color setup
 		LAYOUT_BACKGROUND_COLOR = BLACK_INT; // CHANGE THIS TO INVERT; > 127 dark on light
 		int gridcol = (LAYOUT_BACKGROUND_COLOR > 127) ? 0 : 255;
-		READER_MONOCOLOR = (gridcol == 0) ? BLACK : WHITE;
 		GRID_ALPHA = 40; // EDIT could also be set from preferences in production
 		RiTextGrid.defaultColor(gridcol, gridcol, gridcol - GRID_ALPHA, GRID_ALPHA);
 	}
@@ -130,7 +200,7 @@ public class ELC3Multi extends MultiPageApplet {
 		readerSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Reader", READERNAMES);
 		speedSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Speed", SPEEDNAMES);
 		visualSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Visual", VISUALNAMES);
-		colorSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Color", COLORNAMES);
+		colorSelect = new ButtonSelect(this, 0, BUTTONS_Y, "Color", (String[]) COLOR_MAP.keySet().toArray(new String[0]));
 
 		int totalWidth = 0;
 		for (int i = 0; i < ButtonSelect.instances.size(); i++) {
@@ -239,98 +309,11 @@ public class ELC3Multi extends MultiPageApplet {
 						return i;
 		return -1;
 	}
-	
-	public void mouseClicked() {
-		
-		if (pManager.flipping) return;
-		
-		ButtonSelect clicked = ButtonSelect.click(mouseX, mouseY);
-		if (clicked != null) {
-			
-			// TEXT
-			if (clicked == textSelect) {
-				switch (clicked.value()) {
-				case "POETIC CAPTION":
-					doLayout("textual/poeticCaption.txt");
-					break;
-
-				case "MISSPELT LANDINGS":
-					doLayout("textual/misspeltLandings.txt");
-					break;
-
-				case "THE IMAGE":
-					doLayout("textual/image.txt");
-					break;
-
-				default:
-					break;
-				}
-				readerSelect.advanceTo("Perigram");
-				speedSelect.advanceTo("Fast");
-				visualSelect.advanceTo("Default visuals");
-				// no need to do this - colorSelect.advanceTo("Oatmeal"); - perigram
-				// reader will stay as set
-			}
-			
-			// READER
-			else if (clicked == readerSelect) {
-				
-				MachineReader rd = currentReader();
-				RiText rt = rd.getCurrentCell();
-				rd.pause(true);
-				
-				currentReaderIdx = readerIdxFromName(clicked.value());
-				
-				rd = currentReader();
-				//System.out.println("click: "+clicked.value()+", "+currentReaderIdx);
-				rd.setSpeed((float) SPEED_MAP.get(speedSelect.value()));
-				rd.setCurrentCell(rt);
-				rd.pause(false);
-
-				setVisuals(visualSelect.value(), readerColor);
-
-				pManager.onUpdateFocusedReader(rd);
-			}
-			
-			// SPEED
-			else if (clicked == speedSelect) {
-				readerSpeed = (float) SPEED_MAP.get(clicked.value());
-				currentReader().setSpeed(readerSpeed);
-			}
-			
-			// VISUALS
-			else if (clicked == visualSelect) {
-				setVisuals(clicked.value(), readerColor);
-			}
-			
-			// COLOR - of reader
-			else if (clicked == colorSelect) {
-				readerColor = (float[]) COLOR_MAP.get(clicked.value());
-				if (visualSelect.value().equals("Haloed")) {
-					haloing = new ClearHaloingVisual(readerColor, verso.template().fill(), readerSpeed);
-					currentReader().setBehavior(haloing);
-				} else {
-					switch (currentReaderIdx) {
-					case 0: // perigram
-						neighborFading.setReaderColor(readerColor);
-						break;
-					case 1: // simple spawner
-						defaultVisuals.setReaderColor(readerColor);
-						break;
-					case 2: // perigram spawner
-						neighborFadingNoTrails.setReaderColor(readerColor);
-						break;
-					case 3: // mesostic
-						mesostic.setReaderColor(readerColor);
-						break;
-
-					default:
-						break;
-					}
-
-				}
-			}
-		}
+	public int textIdxFromName(String name) {
+		for (int i = 0; i < TEXTNAMES.length; i++)
+				if (TEXTNAMES[i].equals(name))
+						return i;
+		return -1;
 	}
 
 	protected void setVisuals(String visuals, float[] color) {
