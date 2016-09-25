@@ -21,8 +21,8 @@ public class PerigramLookup implements ReaderConstants
   //private boolean hasStopWord = false;
 
   // CONSTRUCTORS =============================================
-
-  public PerigramLookup(PApplet p, String[] textNames)
+  
+  public PerigramLookup(PApplet p, String... textNames)
   {
     this(p, textNames, guessFileNames(textNames));
   }

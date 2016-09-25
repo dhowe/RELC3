@@ -643,8 +643,10 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
 
   public void setFont(PFont pf)
   {
-    if (pf != null)
+    if (pf != null) {
       this.font = pf;
+  		RiText.defaultFont(pf); // shouldnt be needed
+    }
   }
 
   public MachineReader getFocusedReader()
