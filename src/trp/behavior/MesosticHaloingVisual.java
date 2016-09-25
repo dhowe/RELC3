@@ -5,18 +5,12 @@ import trp.layout.RiTextGrid;
 import trp.reader.MachineReader;
 import trp.reader.MesosticReader;
 
-public class MesosticDefault extends DefaultVisuals
+public class MesosticHaloingVisual extends ClearHaloingVisual
 {
 
-  public MesosticDefault()
+  public MesosticHaloingVisual(float[] rColor, float[] gColor, float rSpeed)
   {
-    this(10f, MBLUE);
-  }
-
-  public MesosticDefault(float fadeTime, float[] color)
-  {
-    setFadeOutTime(fadeTime);
-    setReaderColor(color);
+    super(rColor, gColor, rSpeed);
   }
 
   public void enterWord(MachineReader mr, RiText rt)
@@ -36,12 +30,7 @@ public class MesosticDefault extends DefaultVisuals
       rtg.textFor(rt, newText);
     }
 
-    // adjust fade time: min. of 16 + 2 sec (???)
-    setFadeOutTime(16 + 4 * mr.getSpeed());
-
     super.enterWord(mr, rt);
-
-    if (meso.isUpdatingTitleLetters())
-      meso.doTitleUpdate(meso.isTitleUpperCase());
   }
+
 }

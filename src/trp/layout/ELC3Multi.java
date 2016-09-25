@@ -108,7 +108,7 @@ public class ELC3Multi extends MultiPageApplet
         rd.setCurrentCell(rt);
         rd.pause(false);
 
-        setVisuals(visualSelect.value(), readerColor);
+        setVisuals(visualSelect.value(), readerColor, isSpawner(currentReaderIdx));
 
         pManager.onUpdateFocusedReader(rd);
       }
@@ -124,8 +124,7 @@ public class ELC3Multi extends MultiPageApplet
       // VISUALS
       else if (clicked == visualSelect)
       {
-
-        setVisuals(clicked.value(), readerColor);
+        setVisuals(clicked.value(), readerColor, isSpawner(currentReaderIdx));
       }
 
       // COLOR - of reader
@@ -136,18 +135,19 @@ public class ELC3Multi extends MultiPageApplet
 
         if (visualSelect.value().equals("Haloed"))
         {
-
-          haloing = new ClearHaloingVisual(readerColor, verso.template().fill(), readerSpeed);
-          currentReader().setBehavior(haloing);
-
+          setVisuals("Haloed", readerColor, isSpawner(currentReaderIdx));
         }
         else
         {
-
           BEHAVIORS[currentReaderIdx].setReaderColor(readerColor);
         }
       }
     }
+  }
+
+  private boolean isSpawner(int currentReaderIdx)
+  {
+    return currentReaderIdx == 1 || currentReaderIdx == 2;
   }
 
   public void fontSetup()
@@ -161,7 +161,7 @@ public class ELC3Multi extends MultiPageApplet
   private void colorSetup()
   {
 
-    COLOR_MAP = new HashMap();
+    COLOR_MAP = new LinkedHashMap();
     COLOR_MAP.put("Oatmeal", OATMEAL);
     COLOR_MAP.put("Ochre", MOCHRE);
     COLOR_MAP.put("Brown", MBROWN);
@@ -177,7 +177,7 @@ public class ELC3Multi extends MultiPageApplet
   private void buttonSetup()
   {
 
-    SPEED_MAP = new HashMap();
+    SPEED_MAP = new LinkedHashMap(); // must be LinkedHashMap to preserve keySet() orders below
     SPEED_MAP.put("Fast", 0.5f);
     SPEED_MAP.put("Per-second", 1.0f);
     SPEED_MAP.put("Slow", 1.5f);
@@ -190,15 +190,11 @@ public class ELC3Multi extends MultiPageApplet
 
     int buttonY = 691;
     textSelect = new ButtonSelect(this, 0, buttonY, "Text", TEXT_NAMES);
-    wordMonitor = new ButtonSelect(this, 0, buttonY, "Monitor", new String[] {
-        "This monitors the current word" });
+    wordMonitor = new ButtonSelect(this, 0, buttonY, "Monitor", new String[] { "monitors the current word" }); // the string passed here determines the width of the button
     readerSelect = new ButtonSelect(this, 0, buttonY, "Reader", READER_NAMES);
     speedSelect = new ButtonSelect(this, 0, buttonY, "Speed", (String[]) SPEED_MAP.keySet().toArray(new String[0]));
     visualSelect = new ButtonSelect(this, 0, buttonY, "Visual", VISUAL_NAMES);
     colorSelect = new ButtonSelect(this, 0, buttonY, "Color", (String[]) COLOR_MAP.keySet().toArray(new String[0]));
-    // required because the value() of colorSelect is otherwise "Ochre"
-    // and is - correctly - not reset when a text is changed (reader color preserved after text change)
-    colorSelect.advanceTo("Oatmeal");
 
     int totalWidth = 0;
     for (int i = 0; i < ButtonSelect.instances.size(); i++)
@@ -291,14 +287,25 @@ public class ELC3Multi extends MultiPageApplet
     BEHAVIORS = new ReaderBehavior[] { neighborFading, defaultVisuals, neighborFadingNoTrails, mesostic };
   }
 
-  protected void setVisuals(String visuals, float[] color)
+  protected void setVisuals(String visuals, float[] color, boolean isSpawner)
   {
 
     if (visuals.equals("Haloed"))
     {
 
-      haloing = new ClearHaloingVisual(color, verso.template().fill(), readerSpeed);
+      if (currentReaderIdx == 3) // mesostic reader
+      {
+        haloing = new MesosticHaloingVisual(color, verso.template().fill(), readerSpeed);
+      }
+      else
+      {
+        haloing = new ClearHaloingVisual(color, verso.template().fill(), readerSpeed);
+      }
       currentReader().setBehavior(haloing);
+      if (isSpawner)
+      {
+        currentReader().addBehavior(spawningVB);
+      }
 
     }
     else
