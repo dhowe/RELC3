@@ -137,7 +137,7 @@ public class MultiPageApplet extends ReadersPApplet
         // Readers.warn("No reader corresponding to key #" + idx);
         // }
       }
-      else if (key == 'n' || key == 'N' || keyCode == 39)
+      else if ((key == 'n' || key == 'N' || keyCode == 39) && !pManager.flipping)
       {
         pManager.nextPage();
       }
