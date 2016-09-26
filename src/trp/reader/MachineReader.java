@@ -136,12 +136,19 @@ public abstract class MachineReader implements ReaderConstants
     stepTimeMs = (long) (originalStepTimeMs * factor);
   }
 
-  // SHOULD REMOVE THIS METHOD -- only adjust !!
+  // dch said SHOULD REMOVE THIS METHOD -- only adjust !!
+  // but from the code it seems to me that:
+  // - originalStepTimeMs is the interval/speed when a MachineReader start()'s
+  // - if the reader's setSpeed(ms) is changed originalStepTimeMs says the same
+  // - adjustSpeed is currently relative to originalStepTimeMs
+  // - the method below is a way to change the speed of the reader after it has started
+  //   and this is what we should do in sketches where speeds are user-configurable
+  
   /** sets time for each step in seconds */
-  public void setSpeed(float secondsBtwnSteps, boolean resetOriginalSpeed)
+  public void setSpeed(float secondsBtwnSteps, boolean alsoResetOriginalSpeed)
   {
     this.stepTimeMs = (long) (secondsBtwnSteps * 1000f);
-    if (resetOriginalSpeed)
+    if (alsoResetOriginalSpeed)
       this.originalStepTimeMs = stepTimeMs;
   }
 

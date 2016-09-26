@@ -19,7 +19,7 @@ public class ELC3Multi extends MultiPageApplet
   static final String[] READER_NAMES = { "Perigram", "Simple Spawner", "Perigram Spawner",
       "Mesostic Jumper" };
   static final String[] TEXT_NAMES = { "POETIC CAPTION", "MISSPELT LANDINGS", "THE IMAGE" };
-  static final String[] VISUAL_NAMES = { "Default visuals", "Haloed" };
+  static final String[] VISUAL_NAMES = { "Traces", "Haloes" };
 
   static Map SPEED_MAP, COLOR_MAP;
   static ReaderBehavior[] BEHAVIORS;
@@ -29,9 +29,9 @@ public class ELC3Multi extends MultiPageApplet
       mesostic;
   ButtonSelect textSelect, wordMonitor, readerSelect, speedSelect, visualSelect, colorSelect;
   float readerColor[] = OATMEAL, readerSpeed = 0.5f;
-  String currentWord = "", lastWord = "";
-  RiTextGrid verso, recto;
-  RiText currentCell;
+  String currentWord = "", lastWord = "", nextWord = "";
+  RiTextGrid verso, recto, currentGrid;
+  RiText currentCell, nextCell;
 
   public void settings()
   {
@@ -104,7 +104,7 @@ public class ELC3Multi extends MultiPageApplet
 
         rd = currentReader();
         // System.out.println("click: "+clicked.value()+", "+currentReaderIdx);
-        rd.setSpeed((float) SPEED_MAP.get(speedSelect.value()));
+        rd.setSpeed((float) SPEED_MAP.get(speedSelect.value()), true); // alsoResetOriginalSpeed
         rd.setCurrentCell(rt);
         rd.pause(false);
 
@@ -118,7 +118,7 @@ public class ELC3Multi extends MultiPageApplet
       {
 
         readerSpeed = (float) SPEED_MAP.get(clicked.value());
-        currentReader().setSpeed(readerSpeed);
+        currentReader().setSpeed(readerSpeed, true); // alsoResetOriginalSpeed
       }
 
       // VISUALS
@@ -133,9 +133,9 @@ public class ELC3Multi extends MultiPageApplet
 
         readerColor = (float[]) COLOR_MAP.get(clicked.value());
 
-        if (visualSelect.value().equals("Haloed"))
+        if (visualSelect.value().equals("Haloes"))
         {
-          setVisuals("Haloed", readerColor, isSpawner(currentReaderIdx));
+          setVisuals("Haloes", readerColor, isSpawner(currentReaderIdx));
         }
         else
         {
@@ -178,12 +178,12 @@ public class ELC3Multi extends MultiPageApplet
   {
 
     SPEED_MAP = new LinkedHashMap(); // must be LinkedHashMap to preserve keySet() orders below
-    SPEED_MAP.put("Fast", 0.5f);
-    SPEED_MAP.put("Per-second", 1.0f);
-    SPEED_MAP.put("Slow", 1.5f);
-    SPEED_MAP.put("Slower", 2.0f);
-    SPEED_MAP.put("Slowest", 2.5f);
-    SPEED_MAP.put("Very fast", 0.25f);
+    SPEED_MAP.put("Fluent", 0.4f);
+    SPEED_MAP.put("Steady", 0.8f);
+    SPEED_MAP.put("Slow", 1.2f);
+    SPEED_MAP.put("Slower", 1.6f);
+    SPEED_MAP.put("Slowest", 2.0f);
+    SPEED_MAP.put("Fast", 0.2f);
 
     ButtonSelect.TEXT_FILL = BLACK;
     ButtonSelect.STROKE_WEIGHT = 0;
@@ -216,7 +216,7 @@ public class ELC3Multi extends MultiPageApplet
 
     currentReaderIdx = 0; // reset back to first reader
     currentCell = pManager.getVerso().cellAt(0, 0);
-    readerSpeed = (float) SPEED_MAP.get("Fast");
+    readerSpeed = (float) SPEED_MAP.get("Fluent");
     verso = pManager.getVerso();
     recto = pManager.getRecto();
 
@@ -249,12 +249,12 @@ public class ELC3Multi extends MultiPageApplet
     // MESOSTIC JUMPER - nb: has different default speed
     MachineReader.delete(READERS[3]);
     READERS[3] = new MesoPerigramJumper(verso, "reading as writing through", perigrams);
-    READERS[3].setSpeed((float) SPEED_MAP.get("Slow"), true);
+    READERS[3].setSpeed((float) SPEED_MAP.get("Slow"));
     READERS[3].setBehavior(mesostic);
 
     for (int i = 0; i < READERS.length; i++)
     {
-      READERS[i].start();
+      READERS[i].start(); // original speeds are set when the readers start
       READERS[i].pause(currentReaderIdx != i);
     }
 
@@ -290,7 +290,7 @@ public class ELC3Multi extends MultiPageApplet
   protected void setVisuals(String visuals, float[] color, boolean isSpawner)
   {
 
-    if (visuals.equals("Haloed"))
+    if (visuals.equals("Haloes"))
     {
 
       if (currentReaderIdx == 3) // mesostic reader
@@ -322,7 +322,7 @@ public class ELC3Multi extends MultiPageApplet
           break;
 
         case 1: // simple spawner
-          currentReader().setSpeed((float) SPEED_MAP.get("Slow"));
+          currentReader().setSpeed((float) SPEED_MAP.get("Slow"), true); // alsoResetOriginalSpeed
           currentReader().setBehavior(defaultVisuals);
           currentReader().addBehavior(spawningVB);
           defaultVisuals.setReaderColor(color);
@@ -336,7 +336,7 @@ public class ELC3Multi extends MultiPageApplet
           break;
 
         case 3: // mesostic
-          currentReader().setSpeed((float) SPEED_MAP.get("Slow"), true);
+          currentReader().setSpeed((float) SPEED_MAP.get("Slow"), true); // alsoResetOriginalSpeed
           currentReader().setBehavior(mesostic);
           mesostic.setReaderColor(color);
           speedSelect.advanceTo("Slow");
@@ -377,15 +377,17 @@ public class ELC3Multi extends MultiPageApplet
           noCursor();
       }
 
-      currentWord = currentReader().getCurrentCell().text();
-      currentWord = RiTa.stripPunctuation(currentWord);
+      currentCell = currentReader().getCurrentCell();
+      currentGrid = currentReader().getGrid();
+      nextCell = currentGrid.nextCell(currentCell);
+      nextWord = MachineReader.stripPunctuation(nextCell.text());
+      currentWord = MachineReader.stripPunctuation(currentCell.text());
       if (!currentWord.equals(lastWord))
       {
 
-        int numOfSyllables = countSyllables(RiTa.getSyllables(currentWord));
+        int numOfSyllables = countSyllables(RiTa.getSyllables(nextWord));
 
-        // currentReader().adjustSpeed(1f + (numOfSyllables * 2f)); TODO: how to
-        // adjust speed per-step properly??
+        currentReader().adjustSpeed(1f + (numOfSyllables - 1) * .2f);
 
         // DH: what behavior do you want? adjustSpeed takes a multiplier,
         // so you can pass 1.1 to speed up by 10% or .9 to slow down by 10%
@@ -421,9 +423,9 @@ public class ELC3Multi extends MultiPageApplet
   private void resetButtons()
   {
 
-    speedSelect.advanceTo("Fast");
+    speedSelect.advanceTo("Fluent");
     readerSelect.advanceTo("Perigram");
-    visualSelect.advanceTo("Default visuals");
+    visualSelect.advanceTo("Traces");
   }
 
   private static void pauseReaders()
