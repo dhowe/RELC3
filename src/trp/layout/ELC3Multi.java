@@ -30,7 +30,7 @@ public class ELC3Multi extends MultiPageApplet
   ButtonSelect textSelect, wordMonitor, readerSelect, speedSelect, visualSelect, colorSelect;
   float readerColor[] = OATMEAL, readerSpeed = 0.5f;
   String currentWord = "", lastWord = "", nextWord = "";
-  RiTextGrid verso, recto, currentGrid;
+  RiTextGrid verso, recto;
   RiText currentCell, nextCell;
 
   public void settings()
@@ -378,20 +378,14 @@ public class ELC3Multi extends MultiPageApplet
       }
 
       currentCell = currentReader().getCurrentCell();
-      currentGrid = currentReader().getGrid();
-      nextCell = currentGrid.nextCell(currentCell);
+      nextCell = currentReader().getGrid().nextCell(currentCell);
       nextWord = MachineReader.stripPunctuation(nextCell.text());
       currentWord = MachineReader.stripPunctuation(currentCell.text());
       if (!currentWord.equals(lastWord))
       {
-
-        int numOfSyllables = countSyllables(RiTa.getSyllables(nextWord));
-
-        currentReader().adjustSpeed(1f + (numOfSyllables - 1) * .2f);
-
-        // DH: what behavior do you want? adjustSpeed takes a multiplier,
-        // so you can pass 1.1 to speed up by 10% or .9 to slow down by 10%
-
+        // actually setting a longer interval for the highlighting of the current word
+        // increasing a factor of 1 by (numOfSylls - 1) * .2
+        currentReader().adjustSpeed(1f + (countSyllables(RiTa.getSyllables(nextWord)) - 1) * .2f);
         wordMonitor.setValue(currentWord);
         lastWord = currentWord;
       }
