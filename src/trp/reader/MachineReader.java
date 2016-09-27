@@ -250,7 +250,7 @@ public abstract class MachineReader implements ReaderConstants
       }
       else
       {
-        // if (!flipping) // this doesn't may leave the first word of an nextPage visible
+        // if (!flipping) // uncommenting this would not leave the first word of an nextPage visible
         runExitWordBehaviors(currentCell);
       }
 
