@@ -473,7 +473,16 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
     next = next.next;
 
     rotateY = 2;
+
     showAll();
+
+    if (focusedReader != null) // TODO: not perfect (due to fading weirdness) and needs this safety measure
+    {
+      focusedReader.runEnterWordBehaviors(focusedReader.getCurrentCell());
+      focusedReader.runExitWordBehaviors(focusedReader.getCurrentCell());
+    }
+    else
+      Readers.warn("The focusedReader was null at the end of a page flip. (Should not happen.)");
   }
 
   public void onGridChange(MachineReader changed, RiTextGrid changedFrom, RiTextGrid changedTo)

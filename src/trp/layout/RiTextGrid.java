@@ -39,13 +39,13 @@ public class RiTextGrid
 
   public RiTextGrid(PApplet pApplet, String fileName, int startX, int startY, int NOTUSED)
   {
-    this(pApplet, RiText.createLines(pApplet, RiTa.loadString(/*pApplet, */fileName), startX, startY, pApplet.width
+    this(pApplet, RiText.createLines(pApplet, RiTa.loadString(/* pApplet, */fileName), startX, startY, pApplet.width
         - startX * 2, pApplet.height - startY * 2));
   }
 
   public RiTextGrid(PApplet pApplet, String fileName, int startX, int startY, int width, int height)
   {
-    this(pApplet, RiText.createLines(pApplet, RiTa.loadString(/*pApplet,*/ fileName), startX, startY, width, height));
+    this(pApplet, RiText.createLines(pApplet, RiTa.loadString(/* pApplet, */ fileName), startX, startY, width, height));
   }
 
   /* This uses 'lines' as is, without doing any auto-breaks */
@@ -329,9 +329,10 @@ public class RiTextGrid
     instances.remove(this);
     if (layout != null)
       layout = null;
-    for (Iterator it = iterator(); it.hasNext();) {
-    	RiText rt = (RiText) it.next();
-    	rt.text("");
+    for (Iterator it = iterator(); it.hasNext();)
+    {
+      RiText rt = (RiText) it.next();
+      rt.text("");
       RiText.dispose(rt);
     }
     RiText.dispose(template);
@@ -339,13 +340,14 @@ public class RiTextGrid
 
   public void visible(boolean b)
   {
-  	float alphaVal = b ? ReadersPApplet.GRID_ALPHA : 0;
-  	
+    float alphaVal = b ? ReadersPApplet.GRID_ALPHA : 0;
+
     // Readers.info("RiTextGrid.visible("+b+")");
-    for (Iterator it = iterator(); it.hasNext();) {
+    for (Iterator it = iterator(); it.hasNext();)
+    {
       ((RiText) it.next()).alpha(alphaVal);
     }
-    
+
     if (title != null)
       title.alpha(alphaVal);
     if (footer != null)
@@ -436,7 +438,7 @@ public class RiTextGrid
     }
 
     Readers.warn("Illegal state in RiTextGrid.getGridFor(), no grid for RiText: " + rt);
-    //throw new RuntimeException("Illegal state in RiTextGrid.getGridFor(), no grid for RiText: " + rt);
+    // throw new RuntimeException("Illegal state in RiTextGrid.getGridFor(), no grid for RiText: " + rt);
 
     return null;
   }
@@ -532,8 +534,7 @@ public class RiTextGrid
     Point pt = coordsFor(rt);
     if (pt == null)
     {
-      Readers.error("RiTextGrid.previousCell():  No coords for RiText(" + rt
-          + ") on grid: " + this);
+      Readers.error("RiTextGrid.previousCell():  No coords for RiText(" + rt + ") on grid: " + this);
       return null;
     }
     return previousCell(pt.x, pt.y);
@@ -586,9 +587,8 @@ public class RiTextGrid
     {
       boolean recto = (g == PageManager.getInstance().getRecto());
       boolean verso = (g == PageManager.getInstance().getVerso());
-      Readers.error("RiTextGrid.nextCell(" + x + "," + y + ")->" + cellAt(x, y)
-          + " returned " + "null for " + this + " [verso=" + verso + " recto=" + recto
-          + " newX=" + newX + " newY=" + newY + "]");
+      Readers.error("RiTextGrid.nextCell(" + x + "," + y + ")->" + cellAt(x, y) + " returned " + "null for "
+          + this + " [verso=" + verso + " recto=" + recto + " newX=" + newX + " newY=" + newY + "]");
     }
 
     return next;
@@ -611,8 +611,8 @@ public class RiTextGrid
   {
     RiTextGrid g = this;
 
-    Readers.verify(cellAt(x, y) != null, "previousCell(" + x + "," + y
-        + ") -> no cell at x=" + x + ", y=" + y + " for grid:\n" + g);
+    Readers.verify(cellAt(x, y) != null, "previousCell(" + x + "," + y + ") -> no cell at x=" + x + ", y=" + y
+        + " for grid:\n" + g);
 
     // try prev word on the line
     int newY = y, newX = x - 1;
@@ -664,9 +664,9 @@ public class RiTextGrid
     {
       boolean recto = (g == PageManager.getInstance().getRecto());
       boolean verso = (g == PageManager.getInstance().getVerso());
-      Readers.error("RiTextGrid.previousCell(" + x + "," + y + ")->" + cellAt(x, y)
-          + " returned " + "null for " + this + " [verso=" + verso + " recto=" + recto
-          + " newX=" + newX + " newY=" + newY + "]");
+      Readers.error("RiTextGrid.previousCell(" + x + "," + y + ")->" + cellAt(x, y) + " returned "
+          + "null for " + this + " [verso=" + verso + " recto=" + recto + " newX=" + newX + " newY=" + newY
+          + "]");
     }
 
     return rt;
@@ -764,9 +764,9 @@ public class RiTextGrid
       Readers.warn("Null grid in RiTextGrid.neighborhood()");
       return new RiText[9];
     }
-    
-    Readers.verify(rtg.contains(center), "Grid does not contain center: " + center
-        + "\n\ncoords(" + center + ") returns " + rtg.coords(center) + "\n" + this);
+
+    Readers.verify(rtg.contains(center), "Grid does not contain center: " + center + "\n\ncoords(" + center
+        + ") returns " + rtg.coords(center) + "\n" + this);
 
     RiText[] rts = null;
     if (memoizeNeighbors)
@@ -782,8 +782,7 @@ public class RiTextGrid
 
     if (cOver == null)
     {
-      System.err.println("[WARN] No coords " + "for center: " + center
-          + ", returning empty array!!!");
+      System.err.println("[WARN] No coords " + "for center: " + center + ", returning empty array!!!");
       return new RiText[9];
     }
 
@@ -843,8 +842,7 @@ public class RiTextGrid
         // set it to first word of current line;
         if (rtg.isLineEnd(center) && rtg.rightOutdentIsGreaterOrEqual(center, under))
         {
-          under = (lineY < rtg.numLines() - 2) ? rtg.cellAt(0, lineY + 2)
-              : rtg.cellAt(0, lineY + 1);
+          under = (lineY < rtg.numLines() - 2) ? rtg.cellAt(0, lineY + 2) : rtg.cellAt(0, lineY + 1);
         }
       }
       pUnder = rtg.coordsFor(under);
@@ -860,7 +858,22 @@ public class RiTextGrid
           under = firstLine[i];
       }
       if (under == null)
-        Readers.warn("Illegal state, " + "nothing under: " + center + " (on next grid)");
+      {
+        // TODO: check in new code: this was the warning previously
+        // Readers.warn("Illegal state, " + "nothing under: " + center + " (on next grid)");
+
+        // This should only happen when 'center' is a last word of a long line
+        // and so there really isn't anything 'under' it, so set under to the first word
+        // of the first line on the next grid and give a let warning for the time being
+        under = firstLine[0];
+        Readers.info("Exceptional state, " + "nothing under: \"" + center.text() + "\" (on next grid)");
+        Readers.info("under set to first word of the first line on the next grid.");
+//        for (int i = 0; i < firstLine.length; i++) // DEBUGGING:
+//        {
+//           System.out.print(firstLine[i].text() + " ");
+//        }
+//        System.out.println();
+      }
       pUnder = gnext.coordsFor(under);
     }
 

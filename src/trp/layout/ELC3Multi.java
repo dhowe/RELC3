@@ -149,9 +149,9 @@ public class ELC3Multi extends MultiPageApplet
     }
   }
 
-  private boolean isSpawner(int currentReaderIdx)
+  private boolean isSpawner(int readerIndex)
   {
-    return currentReaderIdx == 1 || currentReaderIdx == 2;
+    return READER_NAMES[readerIndex].contains("awn");
   }
 
   public void fontSetup()
@@ -262,8 +262,7 @@ public class ELC3Multi extends MultiPageApplet
       READERS[i].pause(currentReaderIdx != i);
     }
 
-    // TODO: workaround! see draw method where this is done:
-    // pManager.onUpdateFocusedReader(currentReader());
+    pManager.onUpdateFocusedReader(currentReader());
   }
 
   public void constructBehaviorsFor(PerigramLookup perigrams)

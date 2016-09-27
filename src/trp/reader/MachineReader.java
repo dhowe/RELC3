@@ -233,7 +233,8 @@ public abstract class MachineReader implements ReaderConstants
 
     // attempting to allow human readers to observe every highlighted word
     // TODO: dch, is there a better way to do this?
-    if (PageManager.getInstance().isFlipping())
+    boolean flipping = PageManager.getInstance().isFlipping();
+    if (flipping)
       return;
 
     if (!paused && now >= triggerTime) // time to fire
@@ -249,6 +250,7 @@ public abstract class MachineReader implements ReaderConstants
       }
       else
       {
+        // if (!flipping) // this doesn't may leave the first word of an nextPage visible
         runExitWordBehaviors(currentCell);
       }
 
