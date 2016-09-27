@@ -32,6 +32,8 @@ public class ELC3Multi extends MultiPageApplet
   String currentWord = "", lastWord = "", nextWord = "";
   RiTextGrid verso, recto;
   RiText currentCell, nextCell;
+  boolean loading = false, toogle = false;
+  long lastTime = 0;
 
   public void settings()
   {
@@ -63,6 +65,7 @@ public class ELC3Multi extends MultiPageApplet
   private void doLayout(int i)
   {
 
+    loading = true; // DEBUG
     pauseReaders();
     resetButtons();
 
@@ -73,12 +76,13 @@ public class ELC3Multi extends MultiPageApplet
     pManager.doLayout();
 
     constructReadersFor(new PerigramLookup(this, TEXTS[i]));
+    loading = false; // DEBUG
   }
 
   public void mouseClicked()
   {
 
-    if (pManager.flipping)
+    if (pManager.isFlipping())
       return;
 
     ButtonSelect clicked = ButtonSelect.click(mouseX, mouseY);
@@ -354,7 +358,7 @@ public class ELC3Multi extends MultiPageApplet
     background(LAYOUT_BACKGROUND_COLOR);
 
     // BUTTONS drawn only if page is not flipping
-    if (!pManager.flipping)
+    if (!pManager.isFlipping())
     {
 
       if (mouseY >= textSelect.y && mouseY < (textSelect.y + textSelect.height))
@@ -377,6 +381,20 @@ public class ELC3Multi extends MultiPageApplet
           noCursor();
       }
 
+      // TODO: attempt at 'throbber' that doesn't work ...
+      // if (loading)
+      // {
+      // System.out.println("LOADING true in draw()");
+      // ButtonSelect bs = ButtonSelect.instances.get(0);
+      // if (System.currentTimeMillis() - lastTime > 250)
+      // {
+      // bs.fill = BLACK;
+      // lastTime = System.currentTimeMillis();
+      // }
+      // else
+      // bs.fill = MBLUE;
+      // }
+
       currentCell = currentReader().getCurrentCell();
       nextCell = currentReader().getGrid().nextCell(currentCell);
       nextWord = MachineReader.stripPunctuation(nextCell.text());
@@ -384,8 +402,8 @@ public class ELC3Multi extends MultiPageApplet
       if (!currentWord.equals(lastWord))
       {
         // actually setting a longer interval for the highlighting of the current word
-        // increasing a factor of 1 by (numOfSylls - 1) * .2
-        currentReader().adjustSpeed(1f + (countSyllables(RiTa.getSyllables(nextWord)) - 1) * .2f);
+        // increasing by a factor of 1.<(numOfSylls - 1) * 0.4>
+        currentReader().adjustSpeed(1 + (countSyllables(RiTa.getSyllables(nextWord)) - 1) * .4f);
         wordMonitor.setValue(currentWord);
         lastWord = currentWord;
       }

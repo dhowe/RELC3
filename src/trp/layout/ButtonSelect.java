@@ -16,7 +16,11 @@ public class ButtonSelect implements ReaderConstants
   public static int PADDING = 6, STROKE_WEIGHT = 0, TEXT_SIZE;
 
   // these can be set directly (after creation) to manipulate appearance of one button
-  public float[] stroke, textFill = WHITE, fill, hoverFill = { 255, 255, 255, 64f };
+  public float[] stroke, textFill = WHITE;
+
+  float[] fill;
+
+  public float[] hoverFill = { 255, 255, 255, 64f };
   public int x, y, width, height, padding = 6, strokeWeight = 0, textSize, selectedIndex;
   public String options[], label;
   public boolean hidden;
@@ -128,9 +132,9 @@ public class ButtonSelect implements ReaderConstants
     {
       p.fill(hoverFill[0], hoverFill[1], hoverFill[2], hoverFill[3]);
     }
-    else if (fill != null)
+    else if (getFill() != null)
     {
-      p.fill(fill[0], fill[1], fill[2], fill[3]);
+      p.fill(getFill()[0], getFill()[1], getFill()[2], getFill()[3]);
     }
 
     p.noStroke();
@@ -180,6 +184,11 @@ public class ButtonSelect implements ReaderConstants
     this.selectedIndex = 0;
     return this;
   }
+  
+  public float[] getFill()
+  {
+    return this.fill;
+  }
 
   //////////////////////////////////// statics //////////////////////////////////////////
 
@@ -201,4 +210,5 @@ public class ButtonSelect implements ReaderConstants
     for (Iterator it = instances.iterator(); it.hasNext();)
       ((ButtonSelect) it.next()).draw(mx, my);
   }
+
 }

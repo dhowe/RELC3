@@ -28,7 +28,7 @@ public abstract class MachineReader implements ReaderConstants
 
   // Statics --------------------------------------
 
-  //public static boolean OK_TO_FOCUS = false; // TODO: for a workaround
+  // public static boolean OK_TO_FOCUS = false; // TODO: for a workaround
 
   public static List instances = new ArrayList();
   private static boolean firstUpdate = true;
@@ -43,7 +43,7 @@ public abstract class MachineReader implements ReaderConstants
   private ReaderBehavior defaultVisualBehavior;
   protected Direction lastDirection;
   protected String readerOutputFile;
-  protected String [] readerOutput;
+  protected String[] readerOutput;
 
   public boolean testMode = false;
   private boolean stepping, dead, hasMoved, paused = true;
@@ -53,12 +53,10 @@ public abstract class MachineReader implements ReaderConstants
   protected long delay, birthTime, stepTimeMs = 1000;
   protected long originalStepTimeMs = stepTimeMs;
   private long triggerTime, pauseNetworkUntil;
-  
 
   protected ReaderClient network;
   private PApplet _pApplet;
   private int id;
-   
 
   // Constructors ---------------------------------
 
@@ -81,9 +79,9 @@ public abstract class MachineReader implements ReaderConstants
   {
     if (grid == null)
       throw new RuntimeException("Null grid passed to reader!");
-    
+
     this._pApplet = grid._pApplet;
-    
+
     this.grid = grid;
 
     // random id for server...
@@ -110,7 +108,7 @@ public abstract class MachineReader implements ReaderConstants
   {
     return this._pApplet;
   }
-  
+
   /**
    * Should return the next RiText that the reader will enter. If the returned RiText is null, the reader will remain where it is.
    */
@@ -142,8 +140,8 @@ public abstract class MachineReader implements ReaderConstants
   // - if the reader's setSpeed(ms) is changed originalStepTimeMs says the same
   // - adjustSpeed is currently relative to originalStepTimeMs
   // - the method below is a way to change the speed of the reader after it has started
-  //   and this is what we should do in sketches where speeds are user-configurable
-  
+  // and this is what we should do in sketches where speeds are user-configurable
+
   /** sets time for each step in seconds */
   public void setSpeed(float secondsBtwnSteps, boolean alsoResetOriginalSpeed)
   {
@@ -233,6 +231,11 @@ public abstract class MachineReader implements ReaderConstants
 
     checkLifeSpan(now);
 
+    // attempting to allow human readers to observe every highlighted word
+    // TODO: dch, is there a better way to do this?
+    if (PageManager.getInstance().isFlipping())
+      return;
+
     if (!paused && now >= triggerTime) // time to fire
     {
       RiText wordBeingRead = null;
@@ -240,7 +243,7 @@ public abstract class MachineReader implements ReaderConstants
       if (!hasMoved)
       {
         // TODO: part of ugly workaround
-        //OK_TO_FOCUS = true;
+        // OK_TO_FOCUS = true;
         currentCell = grid.previousCell(currentCell);
         this.grid = RiTextGrid.getGridFor(currentCell);
       }
@@ -304,7 +307,8 @@ public abstract class MachineReader implements ReaderConstants
 
   protected String convertQuotes(String s)
   {
-    if (s == null) return null;
+    if (s == null)
+      return null;
     return s.replaceAll("[‘’”“`]", "'");
   }
 
@@ -342,7 +346,8 @@ public abstract class MachineReader implements ReaderConstants
       }
       catch (Exception e)
       {
-        Readers.error("Unable to create UdpReaderClient " + "(for reader# " + id + ") to " + SERVER_HOST + ":" + UDP_PORT);
+        Readers.error("Unable to create UdpReaderClient " + "(for reader# " + id + ") to " + SERVER_HOST + ":"
+            + UDP_PORT);
 
         warnAndWait(PAUSE_BETWEEN_NETWORK_FAILURES_SEC);
       }
@@ -372,7 +377,7 @@ public abstract class MachineReader implements ReaderConstants
   {
     return RiTa.shortName(this) + "#" + id;
   }
-  
+
   public String getName()
   {
     return RiTa.shortName(this);
@@ -381,8 +386,8 @@ public abstract class MachineReader implements ReaderConstants
   private void warnAndWait(float waitSecs)
   {
     String lastUrl = network != null ? network.getLastAttemptedUrl() : "unknown";
-    Readers.warn("Reader # " + id + " unable to" + " contact server at:\n"
-        + "       " + lastUrl + ", trying again in " + waitSecs + "s");
+    Readers.warn("Reader # " + id + " unable to" + " contact server at:\n" + "       " + lastUrl
+        + ", trying again in " + waitSecs + "s");
     pauseNetworkUntil = System.currentTimeMillis() + ((int) (waitSecs * 1000));
   }
 
@@ -393,7 +398,7 @@ public abstract class MachineReader implements ReaderConstants
 
   public void pause(boolean b)
   {
-    //System.out.println(this+".paused("+b+")");
+    // System.out.println(this+".paused("+b+")");
     paused = b;
     if (!paused)
       stepping = false;
@@ -402,15 +407,16 @@ public abstract class MachineReader implements ReaderConstants
   public static void delete(MachineReader reader)
   {
     // Readers.info(RiTa.shortName(reader)+" expired at: " +RiTa.elapsed());
-  	if (reader != null)
-  		reader.dead = true;
+    if (reader != null)
+      reader.dead = true;
     instances.remove(reader);
     if (reader != null)
     {
       RiTextGrid rtg = reader.grid;
-      if (rtg != null) {
-      	rtg._pApplet.unregisterMethod("draw", reader);
-        //rtg._pApplet.unregisterDraw(reader);
+      if (rtg != null)
+      {
+        rtg._pApplet.unregisterMethod("draw", reader);
+        // rtg._pApplet.unregisterDraw(reader);
       }
     }
   }
@@ -538,9 +544,10 @@ public abstract class MachineReader implements ReaderConstants
   private void registerInstance(PApplet p)
   {
     instances.add(this);
-    if (p != null) {
-    	p.registerMethod("draw", this);
-      //p.registerDraw(this);
+    if (p != null)
+    {
+      p.registerMethod("draw", this);
+      // p.registerDraw(this);
     }
   }
 
@@ -576,7 +583,7 @@ public abstract class MachineReader implements ReaderConstants
 
   /**
    * This is a way to decouple behaviors (on enter/exit words)
-   * from the specific readers. Note that this method first clears 
+   * from the specific readers. Note that this method first clears
    * all current behaviors, then sets this as the sole behavior.
    */
   public void setBehavior(ReaderBehavior behavior)
@@ -748,7 +755,7 @@ public abstract class MachineReader implements ReaderConstants
   {
     return network;
   }
-  
+
   public void writeOutput()
   {
     _pApplet.saveStrings(readerOutputFile, readerOutput);

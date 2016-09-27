@@ -636,9 +636,10 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
 
   public void setFont(PFont pf)
   {
-    if (pf != null) {
+    if (pf != null)
+    {
       this.font = pf;
-  		RiText.defaultFont(pf); // shouldnt be needed
+      RiText.defaultFont(pf); // shouldnt be needed
     }
   }
 
@@ -655,17 +656,8 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
 
     if (newFocusedReader)
     {
-      // JC commented out: DEBUGging? speeded up readers - eventually all -
-      // after focus change
-      // reader.adjustSpeed(.5f);
-      //
-      // if (focusedReader != null) // previous-focus
-      // focusedReader.resetSpeed();
-
       this.focusedReader = reader;
     }
-
-    // if page-turner is not visible, move it to recto
 
     RiTextGrid rtg = focusedReader.getGrid();
     if (rtg == next)
@@ -673,25 +665,30 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
       nextPage();
     }
 
-    if (rtg != left && rtg != right)
-    {
-      focusedReader.jumpToPage(right);
-    }
+    // if page-turner is not visible, move it to recto
+    // TODO: in future js iterations, but for RELC3
+    // we are not going to have the reader jump to any new grids
+    // (in ELC3 readers may be deleted when we ask them to jump
+    // and in ELC3 jumping is not necessary
+    // if (rtg != left && rtg != right)
+    // {
+    // focusedReader.jumpToPage(right);
+    // }
 
-    // move all non-visible readers to the verso page
-
-    for (Iterator it = MachineReader.instances.iterator(); it.hasNext();)
-    {
-      MachineReader mr = (MachineReader) it.next();
-
-      if (mr == focusedReader)
-        continue;
-
-      rtg = mr.getGrid();
-
-      if (rtg != left && rtg != right)
-        mr.jumpToPage(left);
-    }
+    // TODO: in future js iterations? move all non-visible readers to the verso page
+    // NB: commented out for RELC3 - which has only one reader at a time
+    // for (Iterator it = MachineReader.instances.iterator(); it.hasNext();)
+    // {
+    // MachineReader mr = (MachineReader) it.next();
+    //
+    // if (mr == focusedReader)
+    // continue;
+    //
+    // rtg = mr.getGrid();
+    //
+    // if (rtg != left && rtg != right)
+    // mr.jumpToPage(left);
+    // }
   }
 
   // ===========================================================================

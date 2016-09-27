@@ -18,8 +18,6 @@ public class ReadersPApplet extends PApplet implements ReaderConstants
     RiText.defaults.paragraphIndent = 0;
   }
 
-  public static boolean OK_TO_FOCUS = false; // TODO: for a workaround
-
   public static boolean USE_AUDIO = false;
   public static float SCALE = 1f;
   public static int FONT_SZ = 14;
