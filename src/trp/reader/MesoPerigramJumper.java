@@ -15,7 +15,7 @@ import trp.util.Readers;
 
 public class MesoPerigramJumper extends MesosticReader
 {
-  private static boolean DBUG = false;
+  private static boolean DBUG = true; // TODO:
 
   private static final int CHECK_PERIGRAMS = 2;
   private static final int CHECK_DIGRAMS = 1;

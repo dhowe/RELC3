@@ -393,20 +393,25 @@ public class ELC3Multi extends MultiPageApplet
       // else
       // bs.fill = MBLUE;
       // }
-
-      currentCell = currentReader().getCurrentCell();
-      nextCell = currentReader().getGrid().nextCell(currentCell);
-      nextWord = MachineReader.stripPunctuation(nextCell.text());
-      currentWord = MachineReader.stripPunctuation(currentCell.text());
-      if (!currentWord.equals(lastWord))
-      {
-        // actually setting a longer interval for the highlighting of the current word
-        // increasing by a factor of 1.<(numOfSylls - 1) * 0.4>
-        currentReader().adjustSpeed(1 + (countSyllables(RiTa.getSyllables(nextWord)) - 1) * .4f);
-        wordMonitor.setValue(currentWord);
-        lastWord = currentWord;
-      }
-
+      
+      // Working parts of the following moved to MachineReader because otherwise
+      // readers do not have access to that actual word being read after trigger time
+      /*
+       * currentCell = currentReader().getCurrentCell();
+       * nextCell = currentReader().selectNext();
+       * nextWord = MachineReader.stripPunctuation(nextCell.text());
+       * currentWord = MachineReader.stripPunctuation(currentCell.text());
+       * if (!currentWord.equals(lastWord))
+       * {
+       * // actually setting a longer interval for the highlighting of the current word
+       * // increasing by a factor of 1.<(numOfSylls - 1) * 0.4>
+       * currentReader().adjustSpeed(1 + (MachineReader.countSyllables(RiTa.getSyllables(nextWord)) - 1) * .4f);
+       * System.out.println(nextWord + ": " + (1 + (MachineReader.countSyllables(RiTa.getSyllables(nextWord)) - 1) * .4f));
+       * wordMonitor.setValue(currentWord);
+       * lastWord = currentWord;
+       * }
+       * 
+       */ wordMonitor.setValue(MachineReader.stripPunctuation(currentReader().getCurrentCell().text()));
       ButtonSelect.drawAll(mouseX, mouseY);
     }
 
@@ -446,12 +451,6 @@ public class ELC3Multi extends MultiPageApplet
     {
       READERS[i].pause(true);
     }
-  }
-
-  private static int countSyllables(String syllables)
-  {
-
-    return syllables.split("/").length;
   }
 
   public static void main(String[] args)

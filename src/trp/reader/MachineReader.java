@@ -28,8 +28,6 @@ public abstract class MachineReader implements ReaderConstants
 
   // Statics --------------------------------------
 
-  // public static boolean OK_TO_FOCUS = false; // TODO: for a workaround
-
   public static List instances = new ArrayList();
   private static boolean firstUpdate = true;
 
@@ -243,14 +241,12 @@ public abstract class MachineReader implements ReaderConstants
 
       if (!hasMoved)
       {
-        // TODO: part of ugly workaround
-        // OK_TO_FOCUS = true;
         currentCell = grid.previousCell(currentCell);
         this.grid = RiTextGrid.getGridFor(currentCell);
       }
       else
       {
-        // if (!flipping) // uncommenting this would not leave the first word of an nextPage visible
+        // if (!flipping) // NB: un-commenting this would not leave the first word of an nextPage visible
         runExitWordBehaviors(currentCell);
       }
 
@@ -270,6 +266,22 @@ public abstract class MachineReader implements ReaderConstants
           // Readers.info("Grid change rejected, pausing on "+currentCell);
           return;
         }
+      }
+
+      // TODO: there was no test for a null wordBeingRead at this point previously: concerning?
+      if (wordBeingRead == null)
+      {
+        Readers.warn("wordBeingRead is null at this point in MachineReader.draw()");
+        return;
+      }
+      else
+      {
+        // adjust speed relative to the number of syllables in the word being read
+        // TODO: add a flag or option to keep speeds regular, optionally
+        String wordString = stripPunctuation(wordBeingRead.text());
+        this.adjustSpeed(1 + (countSyllables(RiTa.getSyllables(wordString)) - 1) * .3f);
+        // System.out.println(wordString + ": "
+        // + (1 + (countSyllables(RiTa.getSyllables(wordString)) - 1) * .3f));
       }
 
       history.add(wordBeingRead); // store last cell
@@ -322,6 +334,11 @@ public abstract class MachineReader implements ReaderConstants
   public static String stripPunctuation(String s)
   {
     return RiTa.stripPunctuation(s, ALLOWABLE_PUNCTUATION);
+  }
+
+  public static int countSyllables(String syllables)
+  {
+    return syllables.split("/").length;
   }
 
   protected void sendLineBreak()
