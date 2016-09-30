@@ -185,7 +185,7 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
 
     right.title.fadeOut(PAGE_FLIP_TIME);
 
-    next.reset(true);
+    next.reset(); // DEBUG was 'true' try without!
     // next.title.visible(true);
     next.title.alpha(255);
   }
@@ -487,6 +487,7 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
 
   public void onGridChange(MachineReader changed, RiTextGrid changedFrom, RiTextGrid changedTo)
   {
+    //  changed.getHistory().clear(); // DEBUG - does not fix VB problem.
     // System.out.println("PageManager.onGridChange()");
     if (changedFrom == right && changedTo == next || changedFrom == next)
     {

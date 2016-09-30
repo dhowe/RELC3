@@ -1527,13 +1527,15 @@ public class RiTextGrid
    * state. Pass 'true' if all behaviors (fades, etc) should also stop
    * immediately.
    */
-  public void reset(boolean stopBehaviors)
+  public void reset()
   {
     for (Iterator it = iterator(); it.hasNext();)
     {
       RiText rt = (RiText) it.next();
       RiTextGrid.resetTextFor(rt);
-      // if (stopBehaviors) rt.completeBehaviors(); // not sure??
+      // when John started looking at this (Sept 2016) stopBehaviors was
+      // passed true, having no effect since the following line was commented out:
+      // if (stopBehaviors) rt.completeBehaviors();
       rt.fill(template.fill());
       rt.boundingFill(template.boundingFill());
       rt.showBounds(template.showBounds());

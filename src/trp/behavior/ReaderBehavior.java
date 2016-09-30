@@ -25,18 +25,23 @@ public abstract class ReaderBehavior implements ReaderConstants
   {
     fadeCell(word, color, 0, durationSec);
   }
-  
+
   public void fadeCell(final RiText word, final float[] color, final float startOffsetSec, final float durationSec)
   {
-    if (disableFades ) { // for testing only
+    if (disableFades)
+    { // for testing only
       word.fill(color);
       return;
     }
-    
+
     // handle readers trying to fade-in on a fading-out grid
     PageManager pm = PageManager.getInstance();
-    if (pm != null && pm.isFadingOnFlip(word)) return; 
-    
+    if (pm != null && pm.isFadingOnFlip(word))
+    {
+      // Readers.warn(word.text() + " is on a fading-out grid");
+      return;
+    }
+
     if (startOffsetSec > 0)
     {
       if (timer == null)
@@ -49,7 +54,7 @@ public abstract class ReaderBehavior implements ReaderConstants
         {
           RiTextBehavior.deleteAllFades(word);
           word.colorTo(color, durationSec);
-          
+
         }
       }, (long) (startOffsetSec * 1000));
     }
@@ -59,7 +64,7 @@ public abstract class ReaderBehavior implements ReaderConstants
       word.colorTo(color, durationSec);
     }
   }
-  
+
   public static void info(String msg)
   {
     Readers.info(msg);

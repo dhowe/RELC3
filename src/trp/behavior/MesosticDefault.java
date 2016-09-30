@@ -36,8 +36,8 @@ public class MesosticDefault extends DefaultVisuals
       rtg.textFor(rt, newText);
     }
 
-    // adjust fade time: min. of 16 + 2 sec (???)
-    setFadeOutTime(16 + 4 * mr.getSpeed());
+    // adjust fade time: min. of 10 plus twice the reader speed
+    setFadeOutTime(10 + (2 * mr.getSpeed()));
 
     super.enterWord(mr, rt);
 
