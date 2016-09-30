@@ -56,13 +56,13 @@ public class ELC3Multi extends MultiPageApplet
     pManager.setVersoHeader("");
     pManager.setRectoHeader("");
 
-    doLayout(0);
+    doLayout(0); // textIndex 0 = Poetic Caption
 
     if (PRESENTATION_MODE)
       noCursor(); // only hide cursor in a configurable PRESENTATION mode
   }
 
-  private void doLayout(int i)
+  private void doLayout(int textIndex)
   {
 
     loading = true; // DEBUG
@@ -71,11 +71,11 @@ public class ELC3Multi extends MultiPageApplet
 
     pManager.clear();
     pManager.setLeading(30);
-    pManager.setFont(FONTS[i]);
-    pManager.addTextFromFile(TEXTS[i]);
+    pManager.setFont(FONTS[textIndex]);
+    pManager.addTextFromFile(TEXTS[textIndex]);
     pManager.doLayout();
 
-    constructReadersFor(new PerigramLookup(this, TEXTS[i]));
+    constructReadersFor(new PerigramLookup(this, TEXTS[textIndex]), textIndex);
     loading = false; // DEBUG
   }
 
@@ -215,7 +215,7 @@ public class ELC3Multi extends MultiPageApplet
     }
   }
 
-  public void constructReadersFor(PerigramLookup perigrams)
+  public void constructReadersFor(PerigramLookup perigrams, int textIndex)
   {
 
     currentReaderIdx = 0; // reset back to first reader
@@ -252,7 +252,7 @@ public class ELC3Multi extends MultiPageApplet
 
     // MESOSTIC JUMPER - nb: has different default speed
     MachineReader.delete(READERS[3]);
-    READERS[3] = new MesoPerigramJumper(verso, "reading as writing through", perigrams);
+    READERS[3] = new MesoPerigramJumper(verso, getTextToBeSpeltByMesostic(textIndex), perigrams);
     READERS[3].setSpeed((float) SPEED_MAP.get("Slow"));
     READERS[3].setBehavior(mesostic);
 
@@ -263,6 +263,21 @@ public class ELC3Multi extends MultiPageApplet
     }
 
     pManager.onUpdateFocusedReader(currentReader());
+  }
+  
+  private String getTextToBeSpeltByMesostic(int textIndex)
+  {
+    switch (textIndex)
+    {
+      case 0:
+        return "reading as writing through";
+      case 1:
+        return "reaching out falling through circling over landing on turning within spelling as";
+      case 2:
+        return "comes in is over goes out is done lolls in stays there is had no more";
+      default:
+        return "reading as writing through";
+    }
   }
 
   public void constructBehaviorsFor(PerigramLookup perigrams)
