@@ -251,10 +251,11 @@ public abstract class MachineReader implements ReaderConstants
         }
       }
 
-      // TODO: there was no test for a null wordBeingRead at this point previously: concerning?
+      // Test required because spawned (PerigramDirectiona) readers may 'die'
+      // and return null from their selectNext()
       if (wordBeingRead == null)
       {
-        Readers.warn("wordBeingRead=null in "+this+".draw()");
+        // DEBUG Readers.warn("wordBeingRead=null in "+this+".draw()");
         return;
       }
 
