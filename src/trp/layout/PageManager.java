@@ -31,7 +31,7 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
   // ---------------------- members --------------------------
 
   protected RiTextGrid left, right, next;
-  private String versoHeader, rectoHeader;
+  private String versoHeader="", rectoHeader="";
   private PageLayout pageLayout;
   private MachineReader focusedReader;
   private RiLerpBehavior lerp;

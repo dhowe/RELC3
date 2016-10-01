@@ -67,7 +67,7 @@ public class SpawnDirectionalPRs extends Spawning
 //      ((NeighborFadingVisual) vb1).setFadeLeadingNeighbors(false);
 //      ((NeighborFadingVisual) vb1).setFadeTrailingNeighbors(false);
       spawned.setBehavior(spawnedVB);
-      spawned.setCurrentCell(spawningCell);
+      spawned.currentCell(spawningCell);
       spawned.setHasMoved(true);
       spawned.setUpdatesDisabled(true);
       spawned.setParent(spawner);
