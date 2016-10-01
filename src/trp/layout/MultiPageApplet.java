@@ -27,8 +27,9 @@ public class MultiPageApplet extends ReadersPApplet
   public static String[] DIGRAMS = { "beckett/imagePerigrams.txt" };
   protected static int PR_VOICE = 0, MPJ_VOICE = 1, UPR_VOICE = 2, LPR_VOICE = 3;
   protected static String[] AUDIOSETS = { "up15", "down05", "up20", "root" };
-  protected static MachineReader[] READERS;
-  protected static int currentReaderIdx = 0;
+  
+  protected MachineReader[] readers;
+  protected int currentReaderIdx = 0;
 
   protected Map sampleMap = new HashMap();
 
@@ -39,7 +40,7 @@ public class MultiPageApplet extends ReadersPApplet
   {
     USE_AUDIO = false;
 
-    size(1200, 720/*, GLConstants.GLGRAPHICS*/);
+    size(1200, 720);
 
     enableServer(MachineReader.SERVER_HOST);
 
@@ -70,7 +71,7 @@ public class MultiPageApplet extends ReadersPApplet
   }
 
   public MachineReader currentReader() {
-  	return READERS[currentReaderIdx];
+  	return readers[currentReaderIdx];
   }
   
   public void addReaders()

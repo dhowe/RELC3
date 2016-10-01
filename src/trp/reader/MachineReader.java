@@ -2,30 +2,25 @@ package trp.reader;
 
 import java.awt.Point;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import processing.core.PApplet;
-import rita.RiTa;
-import rita.RiText;
+
+import rita.*;
 import rita.support.HistoryQueue;
+
 import trp.behavior.ReaderBehavior;
-import trp.layout.PageManager;
-import trp.layout.RiTextGrid;
-import trp.network.ReaderClient;
-import trp.network.UdpReaderClient;
-import trp.util.Direction;
-import trp.util.ReaderConstants;
-import trp.util.Readers;
+import trp.layout.*;
+import trp.network.*;
+import trp.util.*;
 
 public abstract class MachineReader implements ReaderConstants
 {
-  private static final int DEFAULT_HISTORY_SIZE = 10;
-  public static boolean PRODUCTION_MODE = false;
+  public static boolean PRODUCTION_MODE = false, USE_SERVER = false;
   public static String SERVER_HOST = "lab-lamp.scm.cityu.edu.hk";// "rednoise.org"//"localhost";
-  public static boolean USE_SERVER = false;
-
+  
+  private static final int DEFAULT_HISTORY_SIZE = 10;
+  
   // Statics --------------------------------------
 
   public static List instances = new ArrayList();
@@ -35,7 +30,7 @@ public abstract class MachineReader implements ReaderConstants
 
   protected List behaviors;
   protected RiText currentCell;
-  protected RiTextGrid grid; // leave as protected, use setter
+  protected RiTextGrid grid;
   protected HistoryQueue history; // last read cells
   protected MachineReader parent; // reader that spawned this one
   private ReaderBehavior defaultVisualBehavior;
@@ -43,10 +38,9 @@ public abstract class MachineReader implements ReaderConstants
   protected String readerOutputFile;
   protected String[] readerOutput;
 
-  public boolean testMode = false;
+  public boolean testMode, printToConsole;
   private boolean stepping, dead, hasMoved, paused = true;
   protected boolean updatesDisabled, reverse;
-  public boolean printToConsole;
   protected float readerColor[] = BRIGHT_RED, lifeSpan = Float.MAX_VALUE;
   protected long delay, birthTime, stepTimeMs = 1000;
   protected long originalStepTimeMs = stepTimeMs;
@@ -60,12 +54,7 @@ public abstract class MachineReader implements ReaderConstants
 
   public MachineReader(RiTextGrid grid)
   {
-    this(grid, 1, 0); // DH: changed to avoid (0,0) issue
-  }
-
-  public MachineReader(RiTextGrid grid, Point p)
-  {
-    this(grid, p.x, p.y);
+    this(grid, 0, 0);
   }
 
   public MachineReader(RiTextGrid grid, int startX, int startY)
@@ -87,16 +76,21 @@ public abstract class MachineReader implements ReaderConstants
     this.readerOutputFile = "reader" + this.id + "Output.txt";
 
     this.setGridPosition(startX, startY);
-    this.setCurrentCell(grid.cellAt(startX, startY));
+    this.currentCell(grid.cellAt(startX, startY));
+    
     if (secondsBetweenSteps > 0)
     {
       this.stepTimeMs = (long) (secondsBetweenSteps * 1000);
       this.originalStepTimeMs = this.stepTimeMs; // save
     }
-    this.triggerTime = this.birthTime = System.currentTimeMillis();
+		
+    this.birthTime = System.currentTimeMillis();
+		this.triggerTime = birthTime + stepTimeMs;
+		
     this.history = new HistoryQueue(DEFAULT_HISTORY_SIZE);
     history.allowDuplicates();
     history.setGrowable(false);
+    
     this.registerInstance(_pApplet);
   }
 
@@ -222,8 +216,7 @@ public abstract class MachineReader implements ReaderConstants
    */
   public void draw()
   {
-    if (dead)
-      return;
+    if (dead) return;
 
     long now = System.currentTimeMillis();
 
@@ -231,24 +224,14 @@ public abstract class MachineReader implements ReaderConstants
 
     // attempting to allow human readers to observe every highlighted word
     // TODO: dch, is there a better way to do this?
-    boolean flipping = PageManager.getInstance().isFlipping();
-    if (flipping)
+    if (PageManager.getInstance().isFlipping())
       return;
 
     if (!paused && now >= triggerTime) // time to fire
     {
       RiText wordBeingRead = null;
 
-      if (!hasMoved)
-      {
-        currentCell = grid.previousCell(currentCell);
-        this.grid = RiTextGrid.getGridFor(currentCell);
-      }
-      else
-      {
-        // if (!flipping) // NB: un-commenting this would not leave the first word of an nextPage visible
-        runExitWordBehaviors(currentCell);
-      }
+      runExitWordBehaviors(currentCell);
 
       verify(currentCell != null, "MachineReader.currentCell=null for: " + this);
 
@@ -271,18 +254,11 @@ public abstract class MachineReader implements ReaderConstants
       // TODO: there was no test for a null wordBeingRead at this point previously: concerning?
       if (wordBeingRead == null)
       {
-        Readers.warn("wordBeingRead is null at this point in MachineReader.draw()");
+        Readers.warn("wordBeingRead=null in "+this+".draw()");
         return;
       }
-      else
-      {
-        // adjust speed relative to the number of syllables in the word being read
-        // TODO: add a flag or option to keep speeds regular, optionally
-        String wordString = stripPunctuation(wordBeingRead.text());
-        this.adjustSpeed(1 + (countSyllables(RiTa.getSyllables(wordString)) - 1) * .3f);
-        // System.out.println(wordString + ": "
-        // + (1 + (countSyllables(RiTa.getSyllables(wordString)) - 1) * .3f));
-      }
+
+      adjustSpeedForWord(wordBeingRead);
 
       history.add(wordBeingRead); // store last cell
 
@@ -307,6 +283,16 @@ public abstract class MachineReader implements ReaderConstants
       delay = 0; // reset the delay time, used in pause()
     }
   }
+
+	protected void adjustSpeedForWord(RiText wordBeingRead) {
+		
+		// adjust speed relative to the number of syllables in the word being read
+		// TODO: add a flag or option to keep speeds regular, optionally
+		String wordString = stripPunctuation(wordBeingRead.text());
+		this.adjustSpeed(1 + (countSyllables(RiTa.getSyllables(wordString)) - 1) * .3f);
+		// System.out.println(wordString + ": "
+		// + (1 + (countSyllables(RiTa.getSyllables(wordString)) - 1) * .3f));
+	}
 
   private void checkLifeSpan(long now)
   {
@@ -457,8 +443,10 @@ public abstract class MachineReader implements ReaderConstants
     this.delay = (long) delaySec * 1000;
   }
 
-  public void setCurrentCell(RiText rt/* , boolean notifyListeners */)
+  public MachineReader currentCell(RiText rt/* , boolean notifyListeners */)
   {
+  	//System.out.println(this+".currentCell: "+rt);
+  	
     currentCell = rt; // changed: 2/18
 
     RiTextGrid next = RiTextGrid.getGridFor(rt);
@@ -468,18 +456,16 @@ public abstract class MachineReader implements ReaderConstants
 
     if (next != grid)
       this.changeGrid(next);
+    
+    return this;
   }
 
   /*
-   * Will reject the grid change if we are a page-turner and this would cause a page-flip, when pages are already flipping; in such cases 'grid' remains unchanged.
-   * 
-   * Note: should not be public!
+   * Will reject the grid change if we are a page-turner and this would cause a page-flip, 
+   * when pages are already flipping; in such cases 'grid' remains unchanged.
    */
   protected final void changeGrid(RiTextGrid newGrid)
   {
-    // if (this == PageManager.getInstance().getPageTurner())
-    // System.out.println("PageTurner.changeGrid(grid="+grid+" new="+newGrid+")");
-
     if (newGrid == grid/* && notifyListeners */)
       Readers.error("Call to changeGrid() with same grid as argument!");
 
@@ -506,8 +492,8 @@ public abstract class MachineReader implements ReaderConstants
     RiText rt = grid.cellAt(x, y);
     if (rt == null)
     {
-      Readers.warn("Position (" + x + "," + y + ") does not exist on " + grid + ", using 1,0 instead!");
-      rt = grid.cellAt(1, 0);
+      Readers.warn("Position ("+x+","+y+") does not exist on "+grid+", using 0,0!");
+      rt = grid.cellAt(0, 0);
     }
     this.currentCell = rt;
   }
