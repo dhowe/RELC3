@@ -32,6 +32,7 @@ public class ELC3Multi extends MultiPageApplet {
 	ButtonSelect textSelect, wordMonitor, readerSelect, speedSelect, visualSelect, colorSelect;
 	float readerColor[] = OATMEAL, readerSpeed = 0.5f;
 	RiTextGrid verso, recto;
+  PFont info;
 
 	public void settings() {
 
@@ -136,7 +137,9 @@ public class ELC3Multi extends MultiPageApplet {
 
 		PFont bask = loadFont("Baskerville-25.vlw");
 		PFont gill = loadFont("GillSansMT-24.vlw");
+		PFont info = loadFont("StoneSans-Semi-14.vlw");
 		FONTS = new PFont[] { bask, gill, bask };
+		this.info = info;
 	}
 
 	private void colorSetup() {
@@ -332,9 +335,12 @@ public class ELC3Multi extends MultiPageApplet {
 
 		// draw buttons only if not flipping
 		if (!pManager.isFlipping()) {
-			if (mouseY >= textSelect.y && mouseY < (textSelect.y + textSelect.height)) {
+			if ((mouseY >= textSelect.y && mouseY < (textSelect.y + textSelect.height)) || (mouseY > 0 && mouseY < 44)) {
 				for (int i = 0; i < ButtonSelect.instances.size(); i++)
 					ButtonSelect.instances.get(i).textFill = WHITE;
+
+				String word = MachineReader.stripPunctuation(currentReader().getCurrentCell().text());
+	      showCurrentWord(word);
 
 				if (PRESENTATION_MODE) cursor();
 			}
@@ -345,11 +351,6 @@ public class ELC3Multi extends MultiPageApplet {
 				if (PRESENTATION_MODE) noCursor();
 			}
 
-			String word = MachineReader.stripPunctuation(currentReader().getCurrentCell().text());
-			// if (!word.equals(last)) { System.out.println(word); last = word; }
-			// wordMonitor.setValue(word);
-			showCurrentWord(word);
-
 			ButtonSelect.drawAll(mouseX, mouseY);
 		}
 
@@ -359,10 +360,13 @@ public class ELC3Multi extends MultiPageApplet {
 	private void showCurrentWord(String word) {
 		
 		// what about showing the last x words (perhaps with a fade for older ones) ?
-		// would be nice for mesostic at least, but would also give a better sense of the generation  
+		// would be nice for mesostic at least, but would also give a better sense of the generation
+	  //
+	  // idea above def worth exploring but I think we should continue to allow the human reader
+	  // to have a 'clean' view of the sketch without buttons or word monitor
 		fill(255);
-		textSize(18);
-		textFont(FONTS[0]);
+		textFont(info);
+    // textSize(18);
 		textAlign(RIGHT);
 		text(word, width - 16, 30);
 	}

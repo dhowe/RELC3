@@ -865,9 +865,9 @@ public class RiTextGrid
         // This should only happen when 'center' is a last word of a long line
         // and so there really isn't anything 'under' it, so set under to the first word
         // of the first line on the next grid and give a let warning for the time being
+        // DEBUG Readers.warn("Exceptional state, " + "nothing under: \"" + center.text() + "\" (on next grid)");
+        // DEBUG Readers.info("'under' set to first word of the first line on the next grid.");
         under = firstLine[0];
-        Readers.info("Exceptional state, " + "nothing under: \"" + center.text() + "\" (on next grid)");
-        Readers.info("under set to first word of the first line on the next grid.");
 //        for (int i = 0; i < firstLine.length; i++) // DEBUGGING:
 //        {
 //           System.out.print(firstLine[i].text() + " ");
