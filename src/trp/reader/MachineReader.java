@@ -144,6 +144,8 @@ public abstract class MachineReader implements ReaderConstants
     this.stepTimeMs = (long) (secondsBtwnSteps * 1000f);
     if (alsoResetOriginalSpeed)
       this.originalStepTimeMs = stepTimeMs;
+    
+    this.triggerTime = System.currentTimeMillis() + this.stepTimeMs;
   }
 
   public void setSpeed(float secondsBtwnSteps)
