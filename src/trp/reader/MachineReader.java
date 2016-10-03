@@ -248,8 +248,7 @@ public abstract class MachineReader implements ReaderConstants
       // adjust grids if the wordBeingRead isn't on the current one
       if (!grid.contains(wordBeingRead))
       {
-        if (this == pMan.getFocusedReader())
-          Readers.info("Grid adjustment needed by: " + this + " at: " + this.getCurrentCell().text() + " next: " + wordBeingRead.text());
+        // DEBUG -remove if (this == pMan.getFocusedReader()) Readers.info("Grid adjustment needed by: " + this + " at: " + this.getCurrentCell().text() + " next: " + wordBeingRead.text());
 
         RiTextGrid gridForNextWord = RiTextGrid.getGridFor(wordBeingRead);
 
@@ -260,7 +259,7 @@ public abstract class MachineReader implements ReaderConstants
 
         if (this.paused)
         {
-          Readers.info("we're paused");
+          // Readers.info("we're paused"); DEBUG -remove
           // we're flipping so return with currentCell as is
           return;
         }

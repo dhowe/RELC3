@@ -221,8 +221,8 @@ public class ELC3Multi extends MultiPageApplet {
 			// SIMPLE READING SPAWNER - nb: has different default speed
 			MachineReader.delete(readers[1]);
 			readers[1] = new SimpleReader(verso);
-			readers[1].setSpeed((float) SPEED_MAP.get("Slow")); // was 1.7f
-			readers[1].setBehavior(defaultVisuals);
+      readers[1].setSpeed((float) SPEED_MAP.get("Steady")); // was 1.7f
+      readers[1].setBehavior(defaultVisuals);
 			readers[1].addBehavior(spawningVB);
 		}
 
@@ -231,8 +231,8 @@ public class ELC3Multi extends MultiPageApplet {
 			// PERIGRAM SPAWNER
 			MachineReader.delete(readers[2]);
 			readers[2] = new PerigramReader(verso, perigrams);
-			readers[2].setSpeed(readerSpeed); // was 0.6f
-			readers[2].setBehavior(neighborFadingNT);
+      readers[2].setSpeed(readerSpeed); // was 0.6f
+      readers[2].setBehavior(neighborFadingNT);
 			readers[2].addBehavior(spawningVB);
 		}
 
@@ -241,7 +241,7 @@ public class ELC3Multi extends MultiPageApplet {
 			// MESOSTIC JUMPER - nb: has different default speed
 			MachineReader.delete(readers[3]);
 			readers[3] = new MesoPerigramJumper(verso, MESOSTICS[textIndex], perigrams);
-			readers[3].setSpeed((float) SPEED_MAP.get("Slow"));
+			readers[3].setSpeed((float) SPEED_MAP.get("Steady"));
 			readers[3].setBehavior(mesostic);
 		}
 
@@ -264,9 +264,9 @@ public class ELC3Multi extends MultiPageApplet {
 		((NeighborFadingVisual) neighborFadingNT).setFadeLeadingNeighbors(false);
 		((NeighborFadingVisual) neighborFadingNT).setFadeTrailingNeighbors(false);
 
-		defaultVisuals = new DefaultVisuals(MOCHRE, (float) SPEED_MAP.get("Slow"));
+		defaultVisuals = new DefaultVisuals(MOCHRE, (float) SPEED_MAP.get("Steady"));
 
-		tendrilsDGray = new DefaultVisuals(DGRAY, .5f, (float) SPEED_MAP.get("Slow"));
+		tendrilsDGray = new DefaultVisuals(DGRAY, .5f, (float) SPEED_MAP.get("Steady"));
 		// earlier failed? attempt to make tendrils faster by multiplying speed by
 		// 1.7
 
@@ -303,11 +303,10 @@ public class ELC3Multi extends MultiPageApplet {
 					break;
 
 				case 1: // simple spawner
-					getCurrentReader(currentReaderIdx).setSpeed((float) SPEED_MAP.get("Slow"), true); // alsoResetOriginalSpeed
+					// getCurrentReader(currentReaderIdx).setSpeed((float) SPEED_MAP.get("Steady"), true); // alsoResetOriginalSpeed
 					getCurrentReader(currentReaderIdx).setBehavior(defaultVisuals);
 					getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
 					defaultVisuals.setReaderColor(color);
-					speedSelect.advanceTo("Slow");
 					break;
 
 				case 2: // perigram spawner
@@ -317,10 +316,9 @@ public class ELC3Multi extends MultiPageApplet {
 					break;
 
 				case 3: // mesostic
-					getCurrentReader(currentReaderIdx).setSpeed((float) SPEED_MAP.get("Slow"), true); // alsoResetOriginalSpeed
+					// getCurrentReader(currentReaderIdx).setSpeed((float) SPEED_MAP.get("Steady"), true); // alsoResetOriginalSpeed
 					getCurrentReader(currentReaderIdx).setBehavior(mesostic);
 					mesostic.setReaderColor(color);
-					speedSelect.advanceTo("Slow");
 					break;
 
 				default:

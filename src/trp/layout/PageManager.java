@@ -476,9 +476,9 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
 
     showAll();
 
-    if (focusedReader != null) // TODO: not perfect (due to fading weirdness) and needs this safety measure
+    if (focusedReader != null)
     {
-      Readers.info("unpausing with: " + focusedReader.getCurrentCell().text());
+      // DEBUG -remove Readers.info("unpausing with: " + focusedReader.getCurrentCell().text());
       focusedReader.pause(false);
     }
     else
@@ -490,7 +490,7 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
     // System.out.println("PageManager.onGridChange()");
     if (grid == right && gridForNextWord == next) // DEBUG had: || changedFrom == next
     {
-      Readers.warn("page-turn caused by: " + currentReader.getCurrentCell().text());
+      // DEBUG -remove: Readers.warn("page-turn caused by: " + currentReader.getCurrentCell().text());
       currentReader.pause(true);
       nextPage();
     }
@@ -683,7 +683,7 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
     // focusedReader.jumpToPage(right);
     // }
 
-    // TODO: in future js iterations? move all non-visible readers to the verso page
+    // ALSO: in future js iterations? move all non-visible readers to the verso page
     // NB: commented out for RELC3 - which has only one reader at a time
     // for (Iterator it = MachineReader.instances.iterator(); it.hasNext();)
     // {
