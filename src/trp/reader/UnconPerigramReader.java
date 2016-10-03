@@ -19,8 +19,6 @@ public class UnconPerigramReader extends PerigramReader
   int wordsOut = 0;
   Direction dir;
 
-  private PerigramLookup perigrams;
-
   public UnconPerigramReader(RiTextGrid grid, PerigramLookup perigrams)
   {
     super(grid, perigrams);

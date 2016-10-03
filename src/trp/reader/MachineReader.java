@@ -18,9 +18,9 @@ public abstract class MachineReader implements ReaderConstants
 {
   public static boolean PRODUCTION_MODE = false, USE_SERVER = false;
   public static String SERVER_HOST = "lab-lamp.scm.cityu.edu.hk";// "rednoise.org"//"localhost";
-  
+
   private static final int DEFAULT_HISTORY_SIZE = 10;
-  
+
   // Statics --------------------------------------
 
   public static List instances = new ArrayList();
@@ -37,6 +37,8 @@ public abstract class MachineReader implements ReaderConstants
   protected Direction lastDirection;
   protected String readerOutputFile;
   protected String[] readerOutput;
+
+  protected PageManager pMan;
 
   public boolean testMode, printToConsole;
   private boolean stepping, dead, hasMoved, paused = true;
@@ -76,22 +78,24 @@ public abstract class MachineReader implements ReaderConstants
     this.readerOutputFile = "reader" + this.id + "Output.txt";
 
     this.setGridPosition(startX, startY);
-    this.currentCell(grid.cellAt(startX, startY));
-    
+    this.setCurrentCell(grid.cellAt(startX, startY));
+
     if (secondsBetweenSteps > 0)
     {
       this.stepTimeMs = (long) (secondsBetweenSteps * 1000);
       this.originalStepTimeMs = this.stepTimeMs; // save
     }
-		
+
     this.birthTime = System.currentTimeMillis();
-		this.triggerTime = birthTime + stepTimeMs;
-		
+    this.triggerTime = birthTime + stepTimeMs;
+
     this.history = new HistoryQueue(DEFAULT_HISTORY_SIZE);
     history.allowDuplicates();
     history.setGrowable(false);
-    
+
     this.registerInstance(_pApplet);
+
+    this.pMan = PageManager.getInstance();
   }
 
   // --------------------------- methods --------------------------
@@ -167,8 +171,8 @@ public abstract class MachineReader implements ReaderConstants
         rb.enterWord(this, currentCell);
       }
     }
-    if (stepping)
-      paused = true;
+    if (this.stepping)
+      this.paused = true;
   }
 
   /**
@@ -216,18 +220,14 @@ public abstract class MachineReader implements ReaderConstants
    */
   public void draw()
   {
-    if (dead) return;
+    if (dead)
+      return;
 
     long now = System.currentTimeMillis();
 
     checkLifeSpan(now);
 
-    // attempting to allow human readers to observe every highlighted word
-    // TODO: dch, is there a better way to do this?
-    if (PageManager.getInstance().isFlipping())
-      return;
-
-    if (!paused && now >= triggerTime) // time to fire
+    if (!this.paused && now >= triggerTime) // time to fire
     {
       RiText wordBeingRead = null;
 
@@ -237,26 +237,40 @@ public abstract class MachineReader implements ReaderConstants
 
       wordBeingRead = selectNext();
 
-      // changes grids if necessary
-      if (wordBeingRead != null && !grid.contains(wordBeingRead))
-      {
-        RiTextGrid lastGrid = grid;
-        changeGrid(RiTextGrid.getGridFor(wordBeingRead));
-        boolean changeWasRejected = (grid == lastGrid);
-        if (changeWasRejected)
-        {
-          // pause the page-flipper if its trying to change grids during a flip
-          // Readers.info("Grid change rejected, pausing on "+currentCell);
-          return;
-        }
-      }
-
-      // Test required because spawned (PerigramDirectiona) readers may 'die'
-      // and return null from their selectNext()
+      // Following test required because spawned (PerigramDirectiona) readers
+      // may 'die' and return null from their selectNext()
       if (wordBeingRead == null)
       {
         // DEBUG Readers.warn("wordBeingRead=null in "+this+".draw()");
         return;
+      }
+
+      // adjust grids if the wordBeingRead isn't on the current one
+      if (!grid.contains(wordBeingRead))
+      {
+        if (this == pMan.getFocusedReader())
+          Readers.info("Grid adjustment needed by: " + this + " at: " + this.getCurrentCell().text() + " next: " + wordBeingRead.text());
+
+        RiTextGrid gridForNextWord = RiTextGrid.getGridFor(wordBeingRead);
+
+        if (gridForNextWord == null)
+          Readers.error("There is no grid for the next word: " + wordBeingRead.text());
+
+        adjustGrids(gridForNextWord);
+
+        if (this.paused)
+        {
+          Readers.info("we're paused");
+          // we're flipping so return with currentCell as is
+          return;
+        }
+        // boolean changeWasRejected = (grid == lastGrid);
+        // if (changeWasRejected)
+        // {
+        // // pause the page-flipper if its trying to change grids during a flip
+        // // Readers.info("Grid change rejected, pausing on "+currentCell);
+        // return;
+        // }
       }
 
       adjustSpeedForWord(wordBeingRead);
@@ -264,6 +278,7 @@ public abstract class MachineReader implements ReaderConstants
       history.add(wordBeingRead); // store last cell
 
       currentCell = wordBeingRead; // keep track of current word
+      grid = RiTextGrid.getGridFor(currentCell);
 
       if (!dead) // enterWord
       {
@@ -285,15 +300,16 @@ public abstract class MachineReader implements ReaderConstants
     }
   }
 
-	protected void adjustSpeedForWord(RiText wordBeingRead) {
-		
-		// adjust speed relative to the number of syllables in the word being read
-		// TODO: add a flag or option to keep speeds regular, optionally
-		String wordString = stripPunctuation(wordBeingRead.text());
-		this.adjustSpeed(1 + (countSyllables(RiTa.getSyllables(wordString)) - 1) * .3f);
-		// System.out.println(wordString + ": "
-		// + (1 + (countSyllables(RiTa.getSyllables(wordString)) - 1) * .3f));
-	}
+  protected void adjustSpeedForWord(RiText wordBeingRead)
+  {
+
+    // adjust speed relative to the number of syllables in the word being read
+    // TODO: add a flag or option to keep speeds regular, optionally
+    String wordString = stripPunctuation(wordBeingRead.text());
+    this.adjustSpeed(1 + (countSyllables(RiTa.getSyllables(wordString)) - 1) * .3f);
+    // System.out.println(wordString + ": "
+    // + (1 + (countSyllables(RiTa.getSyllables(wordString)) - 1) * .3f));
+  }
 
   private void checkLifeSpan(long now)
   {
@@ -405,9 +421,9 @@ public abstract class MachineReader implements ReaderConstants
   public void pause(boolean b)
   {
     // System.out.println(this+".paused("+b+")");
-    paused = b;
-    if (!paused)
-      stepping = false;
+    this.paused = b;
+    if (!this.paused)
+      this.stepping = false;
   }
 
   public static void delete(MachineReader reader)
@@ -444,48 +460,41 @@ public abstract class MachineReader implements ReaderConstants
     this.delay = (long) delaySec * 1000;
   }
 
-  public MachineReader currentCell(RiText rt/* , boolean notifyListeners */)
+  public MachineReader setCurrentCell(RiText rt/* , boolean notifyListeners */)
   {
-  	//System.out.println(this+".currentCell: "+rt);
-  	
-    currentCell = rt; // changed: 2/18
+    // System.out.println(this+".currentCell: "+rt);
 
-    RiTextGrid next = RiTextGrid.getGridFor(rt);
+    this.currentCell = rt; // changed: 2/18
+    this.grid = RiTextGrid.getGridFor(rt);
 
-    if (next == null)
-      Readers.error("No grid for cell: " + rt);
+    if (currentCell == null)
+      Readers.error("null cell: " + rt);
 
-    if (next != grid)
-      this.changeGrid(next);
-    
+    if (grid == null)
+      Readers.error("null grid for cell: " + rt);
+
     return this;
   }
 
   /*
-   * Will reject the grid change if we are a page-turner and this would cause a page-flip, 
+   * Will reject the grid change if we are a page-turner and this would cause a page-flip,
    * when pages are already flipping; in such cases 'grid' remains unchanged.
    */
-  protected final void changeGrid(RiTextGrid newGrid)
+  protected void adjustGrids(RiTextGrid newGrid)
   {
-    if (newGrid == grid/* && notifyListeners */)
-      Readers.error("Call to changeGrid() with same grid as argument!");
-
-    if (grid == null) // grid = pMan.getVerso();
-      Readers.error("Call to changeGrid() with reader on null grid!");
-
     // Should we tell the PageManager to do a flip?
-    PageManager pMan = PageManager.getInstance();
     if (pMan == null)
+    {
       Readers.error("Attempt to change grid on a single page layout!");
+      return;
+    }
 
     if (this == pMan.getFocusedReader()) // only if we're a page-turner
     {
-      if (pMan.isFlipping()) // but reject if we're already flipping!
-        return;
-      pMan.onGridChange(this, grid, newGrid);
+      // if (pMan.isFlipping()) // but reject if we're already flipping!
+      // return grid;
+      pMan.onGridChange(this, this.grid, newGrid);
     }
-
-    this.grid = newGrid;
   }
 
   public void setGridPosition(int x, int y)
@@ -493,7 +502,7 @@ public abstract class MachineReader implements ReaderConstants
     RiText rt = grid.cellAt(x, y);
     if (rt == null)
     {
-      Readers.warn("Position ("+x+","+y+") does not exist on "+grid+", using 0,0!");
+      Readers.warn("Position (" + x + "," + y + ") does not exist on " + grid + ", using 0,0!");
       rt = grid.cellAt(0, 0);
     }
     this.currentCell = rt;

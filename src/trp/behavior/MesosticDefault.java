@@ -31,7 +31,7 @@ public class MesosticDefault extends DefaultVisuals
 
     if (meso.isUppercasingSelectedLetter())
     {
-      String newText = RiTextGrid.originalTextFor(rt).replaceFirst(meso.theLetter, meso.theLetter.toUpperCase());
+      String newText = RiTextGrid.originalTextFor(rt).replaceFirst(meso.getTheLetter(), meso.getTheLetter().toUpperCase());
 
       rtg.textFor(rt, newText);
     }

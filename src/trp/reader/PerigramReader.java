@@ -12,7 +12,7 @@ import trp.util.PerigramLookup;
 
 public class PerigramReader extends DigramReader
 {
-  PerigramLookup perigrams;
+  protected PerigramLookup perigrams;
   public int serverOutputType = 0;
 
   // make a ReadersConstant for this? 0=SIMPLE, 1=PERMUTATIONS, etc.

@@ -5,92 +5,99 @@ import rita.RiText;
 import trp.layout.RiTextGrid;
 import trp.util.Readers;
 
-public class MesosticReader extends SimpleReader {
+public class MesosticReader extends SimpleReader
+{
 
-	private static final String PAD = " ";
+  private static final String PAD = " ";
 
-	// in the default testMode, the reader should find an 'm' word and
-	// then an 'o' word etc. until it spells out the phrase below
-	protected String lastWord = "", toBeSpelt = "mesostic reader";
+  // in the default testMode, the reader should find an 'm' word and
+  // then an 'o' word etc. until it spells out the phrase below
+  protected String lastWord = "", toBeSpelt = "mesostic reader";
 
-	protected boolean checkHistory = true, noRepeatedWords = true;
-	protected boolean alignOutput = true, variableSpeed = true;
-	protected boolean titleIsUpperCase = false, uppercaseSelectedLetter = true;
-	protected boolean caseSensitive, updateTitleLetters, allowsOffScreenJumps;
+  protected boolean checkHistory = true, noRepeatedWords = true;
+  protected boolean alignOutput = true, variableSpeed = true;
+  protected boolean titleIsUpperCase = false, uppercaseSelectedLetter = true;
+  protected boolean caseSensitive, updateTitleLetters, allowsOffScreenJumps;
 
-	protected float maxWordLength = 1;// originalSpeed;
-	protected int characterPos = 0, titlePos = 0, lastCharacterPos = 0;
-	public String theLetter, lastLetter;
-	private String overrideTextForServer;
-  //long adjustableSpeedMs = -1; 
-  
-	public MesosticReader(RiTextGrid grid, String _toBeSpelt)
-	{
-		this(grid, _toBeSpelt, false, true);
-	}
+  protected float maxWordLength = 1;// originalSpeed;
+  protected int characterPos = 0, titlePos = 0, lastCharacterPos = 0;
+  protected String theLetter;
+  protected String lastLetter;
+  protected RiText lastCellRead = null;
 
-	public MesosticReader(RiTextGrid grid, String _toBeSpelt, boolean _caseSensitive, boolean _uppercaseSelectedLetter) 
-	{
-		super(grid);
-		toBeSpelt = _toBeSpelt.toLowerCase();
-		caseSensitive = _caseSensitive;
-		uppercaseSelectedLetter = _uppercaseSelectedLetter;
-		maxWordLength = RiTextGrid.computeMaxWordLength();
-	}
+  private String overrideTextForServer;
 
-	// -------------------- methods --------------------------
+  // long adjustableSpeedMs = -1;
 
-	public boolean isUppercasingSelectedLetter() {
-		return uppercaseSelectedLetter;
-	}
+  public MesosticReader(RiTextGrid grid, String _toBeSpelt)
+  {
+    this(grid, _toBeSpelt, false, true);
+  }
 
-	public void setUppercaseSelectedLetter(boolean uppercaseSelectedLetter) {
-		this.uppercaseSelectedLetter = uppercaseSelectedLetter;
-	}
+  public MesosticReader(RiTextGrid grid, String _toBeSpelt, boolean _caseSensitive, boolean _uppercaseSelectedLetter)
+  {
+    super(grid);
+    toBeSpelt = _toBeSpelt.toLowerCase();
+    caseSensitive = _caseSensitive;
+    uppercaseSelectedLetter = _uppercaseSelectedLetter;
+    maxWordLength = RiTextGrid.computeMaxWordLength();
+  }
 
-	public void doTitleUpdate(boolean toLowercase) 
-	{
-		String titleStr = grid.getTitleStr();
+  // -------------------- methods --------------------------
 
-		if (titleStr.length() < 1)
-			return;
+  public boolean isUppercasingSelectedLetter()
+  {
+    return uppercaseSelectedLetter;
+  }
 
-		char c = titleStr.charAt(titlePos);
-		while (!((c + "").equalsIgnoreCase(theLetter))) {
-			if (++titlePos == titleStr.length())
-				titlePos = 0;
-			c = titleStr.charAt(titlePos);
-		}
-		String pre = titleStr.substring(0, titlePos);
-		String post = titleStr.substring(titlePos + 1);
+  public void setUppercaseSelectedLetter(boolean uppercaseSelectedLetter)
+  {
+    this.uppercaseSelectedLetter = uppercaseSelectedLetter;
+  }
 
-		String updated = toLowercase ? pre.toUpperCase()
-				+ Character.toLowerCase(c) + post.toUpperCase() : pre
-				.toLowerCase()
-				+ Character.toUpperCase(c) + post.toLowerCase();
+  public void doTitleUpdate(boolean toLowercase)
+  {
+    String titleStr = grid.getTitleStr();
 
-		grid.setTitle(updated);
+    if (titleStr.length() < 1)
+      return;
 
-		if (++titlePos == titleStr.length())
-			titlePos = 0;
-	}
+    char c = titleStr.charAt(titlePos);
+    while (!((c + "").equalsIgnoreCase(getTheLetter())))
+    {
+      if (++titlePos == titleStr.length())
+        titlePos = 0;
+      c = titleStr.charAt(titlePos);
+    }
+    String pre = titleStr.substring(0, titlePos);
+    String post = titleStr.substring(titlePos + 1);
 
-	/**  Line up the mesostics if 'alignOutput' is true */
-	public String getTextForServer(RiText selected) 
-	{
-		//System.out.println("MesosticReader.getTextForServer("+selected+")");
+    String updated = toLowercase ? pre.toUpperCase() + Character.toLowerCase(c) + post.toUpperCase()
+        : pre.toLowerCase() + Character.toUpperCase(c) + post.toLowerCase();
 
-		if (overrideTextForServer != null) {
-			String s = overrideTextForServer;
-			overrideTextForServer = null;
-			return s;
-		}
+    grid.setTitle(updated);
 
-		String raw = RiTa.trimPunctuation(selected.text());
+    if (++titlePos == titleStr.length())
+      titlePos = 0;
+  }
 
-		if (alignOutput) 
-		{
-      char ch = theLetter.charAt(0);
+  /** Line up the mesostics if 'alignOutput' is true */
+  public String getTextForServer(RiText selected)
+  {
+    // System.out.println("MesosticReader.getTextForServer("+selected+")");
+
+    if (overrideTextForServer != null)
+    {
+      String s = overrideTextForServer;
+      overrideTextForServer = null;
+      return s;
+    }
+
+    String raw = RiTa.trimPunctuation(selected.text());
+
+    if (alignOutput)
+    {
+      char ch = getTheLetter().charAt(0);
 
       if (uppercaseSelectedLetter)
         ch = Character.toUpperCase(ch);
@@ -108,178 +115,217 @@ public class MesosticReader extends SimpleReader {
       }
       else
         Readers.error("Mesostic letter (" + ch + ") not found in '" + raw + "'");
-		}
-		
-		if (printToConsole) System.out.println(raw);
+    }
 
-		return raw;
-	}
+    if (printToConsole)
+      System.out.println(raw);
 
-	// methods -----------------------------
+    return raw;
+  }
 
-	private String padMesostic(String raw, char c, int idx)
-	{
-		String pre = raw.substring(0, idx);
-		String padStr = "";
-		for (int i = 0; i < maxWordLength - pre.length() - 1; i++)
-			padStr += PAD;
-		return padStr + raw;// pre + c + pos;
-	}
+  // methods -----------------------------
 
-	// bumps the characterPos and puts the next letter into 'theLetter'
-	protected void nextLetterToBeSpelt() {
+  private String padMesostic(String raw, char c, int idx)
+  {
+    String pre = raw.substring(0, idx);
+    String padStr = "";
+    for (int i = 0; i < maxWordLength - pre.length() - 1; i++)
+      padStr += PAD;
+    return padStr + raw;// pre + c + pos;
+  }
 
-		lastLetter = theLetter; // save the last
-		lastCharacterPos = characterPos; // also save pos
+  // bumps the characterPos and puts the next letter into 'theLetter'
+  protected void nextLetterToBeSpelt()
+  {
 
-		if (characterPos >= toBeSpelt.length())
-		{
-			// add a space after last word
-			sendLineBreak();
-			if (printToConsole) System.out.println();
-			characterPos = 0;
-		}
+    lastCellRead = this.getCurrentCell();
+    setLastLetter(getTheLetter()); // save the last
+    lastCharacterPos = characterPos; // also save pos
 
-		theLetter = toBeSpelt.substring(characterPos, ++characterPos);
-		 
-		while (!theLetter.toString().matches("[\\p{InBasic_Latin}\\p{InCyrillic}_]") || theLetter.toString().matches("\\s")) // was: [A-Za-z_]; trying with
-		{
-			theLetter = toBeSpelt.substring(characterPos, ++characterPos);
-			sendLineBreak(); // add a space between words
-			if (printToConsole) System.out.println();
-		}
-	}
+    if (characterPos >= toBeSpelt.length())
+    {
+      // add a space after last word
+      sendLineBreak();
+      if (printToConsole)
+        System.out.println();
+      characterPos = 0;
+    }
 
-	public RiText selectNext() 
-	{
-		RiText rt = getNextCellWithLetter();
+    setTheLetter(toBeSpelt.substring(characterPos, ++characterPos));
 
-		lastWord = rt.text().toLowerCase();
-		
-		return rt;
-	}
+    while (!getTheLetter().toString().matches("[\\p{InBasic_Latin}\\p{InCyrillic}_]")
+        || getTheLetter().toString().matches("\\s")) // was: [A-Za-z_]; trying with
+    {
+      setTheLetter(toBeSpelt.substring(characterPos, ++characterPos));
+      sendLineBreak(); // add a space between words
+      if (printToConsole)
+        System.out.println();
+    }
+  }
+
+  public RiText selectNext()
+  {
+    RiText rt = getNextCellWithLetter();
+
+    lastWord = rt.text().toLowerCase();
+
+    return rt;
+  }
 
   protected RiText getNextCellWithLetter()
   {
     nextLetterToBeSpelt();
 
-		RiTextGrid g = grid;
+    RiTextGrid g = grid;
 
-		RiText rt = g.nextCell(currentCell);
+    RiText rt = g.nextCell(currentCell);
 
-		RiText startWord = rt;
+    RiText startWord = rt;
 
-		while (!conditionsMet(rt))
-		{
-			rt = g.nextCell(rt);
+    while (!conditionsMet(rt))
+    {
+      rt = g.nextCell(rt);
 
-			g = RiTextGrid.getGridFor(rt); // check other grids (?)
-			if (rt == startWord) 
-			{
-				System.out.println("[WARN] No words containing '"+theLetter+"' found in the text!");
-				
-				if (wasSpawned()) 
-				{
-					System.out.println("      Deleting spawned reader: " + this);
-					delete(this);
-				} 
-				else 
-				{
-					overrideTextForServer = theLetter; 
-					System.out.println("      Picking random next word...");
-					rt = g.nextCell(rt); // send correct letter then just go to next word (TODO: jump down a line or 2)
-				}
-			}
-		}
+      g = RiTextGrid.getGridFor(rt); // check other grids (?)
+      if (rt == startWord)
+      {
+        System.out.println("[WARN] No words containing '" + getTheLetter() + "' found in the text!");
+
+        if (wasSpawned())
+        {
+          System.out.println("      Deleting spawned reader: " + this);
+          delete(this);
+        }
+        else
+        {
+          overrideTextForServer = getTheLetter();
+          System.out.println("      Picking random next word...");
+          rt = g.nextCell(rt); // send correct letter then just go to next word (TODO: jump down a line or 2)
+        }
+      }
+    }
     return rt;
   }
-	
-/*	public void start()
-	{
-	  super.start();
-	  adjustableSpeedMs = originalStepTimeMs;
-	}
 
-	public void adjustSpeed(float factor) 
-	{
-	  adjustableSpeedMs *= factor;
-	}*/
-	
-/*	protected void adjustSpeed(RiText result) 
-	{
-		if (varySpeedOnWordLength()) 
-		{
-			// scale varies from .3 - 3.3
-			float scale = .3f + (3 * result.length() / maxWordLength);
+  /*
+   * public void start()
+   * {
+   * super.start();
+   * adjustableSpeedMs = originalStepTimeMs;
+   * }
+   * 
+   * public void adjustSpeed(float factor)
+   * {
+   * adjustableSpeedMs *= factor;
+   * }
+   */
 
-			float nextSpeed = (adjustableSpeedMs/1000f  * scale);
-			
-			// then multiply speed by scale
-			setSpeed(nextSpeed);
-		}
-	}*/
+  /*
+   * protected void adjustSpeed(RiText result)
+   * {
+   * if (varySpeedOnWordLength())
+   * {
+   * // scale varies from .3 - 3.3
+   * float scale = .3f + (3 * result.length() / maxWordLength);
+   * 
+   * float nextSpeed = (adjustableSpeedMs/1000f * scale);
+   * 
+   * // then multiply speed by scale
+   * setSpeed(nextSpeed);
+   * }
+   * }
+   */
 
-	public void setTitleIsUpperCase(boolean b) {
-		titleIsUpperCase = b;
-	}
+  public void setTitleIsUpperCase(boolean b)
+  {
+    titleIsUpperCase = b;
+  }
 
-	public boolean conditionsMet(RiText rt) {
+  public boolean conditionsMet(RiText rt)
+  {
 
-		// JC: added to disallow match of special punctuation
-		// surrounded by whitespace (in the clock) 
-		if ((rt == null) || rt.text().matches("[•|]"))
-			return false;
+    // JC: added to disallow match of special punctuation
+    // surrounded by whitespace (in the clock)
+    if ((rt == null) || rt.text().matches("[•|]"))
+      return false;
 
-		// no repeated words
-		if (rt.text().toLowerCase().equals(lastWord)) 
-			return false; 
+    // no repeated words
+    if (rt.text().toLowerCase().equals(lastWord))
+      return false;
 
-		if (checkHistory) 
-		{
-	    // tests to see if the proposed next word has 'history'
-			MachineReader[] mrs = grid.getReaders(false);
-			for (int i = 0; i < mrs.length; i++) 
-			{
-				// if the new word is in any reader's history
-				if (mrs[i].getHistory().contains(rt)) {
-					//System.out.println("found history for " + rt.text());
-					return false;
-				}
-			}
-		}
-	
-		// do letter-related tests
-		// JC: added to allow wild card next word for 0's in timeItems
-		if (theLetter.equals("_"))
-			return true;
+    if (checkHistory)
+    {
+      // tests to see if the proposed next word has 'history'
+      MachineReader[] mrs = grid.getReaders(false);
+      for (int i = 0; i < mrs.length; i++)
+      {
+        // if the new word is in any reader's history
+        if (mrs[i].getHistory().contains(rt))
+        {
+          // System.out.println("found history for " + rt.text());
+          return false;
+        }
+      }
+    }
 
-		if (caseSensitive)
-			return rt.contains(theLetter);
-		else
-			return rt.text().toLowerCase().contains(theLetter);
-	}
+    // do letter-related tests
+    // JC: added to allow wild card next word for 0's in timeItems
+    if (getTheLetter().equals("_"))
+      return true;
 
-	public String getCurrentLetter() {
-		return theLetter;
-	}
+    if (caseSensitive)
+      return rt.contains(getTheLetter());
+    else
+      return rt.text().toLowerCase().contains(getTheLetter());
+  }
 
-	public void setVariableSpeed(boolean variableSpeed) {
-		this.variableSpeed = variableSpeed;
-	}
+  public String getCurrentLetter()
+  {
+    return getTheLetter();
+  }
 
-	public boolean varySpeedOnWordLength() {
-		return variableSpeed;
-	}
+  public void setVariableSpeed(boolean variableSpeed)
+  {
+    this.variableSpeed = variableSpeed;
+  }
 
-	public boolean isUpdatingTitleLetters() {
-		return updateTitleLetters;
-	}
+  public boolean varySpeedOnWordLength()
+  {
+    return variableSpeed;
+  }
 
-	public void setUpdateTitleLetters(boolean updateTitleLetters) {
-		this.updateTitleLetters = updateTitleLetters;
-	}
+  public boolean isUpdatingTitleLetters()
+  {
+    return updateTitleLetters;
+  }
 
-	public boolean isTitleUpperCase() {
-		return titleIsUpperCase;
-	}
+  public void setUpdateTitleLetters(boolean updateTitleLetters)
+  {
+    this.updateTitleLetters = updateTitleLetters;
+  }
+
+  public boolean isTitleUpperCase()
+  {
+    return titleIsUpperCase;
+  }
+
+  public String getTheLetter()
+  {
+    return theLetter;
+  }
+
+  public void setTheLetter(String theLetter)
+  {
+    this.theLetter = theLetter;
+  }
+
+  public String getLastLetter()
+  {
+    return lastLetter;
+  }
+
+  public void setLastLetter(String lastLetter)
+  {
+    this.lastLetter = lastLetter;
+  }
 }

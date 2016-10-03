@@ -22,7 +22,7 @@ public class MesoPerigramJumper extends MesosticReader
   private static final int CHECK_NONE = 0;
 
   private PerigramLookup perigrams;
-
+  
   protected MesoPerigramJumper(RiTextGrid grid, String toBeSpelt)
   {
     super(grid, toBeSpelt);
@@ -39,15 +39,16 @@ public class MesoPerigramJumper extends MesosticReader
   }
 
   /**
-   * Look first for words on subsequent lines with n-grams, 
+   * Look first for words on subsequent lines with n-grams,
    * then subsequent lines without n-grams, then default to
    * MesosticReader.selectNext(), if something good has not yet been found...
    */
   public RiText selectNext()
   {
-
-    nextLetterToBeSpelt();
     // System.out.println("MesoDigramJumper.selectNext("+theLetter+")");
+
+    if (this.getCurrentCell() != lastCellRead) // TODO: quick fix for page-turning
+      nextLetterToBeSpelt();
 
     int[] ngramLineIdxs = { 1, 2, 3, 4, 5, 6 };
 
@@ -57,7 +58,7 @@ public class MesoPerigramJumper extends MesosticReader
     if (result == null)
     {
       if (printToConsole && DBUG)
-        Readers.info("MesoPerigramJumper: no perigrams for '" + theLetter + "',  trying digrams...");
+        Readers.info("MesoPerigramJumper: no perigrams for '" + getTheLetter() + "',  trying digrams...");
       result = checkLines(ngramLineIdxs, CHECK_DIGRAMS);
     }
 
@@ -65,26 +66,28 @@ public class MesoPerigramJumper extends MesosticReader
     if (result == null)
     {
       if (printToConsole && DBUG)
-        Readers.info("MesoPerigramJumper: no digrams for '" + theLetter + "',  trying w'out ngrams...");
+        Readers.info("MesoPerigramJumper: no digrams for '" + getTheLetter() + "',  trying w'out ngrams...");
       int[] letterLineIdxs = { 1, 2, 3, 4 }; // less lines
       result = checkLines(letterLineIdxs, CHECK_NONE);
     }
-    else {
-      //Readers.info("MesoPerigramJumper got digram!!!!!! for '" + theLetter+" -> "+result.text());
+    else
+    {
+      // Readers.info("MesoPerigramJumper got digram!!!!!! for '" + theLetter+" -> "+result.text());
     }
 
     // still got nothing, use normal mesostic method
     if (result == null)
     {
       if (DBUG)
-        Readers.info("MesoPerigramJumper giving up on '" + theLetter + "', defaulting to MesosticReader...");
-      this.theLetter = lastLetter; // hack
-      characterPos--;
+        Readers.info("MesoPerigramJumper giving up on '" + getTheLetter()
+            + "', defaulting to MesosticReader...");
+      this.setTheLetter(getLastLetter()); // hack
+      characterPos = lastCharacterPos; // hack
       result = super.selectNext();
     }
 
     if (result == null)
-      Readers.error("Unable to find word for '" + theLetter + "'");
+      Readers.error("Unable to find word for '" + getTheLetter() + "'");
 
     // DISABLED FOR NOW
 
@@ -119,7 +122,8 @@ public class MesoPerigramJumper extends MesosticReader
         continue;
 
       // get matching words, ordered by x-distance
-      List matches = (mode != CHECK_NONE) ? searchLineForLetterUsingNgrams(theLetter, rtg, lineIdx, mode) : searchLineForLetter(theLetter, rtg, lineIdx);
+      List matches = (mode != CHECK_NONE) ? searchLineForLetterUsingNgrams(getTheLetter(), rtg, lineIdx, mode)
+          : searchLineForLetter(getTheLetter(), rtg, lineIdx);
 
       if (!matches.isEmpty())
       {

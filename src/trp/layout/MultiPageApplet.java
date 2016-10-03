@@ -70,7 +70,7 @@ public class MultiPageApplet extends ReadersPApplet
     addReaders();
   }
 
-  public MachineReader currentReader() {
+  public MachineReader getCurrentReader(int currentReaderIdx) {
   	return readers[currentReaderIdx];
   }
   
@@ -150,7 +150,7 @@ public class MultiPageApplet extends ReadersPApplet
       {
         // assuming only one 'current' reader for ELC3 ...
         pause = !pause;
-        currentReader().pause(pause);
+        getCurrentReader(currentReaderIdx).pause(pause);
         return; // ... super.keyPressed() will not be called (because it would pause or start all readers)
       }
     }

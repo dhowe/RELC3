@@ -86,16 +86,16 @@ public class ELC3Multi extends MultiPageApplet {
 			// READER
 			else if (clicked == readerSelect) {
 
-				MachineReader rd = currentReader();
+				MachineReader rd = getCurrentReader(currentReaderIdx);
 				RiText rt = rd.getCurrentCell();
 				rd.pause(true);
 
 				currentReaderIdx = readerIdxFromName(clicked.value());
-
-				rd = currentReader();
+				rd = getCurrentReader(currentReaderIdx);
+				
 				// System.out.println("click: "+clicked.value()+", "+currentReaderIdx);
 				rd.setSpeed((float) SPEED_MAP.get(speedSelect.value()), true); // alsoResetOriginalSpeed
-				rd.currentCell(rt);
+				rd.setCurrentCell(rt);
 				rd.pause(false);
 
 				setVisuals(visualSelect.value(), readerColor, isSpawner(currentReaderIdx));
@@ -106,7 +106,7 @@ public class ELC3Multi extends MultiPageApplet {
 			// SPEED
 			else if (clicked == speedSelect) {
 				readerSpeed = (float) SPEED_MAP.get(clicked.value());
-				currentReader().setSpeed(readerSpeed, true); // alsoResetOriginalSpeed
+				getCurrentReader(currentReaderIdx).setSpeed(readerSpeed, true); // alsoResetOriginalSpeed
 			}
 
 			// VISUALS
@@ -246,12 +246,12 @@ public class ELC3Multi extends MultiPageApplet {
 		}
 
 		for (int i = 0; i < readers.length; i++) {
-			readers[i].currentCell(pManager.getVerso().cellAt(0, 0));
+			readers[i].setCurrentCell(pManager.getVerso().cellAt(0, 0));
 			readers[i].start(); // original speeds are set when the readers start
 			readers[i].pause(currentReaderIdx != i);
 		}
 
-		pManager.onUpdateFocusedReader(currentReader());
+		pManager.onUpdateFocusedReader(getCurrentReader(currentReaderIdx));
 	}
 
 	public void constructBehaviorsFor(PerigramLookup perigrams) {
@@ -285,10 +285,10 @@ public class ELC3Multi extends MultiPageApplet {
 		if (visuals.equals("Haloes")) {
 			haloing = (currentReaderIdx == 3) ? new MesosticHaloingVisual(color, verso.template().fill(), readerSpeed) : new ClearHaloingVisual(color, verso.template().fill(), readerSpeed);
 
-			currentReader().setBehavior(haloing);
+			getCurrentReader(currentReaderIdx).setBehavior(haloing);
 
 			if (isSpawner) {
-				currentReader().addBehavior(spawningVB);
+				getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
 			}
 		}
 		else {
@@ -298,27 +298,27 @@ public class ELC3Multi extends MultiPageApplet {
 			switch (currentReaderIdx) {
 
 				case 0: // perigram
-					currentReader().setBehavior(neighborFading);
+					getCurrentReader(currentReaderIdx).setBehavior(neighborFading);
 					neighborFading.setReaderColor(color);
 					break;
 
 				case 1: // simple spawner
-					currentReader().setSpeed((float) SPEED_MAP.get("Slow"), true); // alsoResetOriginalSpeed
-					currentReader().setBehavior(defaultVisuals);
-					currentReader().addBehavior(spawningVB);
+					getCurrentReader(currentReaderIdx).setSpeed((float) SPEED_MAP.get("Slow"), true); // alsoResetOriginalSpeed
+					getCurrentReader(currentReaderIdx).setBehavior(defaultVisuals);
+					getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
 					defaultVisuals.setReaderColor(color);
 					speedSelect.advanceTo("Slow");
 					break;
 
 				case 2: // perigram spawner
-					currentReader().setBehavior(neighborFadingNT);
-					currentReader().addBehavior(spawningVB);
+					getCurrentReader(currentReaderIdx).setBehavior(neighborFadingNT);
+					getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
 					neighborFadingNT.setReaderColor(color);
 					break;
 
 				case 3: // mesostic
-					currentReader().setSpeed((float) SPEED_MAP.get("Slow"), true); // alsoResetOriginalSpeed
-					currentReader().setBehavior(mesostic);
+					getCurrentReader(currentReaderIdx).setSpeed((float) SPEED_MAP.get("Slow"), true); // alsoResetOriginalSpeed
+					getCurrentReader(currentReaderIdx).setBehavior(mesostic);
 					mesostic.setReaderColor(color);
 					speedSelect.advanceTo("Slow");
 					break;
@@ -339,7 +339,7 @@ public class ELC3Multi extends MultiPageApplet {
 				for (int i = 0; i < ButtonSelect.instances.size(); i++)
 					ButtonSelect.instances.get(i).textFill = WHITE;
 
-				String word = MachineReader.stripPunctuation(currentReader().getCurrentCell().text());
+				String word = MachineReader.stripPunctuation(getCurrentReader(currentReaderIdx).getCurrentCell().text());
 	      showCurrentWord(word);
 
 				if (PRESENTATION_MODE) cursor();

@@ -31,7 +31,7 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
   // ---------------------- members --------------------------
 
   protected RiTextGrid left, right, next;
-  private String versoHeader="", rectoHeader="";
+  private String versoHeader = "", rectoHeader = "";
   private PageLayout pageLayout;
   private MachineReader focusedReader;
   private RiLerpBehavior lerp;
@@ -478,32 +478,30 @@ public class PageManager implements BehaviorListener, ReaderConstants, PConstant
 
     if (focusedReader != null) // TODO: not perfect (due to fading weirdness) and needs this safety measure
     {
-      focusedReader.runEnterWordBehaviors(focusedReader.getCurrentCell());
-      focusedReader.runExitWordBehaviors(focusedReader.getCurrentCell());
+      Readers.info("unpausing with: " + focusedReader.getCurrentCell().text());
+      focusedReader.pause(false);
     }
     else
       Readers.warn("The focusedReader was null at the end of a page flip. (Should not happen.)");
   }
 
-  public void onGridChange(MachineReader changed, RiTextGrid changedFrom, RiTextGrid changedTo)
+  public void onGridChange(MachineReader currentReader, RiTextGrid grid, RiTextGrid gridForNextWord)
   {
-    //  changed.getHistory().clear(); // DEBUG - does not fix VB problem.
     // System.out.println("PageManager.onGridChange()");
-    if (changedFrom == right && changedTo == next || changedFrom == next)
+    if (grid == right && gridForNextWord == next) // DEBUG had: || changedFrom == next
     {
-      // dont' flip if we are a page-turner and already flipping
-      /* if (!(isFlipping() && changed == pageTurner)) */
+      Readers.warn("page-turn caused by: " + currentReader.getCurrentCell().text());
+      currentReader.pause(true);
       nextPage();
     }
-    else
-    {
-
-      // Should this ever happen or is this a problem?
-      // Yes, on change from left->right! ???
-      if (!(changedFrom == left && changedTo == right))
-        Readers.warn("Ignoring flip(reader=" + changed + ")\n " + "changedFrom=" + changedFrom + " to="
-            + changedTo + " (this shouldn't happen on a text with more than 2 pages!)");
-    }
+    // {
+    //
+    // // Should this ever happen or is this a problem?
+    // // Yes, on change from left->right! ???
+    // if (!(changedFrom == left && changedTo == right))
+    // Readers.warn("Ignoring flip(reader=" + changed + ")\n " + "changedFrom=" + changedFrom + " to="
+    // + changedTo + " (this shouldn't happen on a text with more than 2 pages!)");
+    // }
   }
 
   public RiTextGrid getRecto()
