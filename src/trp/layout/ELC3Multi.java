@@ -130,7 +130,7 @@ public class ELC3Multi extends MultiPageApplet {
 
 	private boolean isSpawner(int readerIndex) {
 
-		return READER_NAMES[readerIndex].contains("awn");
+		return READER_NAMES[readerIndex].contains("awn"); // how about endsWith("Spawner") ?
 	}
 
 	public void fontSetup() {
@@ -245,12 +245,14 @@ public class ELC3Multi extends MultiPageApplet {
 			readers[3].setBehavior(mesostic);
 		}
 
+		//currentReaderIdx = 3;
+		
 		for (int i = 0; i < readers.length; i++) {
 			readers[i].setCurrentCell(pManager.getVerso().cellAt(0, 0));
 			readers[i].start(); // original speeds are set when the readers start
 			readers[i].pause(currentReaderIdx != i);
 		}
-
+		
 		pManager.onUpdateFocusedReader(getCurrentReader(currentReaderIdx));
 	}
 
