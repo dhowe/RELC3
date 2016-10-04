@@ -50,20 +50,16 @@ public class NeighborFadingVisual extends DefaultVisuals
 
     RiTextGrid.resetTextFor(rt);
     
-    // is it the first cell?
-    // if (mr.getHistory().size() < 1)
-    // return;
-
-    // RiText lastRead = mr.getLastReadCell();
-    // verify(lastRead != null, "lastRead is null for: " + rt);
-
     // get the last few cells read
     // if you get two these will appear in the
     // reader color preceded by a faded out cell
+    
+    // DCH: this function was returning null on the 1st cell
+    // and causing problems below, now it returns an empty List 
     recentlyReadCells = mr.getRecentlyReadCells(2);
+    
     RiTextGrid rtg = mr.getGrid();
     RiText[] neighbors = rtg.neighborhood(rt);
-    ArrayList neighborList = getNeighborList(neighbors);
 
     // handle word being read
     fadeCell(rt, readerColor, fadeInTime);

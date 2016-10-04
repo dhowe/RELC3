@@ -41,7 +41,7 @@ public abstract class MachineReader implements ReaderConstants
   protected PageManager pMan;
 
   public boolean testMode, printToConsole;
-  private boolean stepping, dead, hasMoved, paused = true;
+	private boolean stepping, dead, hasMoved, paused = true;
   protected boolean updatesDisabled, reverse;
   protected float readerColor[] = BRIGHT_RED, lifeSpan = Float.MAX_VALUE;
   protected long delay, birthTime, stepTimeMs = 1000;
@@ -474,6 +474,8 @@ public abstract class MachineReader implements ReaderConstants
     if (grid == null)
       Readers.error("null grid for cell: " + rt);
 
+    runEnterWordBehaviors(currentCell);
+    
     return this;
   }
 
@@ -684,7 +686,7 @@ public abstract class MachineReader implements ReaderConstants
   {
     ArrayList resultList = new ArrayList();
     if (history.size() < 1)
-      return null;
+      return resultList; // changed from null: DH
     for (int i = 1; i < (howMany + 1); i++)
     {
       if (i > history.size())

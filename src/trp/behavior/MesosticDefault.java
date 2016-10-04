@@ -31,9 +31,11 @@ public class MesosticDefault extends DefaultVisuals
 
     if (meso.isUppercasingSelectedLetter())
     {
-      String newText = RiTextGrid.originalTextFor(rt).replaceFirst(meso.getTheLetter(), meso.getTheLetter().toUpperCase());
-
-      rtg.textFor(rt, newText);
+    	String lett = meso.getTheLetter();
+    	if (lett != null) {
+	      String newText = RiTextGrid.originalTextFor(rt).replaceFirst(lett, lett.toUpperCase());
+	      rtg.textFor(rt, newText);
+    	}
     }
 
     // adjust fade time: min. of 10 plus twice the reader speed
