@@ -1,7 +1,6 @@
 package trp.layout;
 
 import static trp.util.Direction.*;
-
 import rita.*;
 
 import java.util.*;
@@ -9,7 +8,7 @@ import java.util.*;
 import processing.core.*;
 import trp.behavior.*;
 import trp.reader.*;
-import trp.util.PerigramLookup;
+import trp.util.*;
 
 public class ELC3Multi extends MultiPageApplet {
 
@@ -26,13 +25,15 @@ public class ELC3Multi extends MultiPageApplet {
 
 	static Map SPEED_MAP, COLOR_MAP;
 	static ReaderBehavior[] BEHAVIORS;
+	static PerigramLookup[] PERIGRAMS;
 	static PFont[] FONTS;
 
 	ReaderBehavior neighborFading, spawningVB, defaultVisuals, tendrilsDGray, neighborFadingNT, haloing, mesostic;
-	ButtonSelect textSelect, wordMonitor, readerSelect, speedSelect, visualSelect, colorSelect;
+	ButtonSelect textSelect, readerSelect, speedSelect, visualSelect, colorSelect;
 	float readerColor[] = OATMEAL, readerSpeed = 0.5f;
 	RiTextGrid verso, recto;
   PFont info;
+	private String[] textContents;
 
 	public void settings() {
 
@@ -45,16 +46,48 @@ public class ELC3Multi extends MultiPageApplet {
 		fontSetup();
 		colorSetup();
 		buttonSetup();
-		createPageManager();
-		doLayout(0/* Poetic Caption */);
+		loadTextData();
+		doLayout(0); // 0: Poetic Caption
 	}
 
-	private void createPageManager() {
+	public void draw() {
 
-		pManager = PageManager.create(this, 40, 40, 38, 30);
-		pManager.showPageNumbers(false);
-		pManager.setApplicationId("elc3");
-		pManager.decreaseGutterBy(20);
+		background(LAYOUT_BACKGROUND_COLOR);
+
+		// draw buttons only if not flipping
+		if (!pManager.isFlipping()) {
+			if ((mouseY >= textSelect.y && mouseY < (textSelect.y + textSelect.height)) || (mouseY > 0 && mouseY < 44)) {
+				for (int i = 0; i < ButtonSelect.instances.size(); i++)
+					ButtonSelect.instances.get(i).textFill = WHITE;
+
+				String word = MachineReader.stripPunctuation(getCurrentReader(currentReaderIdx).getCurrentCell().text());
+	      showCurrentWord(word);
+
+				if (PRESENTATION_MODE) cursor();
+			}
+			else {
+				for (int i = 0; i < ButtonSelect.instances.size(); i++)
+					ButtonSelect.instances.get(i).textFill = BLACK;
+
+				if (PRESENTATION_MODE) noCursor();
+			}
+
+			ButtonSelect.drawAll(mouseX, mouseY);
+		}
+
+		pManager.draw(g);
+	}
+	
+	private void loadTextData() {
+		
+		long ts = System.currentTimeMillis();
+		textContents = Readers.loadFiles(TEXTS);
+		PERIGRAMS = new PerigramLookup[TEXTS.length];
+		String[][] trigramData = Readers.loadTrigramsFiles(Readers.guessFileNames(TEXTS));
+		for (int i = 0; i < trigramData.length; i++) {
+			PERIGRAMS[i] = new PerigramLookup(textContents[i], trigramData[i]);	
+		}
+    Readers.info("Load texts/metadata in " + RiTa.elapsed(ts) + " s");
 	}
 
 	private void doLayout(int textIndex) {
@@ -62,13 +95,20 @@ public class ELC3Multi extends MultiPageApplet {
 		pauseReaders();
 		resetButtons();
 
+		if (pManager == null) {
+			pManager = PageManager.create(this, 40, 40, 38, 30);
+			pManager.showPageNumbers(false);
+			pManager.setApplicationId("elc3");
+			pManager.decreaseGutterBy(20);
+		}
+		
 		pManager.clear();
 		pManager.setLeading(30);
 		pManager.setFont(FONTS[textIndex]);
 		pManager.addTextFromFile(TEXTS[textIndex]);
 		pManager.doLayout();
 
-		constructReadersFor(new PerigramLookup(this, TEXTS[textIndex]), textIndex);
+		constructReadersFor(PERIGRAMS[textIndex], textIndex);
 	}
 
 	public void mouseClicked() {
@@ -174,9 +214,6 @@ public class ELC3Multi extends MultiPageApplet {
 
 		int buttonY = 691;
 		textSelect = new ButtonSelect(this, 0, buttonY, "Text", TEXT_NAMES);
-		// wordMonitor = new ButtonSelect(this, 0, buttonY, "Monitor", new String[]
-		// { "monitors the current word" }); // the string passed here determines
-		// the width of the button
 		readerSelect = new ButtonSelect(this, 0, buttonY, "Reader", READER_NAMES);
 		speedSelect = new ButtonSelect(this, 0, buttonY, "Speed", (String[]) SPEED_MAP.keySet().toArray(new String[0]));
 		visualSelect = new ButtonSelect(this, 0, buttonY, "Visual", VISUAL_NAMES);
@@ -327,34 +364,6 @@ public class ELC3Multi extends MultiPageApplet {
 					break;
 			}
 		}
-	}
-
-	public void draw() {
-
-		background(LAYOUT_BACKGROUND_COLOR);
-
-		// draw buttons only if not flipping
-		if (!pManager.isFlipping()) {
-			if ((mouseY >= textSelect.y && mouseY < (textSelect.y + textSelect.height)) || (mouseY > 0 && mouseY < 44)) {
-				for (int i = 0; i < ButtonSelect.instances.size(); i++)
-					ButtonSelect.instances.get(i).textFill = WHITE;
-
-				String word = MachineReader.stripPunctuation(getCurrentReader(currentReaderIdx).getCurrentCell().text());
-	      showCurrentWord(word);
-
-				if (PRESENTATION_MODE) cursor();
-			}
-			else {
-				for (int i = 0; i < ButtonSelect.instances.size(); i++)
-					ButtonSelect.instances.get(i).textFill = BLACK;
-
-				if (PRESENTATION_MODE) noCursor();
-			}
-
-			ButtonSelect.drawAll(mouseX, mouseY);
-		}
-
-		pManager.draw(g);
 	}
 	
 	private void showCurrentWord(String word) {

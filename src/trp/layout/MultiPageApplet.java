@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import processing.core.PApplet;
-import rita.RiText;
+import rita.*;
 import trp.behavior.DefaultVisuals;
 import trp.behavior.HaloingVisualBehavior;
 import trp.behavior.MesosticDefault;
@@ -76,7 +76,11 @@ public class MultiPageApplet extends ReadersPApplet
   
   public void addReaders()
   {
-    PerigramLookup perigrams = PerigramLookup.getInstance(this, TEXTS);
+  	String[] textContents = new String[TEXTS.length];
+  	for (int i = 0; i < TEXTS.length; i++) {
+			textContents[i] = RiTa.loadString(TEXTS[i]);
+		}
+    PerigramLookup perigrams = new PerigramLookup(TEXTS);
 
     RiTextGrid verso = pManager.getVerso();
     RiTextGrid recto = pManager.getRecto();

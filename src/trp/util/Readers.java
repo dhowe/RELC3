@@ -5,7 +5,6 @@ import java.net.*;
 import java.util.*;
 
 import processing.core.PApplet;
-
 import rita.*;
 import rita.render.RiLerpBehavior;
 import trp.reader.MachineReader;
@@ -23,8 +22,33 @@ public class Readers implements ReaderConstants
 		//if (PRODUCTION_MODE) PREFERENCES = loadPrefs(PREFERENCE_URL);
 	}
 
-	// METHODS ==================================================s
+	// METHODS ==================================================
+	
+	public static  String[] loadFiles(String[] textFileNames) {
 
+		String[] textContents = new String[textFileNames.length];
+		for (int i = 0; i < textFileNames.length; i++) {
+			textContents[i] = RiTa.loadString(textFileNames[i]);
+		}
+		return textContents;
+	}
+	
+	public static String[][] loadTrigramsFiles(String[] rawTrigramsFile) {
+		String[][] trigramFilesContent = new String[rawTrigramsFile.length][];
+		for (int j = 0; j < rawTrigramsFile.length; j++) {
+			trigramFilesContent[j] = RiTa.loadStrings(rawTrigramsFile[j]);
+		}
+		return trigramFilesContent;
+	}
+
+	public static String[] guessFileNames(String[] textNames) // util
+	{
+		String[] periNames = new String[textNames.length];
+		for (int i = 0; i < textNames.length; i++)
+			periNames[i] = textNames[i].replaceAll("\\.txt", "Perigrams.txt");
+		return periNames;
+	}
+	
   public static RiLerpBehavior createLerp(RiText cellAt, int start, int target, float durationSec)
   {
       // System.out.println("RiText.createLerp("+start+","+target+","+startOffsetSec+","+durationSec+")");
