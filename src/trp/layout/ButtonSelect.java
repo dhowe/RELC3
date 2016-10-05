@@ -12,7 +12,8 @@ public class ButtonSelect implements ReaderConstants
   protected static ArrayList<ButtonSelect> instances = new ArrayList<ButtonSelect>();
 
   // these can be set directly (before creation) to manipulate appearance of all buttons
-  public static float[] STROKE = BLACK, TEXT_FILL = WHITE, FILL, HOVERFILL = { 255, 255, 255, 64f };
+  public static float[] STROKE = BLACK, TEXT_FILL = WHITE, FILL, HOVERFILL = { 255, 255, 255, 64f },
+      LABELFILL = OATMEAL;
   public static int PADDING = 6, STROKE_WEIGHT = 0, TEXT_SIZE;
 
   // these can be set directly (after creation) to manipulate appearance of one button
@@ -24,9 +25,10 @@ public class ButtonSelect implements ReaderConstants
   public int x, y, width, height, padding = 6, strokeWeight = 0, textSize, selectedIndex;
   public String options[], label;
   public boolean hidden;
-  public PFont font;
+  public PFont font, labelFont;
 
   protected PApplet p;
+  protected int setableWidth = 0;
 
   public ButtonSelect(PApplet p, int x, int y, String label, String[] options)
   {
@@ -48,6 +50,7 @@ public class ButtonSelect implements ReaderConstants
     this.options = options;
     this.selectedIndex = selectedIndex;
     this.font = (font == null) ? p.loadFont("StoneSans-Semi-14.vlw") : font;
+    this.labelFont = p.loadFont("GillSans-Light-14.vlw");
     instances.add(this);
   }
 
@@ -74,13 +77,27 @@ public class ButtonSelect implements ReaderConstants
       return;
 
     setProps();
+    drawLabel(LABELFILL);
     drawText();
     drawRects(mx, my);
   }
 
+  private void drawLabel(float[] labelFill)
+  {
+    p.textFont(labelFont);
+    p.fill(labelFill[0], labelFill[1], labelFill[2], labelFill[3]);
+    p.text(label(), x + width / 2f, (y - height / 2f) + 2); // KLUDGE: + 2
+  }
+
   private void drawText()
   {
-
+    if (textSize > 0)
+      p.textFont(font, textSize);
+    else
+      p.textFont(font);
+    
+    textFill = WHITE; // KLUDGE
+    
     p.fill(textFill[0], textFill[1], textFill[2], textFill[3]);
     p.text(value(), x + width / 2f, y + height / 2f);
   }
@@ -99,16 +116,21 @@ public class ButtonSelect implements ReaderConstants
     }
 
     // width/height
-    if (width == 0)
+    if (setableWidth != 0)
+    {
+      width = setableWidth;
+    }
+    else if (width == 0)
     {
       for (int i = 0; i < options.length; i++)
       {
         width = (int) Math.max(width, p.textWidth(options[i]) + (padding * 2));
       }
     }
+
     if (height == 0)
     {
-      height = (int) (p.textAscent() + p.textDescent() + (padding * 2));
+      height = (int) (p.textAscent() + p.textDescent() + ((padding - 2) * 2)); // KLUDGE: - 2
     }
   }
 
@@ -117,7 +139,12 @@ public class ButtonSelect implements ReaderConstants
     setProps();
     return width;
   }
-  
+
+  public void setWidth(int width)
+  {
+    this.setableWidth = width;
+  }
+
   private void drawRects(int mx, int my)
   {
 
@@ -164,6 +191,11 @@ public class ButtonSelect implements ReaderConstants
     return foundIt ? this : null;
   }
 
+  public String label()
+  {
+    return label;
+  }
+
   public String value()
   {
 
@@ -184,7 +216,7 @@ public class ButtonSelect implements ReaderConstants
     this.selectedIndex = 0;
     return this;
   }
-  
+
   public float[] getFill()
   {
     return this.fill;
