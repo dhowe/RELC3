@@ -11,8 +11,8 @@ import trp.util.Readers;
 
 public class UnconPerigramReader extends PerigramReader
 {
-  static final boolean USE_PERIGRAMS = true; // remove this once refactoring is
-  // complete
+  // remove this once refactoring is complete:
+  static final boolean USE_PERIGRAMS = true;
 
   static double[] pathWeighting = { .4, .5, .75, .4, 1, 1, 1, 1, 1 };
 
@@ -136,10 +136,9 @@ public class UnconPerigramReader extends PerigramReader
         cellToTry = right.cellAt(0, 0);
     }
     if (printToConsole)
-      System.out.println("Jumping with: " + getLastReadCell().text() + " "
-          + currentCell.text() + " " + cellToTry.text());
+      System.out.println("Jumping with: " + getLastReadCell().text() + " " + currentCell.text() + " "
+          + cellToTry.text());
     currentCell = cellToTry;
   }
-
 
 } // end

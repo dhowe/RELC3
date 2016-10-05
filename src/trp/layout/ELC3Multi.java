@@ -15,7 +15,7 @@ public class ELC3Multi extends MultiPageApplet
 
   static final String[] TEXTS = { "textual/poeticCaption.txt", "textual/misspeltLandings.txt",
       "textual/image.txt" };
-  static final String[] READER_NAMES = { "Perigram", "Simple Spawner", "Perigram Spawner",
+  static final String[] READER_NAMES = { "Perigram", "Less Directed Perigram", "Simple Spawner", "Perigram Spawner",
       "Mesostic Jumper" };
   static final String[] TEXT_NAMES = { "POETIC CAPTION", "MISSPELT LANDINGS", "THE IMAGE" };
   static final String[] VISUAL_NAMES = { "Traces", "Haloes" };
@@ -61,7 +61,7 @@ public class ELC3Multi extends MultiPageApplet
     // draw buttons only if not flipping
     // if (!pManager.isFlipping())
     // {
-    if ((mouseY >= textSelect.y && mouseY < (textSelect.y + textSelect.height)))
+    if ((mouseY < height) && (mouseY > (height - (textSelect.height + 14)))) // KLUDGE: + 14 for label
     {
       ButtonSelect.drawAll(mouseX, mouseY);
 
@@ -116,7 +116,7 @@ public class ELC3Multi extends MultiPageApplet
 
     if (pManager == null)
     {
-      pManager = PageManager.create(this, 40, 40, 38, 30);
+      pManager = PageManager.create(this, 40, 40, 38, 38); // bottom marg was 30, adjust for Beckett
       pManager.showPageNumbers(false);
       pManager.setApplicationId("elc3");
       pManager.decreaseGutterBy(20);
@@ -299,39 +299,49 @@ public class ELC3Multi extends MultiPageApplet
       readers[0].setBehavior(neighborFading);
     }
 
+    // UNCONSTRAINED PERIGRAM
     if (readers.length > 1)
     {
 
-      // SIMPLE READING SPAWNER - nb: has different default speed
       MachineReader.delete(readers[1]);
-      readers[1] = new SimpleReader(verso);
-      readers[1].setSpeed((float) SPEED_MAP.get("Steady")); // was 1.7f
-      readers[1].setBehavior(defaultVisuals);
-      readers[1].addBehavior(spawningVB);
+      readers[1] = new UnconPerigramReader(verso, perigrams);
+      readers[1].setSpeed(readerSpeed); // was 0.5f
+      readers[1].setBehavior(neighborFadingNT);
     }
 
     if (readers.length > 2)
     {
 
-      // PERIGRAM SPAWNER
+      // SIMPLE READING SPAWNER - nb: has different default speed
       MachineReader.delete(readers[2]);
-      readers[2] = new PerigramReader(verso, perigrams);
-      readers[2].setSpeed(readerSpeed); // was 0.6f
-      readers[2].setBehavior(neighborFadingNT);
+      readers[2] = new SimpleReader(verso);
+      readers[2].setSpeed((float) SPEED_MAP.get("Steady")); // was 1.7f
+      readers[2].setBehavior(defaultVisuals);
       readers[2].addBehavior(spawningVB);
     }
 
     if (readers.length > 3)
     {
 
-      // MESOSTIC JUMPER - nb: has different default speed
+      // PERIGRAM SPAWNER
       MachineReader.delete(readers[3]);
-      readers[3] = new MesoPerigramJumper(verso, MESOSTICS[textIndex], perigrams);
-      readers[3].setSpeed((float) SPEED_MAP.get("Steady"));
-      readers[3].setBehavior(mesostic);
+      readers[3] = new PerigramReader(verso, perigrams);
+      readers[3].setSpeed(readerSpeed); // was 0.6f
+      readers[3].setBehavior(neighborFadingNT);
+      readers[3].addBehavior(spawningVB);
     }
 
-    // currentReaderIdx = 3;
+    if (readers.length > 4)
+    {
+
+      // MESOSTIC JUMPER - nb: has different default speed
+      MachineReader.delete(readers[4]);
+      readers[4] = new MesoPerigramJumper(verso, MESOSTICS[textIndex], perigrams);
+      readers[4].setSpeed((float) SPEED_MAP.get("Steady"));
+      readers[4].setBehavior(mesostic);
+    }
+
+    // currentReaderIdx = 4; // Mesostic default
 
     for (int i = 0; i < readers.length; i++)
     {
@@ -373,13 +383,16 @@ public class ELC3Multi extends MultiPageApplet
   protected void setVisuals(String visuals, float[] color, boolean isSpawner)
   {
 
+    readerColor = color;
+
     if (visuals.equals("Haloes"))
     {
-      haloing = (currentReaderIdx == 3)
+      haloing = (currentReaderIdx == 4)
           ? new MesosticHaloingVisual(color, verso.template().fill(), readerSpeed)
           : new ClearHaloingVisual(color, verso.template().fill(), readerSpeed);
 
       getCurrentReader(currentReaderIdx).setBehavior(haloing);
+      haloing.setReaderColor(readerColor);
 
       if (isSpawner)
       {
@@ -389,8 +402,6 @@ public class ELC3Multi extends MultiPageApplet
     else
     {
 
-      readerColor = color;
-
       switch (currentReaderIdx)
       {
 
@@ -399,20 +410,25 @@ public class ELC3Multi extends MultiPageApplet
           neighborFading.setReaderColor(color);
           break;
 
-        case 1: // simple spawner
+        case 1: // unconstrained perigram
+          getCurrentReader(currentReaderIdx).setBehavior(neighborFadingNT);
+          neighborFadingNT.setReaderColor(color);
+          break;
+
+        case 2: // simple spawner
           // getCurrentReader(currentReaderIdx).setSpeed((float) SPEED_MAP.get("Steady"), true); // alsoResetOriginalSpeed
           getCurrentReader(currentReaderIdx).setBehavior(defaultVisuals);
           getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
           defaultVisuals.setReaderColor(color);
           break;
 
-        case 2: // perigram spawner
+        case 3: // perigram spawner
           getCurrentReader(currentReaderIdx).setBehavior(neighborFadingNT);
           getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
           neighborFadingNT.setReaderColor(color);
           break;
 
-        case 3: // mesostic
+        case 4: // mesostic
           // getCurrentReader(currentReaderIdx).setSpeed((float) SPEED_MAP.get("Steady"), true); // alsoResetOriginalSpeed
           getCurrentReader(currentReaderIdx).setBehavior(mesostic);
           mesostic.setReaderColor(color);
