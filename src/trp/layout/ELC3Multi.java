@@ -157,6 +157,7 @@ public class ELC3Multi extends MultiPageApplet
 
         currentReaderIdx = readerIdxFromName(clicked.value());
         rd = getCurrentReader(currentReaderIdx);
+        rd.getGrid().reset(); // rest the current grid on reader change
 
         // System.out.println("click: "+clicked.value()+", "+currentReaderIdx);
         rd.setSpeed((float) SPEED_MAP.get(speedSelect.value()), true); // alsoResetOriginalSpeed
