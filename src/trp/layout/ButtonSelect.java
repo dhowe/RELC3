@@ -1,5 +1,6 @@
 package trp.layout;
 
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -95,9 +96,9 @@ public class ButtonSelect implements ReaderConstants
       p.textFont(font, textSize);
     else
       p.textFont(font);
-    
+
     textFill = WHITE; // KLUDGE
-    
+
     p.fill(textFill[0], textFill[1], textFill[2], textFill[3]);
     p.text(value(), x + width / 2f, y + height / 2f);
   }
@@ -175,6 +176,12 @@ public class ButtonSelect implements ReaderConstants
     return this;
   }
 
+  public ButtonSelect backup()
+  {
+    selectedIndex = (--selectedIndex >= 0) ? selectedIndex : options.length - 1;
+    return this;
+  }
+
   public ButtonSelect advanceTo(String s) // returns null if s is not an option
   {
     boolean foundIt = false;
@@ -232,6 +239,23 @@ public class ButtonSelect implements ReaderConstants
       ButtonSelect button = (ButtonSelect) it.next();
       if (button.contains(mx, my))
         return button.advance();
+    }
+    return null;
+  }
+
+  public static ButtonSelect click(ReadersPApplet p, int mx, int my)
+  { // assumes no overlap between buttons
+
+    for (Iterator it = instances.iterator(); it.hasNext();)
+    {
+      ButtonSelect button = (ButtonSelect) it.next();
+      if (button.contains(mx, my))
+      {
+        if (p.isShiftDown())
+          return button.backup();
+        else
+          return button.advance();
+      }
     }
     return null;
   }

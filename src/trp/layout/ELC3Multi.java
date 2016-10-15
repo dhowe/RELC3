@@ -15,8 +15,8 @@ public class ELC3Multi extends MultiPageApplet
 
   static final String[] TEXTS = { "textual/poeticCaption.txt", "textual/misspeltLandings.txt",
       "textual/image.txt" };
-  static final String[] READER_NAMES = { "Perigram", "Less Directed Perigram", "Simple Spawner", "Perigram Spawner",
-      "Mesostic Jumper" };
+  static final String[] READER_NAMES = { "Perigram", "Less Directed Perigram", "Simple Spawner",
+      "Perigram Spawner", "Less Directed Spawner", "Mesostic Jumper" };
   static final String[] TEXT_NAMES = { "POETIC CAPTION", "MISSPELT LANDINGS", "THE IMAGE" };
   static final String[] VISUAL_NAMES = { "Traces", "Haloes" };
   static final String[] MESOSTICS = { "reading as writing through",
@@ -24,12 +24,12 @@ public class ELC3Multi extends MultiPageApplet
       "comes in is over goes out is done lolls in stays there is had no more", "reading as writing through" };
 
   static Map SPEED_MAP, COLOR_MAP;
-  static ReaderBehavior[] BEHAVIORS;
+  static ReaderBehavior[] BEHAVIORS, TRAILS, HALOING;
   static PerigramLookup[] PERIGRAMS;
   static PFont[] FONTS;
 
   ReaderBehavior neighborFading, spawningVB, defaultVisuals, tendrilsDGray, neighborFadingNT, haloing,
-      mesostic;
+      mesostic, mesoHaloing;
   ButtonSelect textSelect, readerSelect, speedSelect, visualSelect, colorSelect;
   float readerColor[] = OATMEAL, readerSpeed = 0.5f;
   RiTextGrid verso, recto;
@@ -137,7 +137,7 @@ public class ELC3Multi extends MultiPageApplet
     if (pManager.isFlipping())
       return;
 
-    ButtonSelect clicked = ButtonSelect.click(mouseX, mouseY);
+    ButtonSelect clicked = ButtonSelect.click(this, mouseX, mouseY);
     if (clicked != null)
     {
 
@@ -186,15 +186,7 @@ public class ELC3Multi extends MultiPageApplet
       else if (clicked == colorSelect)
       {
         readerColor = (float[]) COLOR_MAP.get(clicked.value());
-
-        if (visualSelect.value().equals("Haloes"))
-        {
-          setVisuals("Haloes", readerColor, isSpawner(currentReaderIdx));
-        }
-        else
-        {
-          BEHAVIORS[currentReaderIdx].setReaderColor(readerColor);
-        }
+        BEHAVIORS[currentReaderIdx].setReaderColor(readerColor);
       }
     }
   }
@@ -202,7 +194,7 @@ public class ELC3Multi extends MultiPageApplet
   private boolean isSpawner(int readerIndex)
   {
 
-    return READER_NAMES[readerIndex].contains("awn"); // how about endsWith("Spawner") ?
+    return READER_NAMES[readerIndex].endsWith("Spawner");
   }
 
   public void fontSetup()
@@ -335,14 +327,25 @@ public class ELC3Multi extends MultiPageApplet
     if (readers.length > 4)
     {
 
-      // MESOSTIC JUMPER - nb: has different default speed
+      // LESS DIRECTED SPAWNER
       MachineReader.delete(readers[4]);
-      readers[4] = new MesoPerigramJumper(verso, MESOSTICS[textIndex], perigrams);
+      readers[4] = new UnconPerigramReader(verso, perigrams);
       readers[4].setSpeed((float) SPEED_MAP.get("Steady"));
-      readers[4].setBehavior(mesostic);
+      readers[4].setBehavior(neighborFadingNT);
+      readers[4].addBehavior(spawningVB);
     }
 
-    // currentReaderIdx = 4; // Mesostic default
+    if (readers.length > 5)
+    {
+
+      // MESOSTIC JUMPER - nb: has different default speed
+      MachineReader.delete(readers[5]);
+      readers[5] = new MesoPerigramJumper(verso, MESOSTICS[textIndex], perigrams);
+      readers[5].setSpeed((float) SPEED_MAP.get("Steady"));
+      readers[5].setBehavior(mesostic);
+    }
+
+    // currentReaderIdx = 6; // Mesostic default
 
     for (int i = 0; i < readers.length; i++)
     {
@@ -376,68 +379,36 @@ public class ELC3Multi extends MultiPageApplet
 
     mesostic = new MesosticDefault(10f, MYELLOW);
 
+    mesoHaloing = new MesosticHaloingVisual(MOCHRE, verso.template().fill(), readerSpeed);
+    
+    haloing = new ClearHaloingVisual(MOCHRE, verso.template().fill(), readerSpeed);
+
     // these appear to be the default behaviors, at least when not haloing?
-    // (not sure if we need to keep recreating them over and over)
-    BEHAVIORS = new ReaderBehavior[] { neighborFading, defaultVisuals, neighborFadingNT, mesostic };
+    // Current (6) readers for reference:
+    // { "Perigram", "Less Directed Perigram", "Simple Spawner",
+    // "Perigram Spawner", "Less Directed Spawner", "Mesostic Jumper" }
+    TRAILS = new ReaderBehavior[] { neighborFading, neighborFading, defaultVisuals, neighborFadingNT,
+        neighborFadingNT, mesostic };
+    HALOING = new ReaderBehavior[] { haloing, haloing, haloing, haloing, haloing, mesoHaloing };
+    // NB (not brilliant): number of behaviors in this array must match number of READER_NAMES
+    BEHAVIORS = TRAILS;
+    if (READER_NAMES.length != BEHAVIORS.length)
+      Readers.warn("Number of behaviors does nto match number of readers.");
   }
 
   protected void setVisuals(String visuals, float[] color, boolean isSpawner)
   {
-
-    readerColor = color;
-
     if (visuals.equals("Haloes"))
-    {
-      haloing = (currentReaderIdx == 4)
-          ? new MesosticHaloingVisual(color, verso.template().fill(), readerSpeed)
-          : new ClearHaloingVisual(color, verso.template().fill(), readerSpeed);
-
-      getCurrentReader(currentReaderIdx).setBehavior(haloing);
-      haloing.setReaderColor(readerColor);
-
-      if (isSpawner)
-      {
-        getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
-      }
-    }
+      BEHAVIORS = HALOING;
     else
+      BEHAVIORS = TRAILS;
+
+    getCurrentReader(currentReaderIdx).setBehavior(BEHAVIORS[currentReaderIdx]);
+    BEHAVIORS[currentReaderIdx].setReaderColor(color);
+
+    if (isSpawner)
     {
-
-      switch (currentReaderIdx)
-      {
-
-        case 0: // perigram
-          getCurrentReader(currentReaderIdx).setBehavior(neighborFading);
-          neighborFading.setReaderColor(color);
-          break;
-
-        case 1: // unconstrained perigram
-          getCurrentReader(currentReaderIdx).setBehavior(neighborFadingNT);
-          neighborFadingNT.setReaderColor(color);
-          break;
-
-        case 2: // simple spawner
-          // getCurrentReader(currentReaderIdx).setSpeed((float) SPEED_MAP.get("Steady"), true); // alsoResetOriginalSpeed
-          getCurrentReader(currentReaderIdx).setBehavior(defaultVisuals);
-          getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
-          defaultVisuals.setReaderColor(color);
-          break;
-
-        case 3: // perigram spawner
-          getCurrentReader(currentReaderIdx).setBehavior(neighborFadingNT);
-          getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
-          neighborFadingNT.setReaderColor(color);
-          break;
-
-        case 4: // mesostic
-          // getCurrentReader(currentReaderIdx).setSpeed((float) SPEED_MAP.get("Steady"), true); // alsoResetOriginalSpeed
-          getCurrentReader(currentReaderIdx).setBehavior(mesostic);
-          mesostic.setReaderColor(color);
-          break;
-
-        default:
-          break;
-      }
+      getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
     }
   }
 

@@ -10,7 +10,7 @@ import trp.reader.MachineReader;
 public class ClearHaloingVisual extends DefaultVisuals
 {
   // private members
-  private float[] readerColor, innerFadeToColor, outerFadeToColor, gridColor;
+  private float[] innerFadeToColor, outerFadeToColor, gridColor;
   private float readerSpeed;
   private ArrayList innerFadingNeighbors = new ArrayList();
   private ArrayList outerFadingNeighbors = new ArrayList();

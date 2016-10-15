@@ -32,6 +32,7 @@ public class ReadersPApplet extends PApplet implements ReaderConstants
   protected static final Direction SW = Direction.SW; // keep
 
   protected boolean pause;
+  protected boolean isShiftDown;
   protected RiTextGrid grid;
   // TODO JHC removed audio handlers for ELC3
   // private RiSample[] samples;
@@ -56,9 +57,15 @@ public class ReadersPApplet extends PApplet implements ReaderConstants
     if (MachineReader.PRODUCTION_MODE)
       return;
     
-    if (key == 'v') {
+    if (keyCode == SHIFT)
+    {
+      setShiftDown(true);        
+    }
+
+    if (key == 'v')
+    {
       Readers.NO_VISUALS = !Readers.NO_VISUALS;
-      //System.out.println("ReadersPApplet.keyPressed("+key+")");
+      // System.out.println("ReadersPApplet.keyPressed("+key+")");
     }
 
     if (keyCode == 157)
@@ -85,72 +92,91 @@ public class ReadersPApplet extends PApplet implements ReaderConstants
     }
   }
 
-// TODO: JHC removed audio handling for ELC3
-  
-/*  protected void addAudioToRiTexts(String dir, RiText[] words, String wordSet)
+  public void keyReleased()
   {
-    long ts = System.currentTimeMillis();
-    if (!wordSet.equals(""))
-      wordSet = wordSet + "/";
-    samples = new RiSample[words.length];
-    for (int i = 0; i < samples.length; i++)
+    if (keyCode == SHIFT)
     {
-      samples[i] = Readers.loadSample(words[i].pApplet, dir + wordSet + "word_" + i + ".mp3");
-    }
-    Readers.info("Loaded audio samples in " + Readers.elapsed(ts));
+      setShiftDown(false);        
+    }    
   }
 
-  protected void addAudioToRiTexts(String dir, RiText[] words, Map sampleMap, String[] audioSets)
+  public boolean isShiftDown()
   {
-    long ts = System.currentTimeMillis();
-    //System.out.println("Total words: " + words.length);
-    // iterate through words of text
-    for (int j = 0; j < words.length; j++)
-    {
-      // creating an array of sample for each word
-      // with length of the set of names of the various sets available
-      RiSample[] samples = new RiSample[audioSets.length];
-      for (int i = 0; i < audioSets.length; i++)
-      {
-        String wordSet = audioSets[i];
-        if (!wordSet.equals(""))
-          wordSet = wordSet + "/";
-        // the RiTa method seems to have problems loading so many samples
-        // needs huge memory at the moment
-        samples[i] = Readers.loadSample(this, dir + wordSet + "word_" + j + ".wav");
-      }
-      sampleMap.put(words[j], samples);
-      // just to see when and if it chokes
-      //System.out.print(j + " ");
-      //if ((j + 1) % 30 == 0)
-        //System.out.println();
-    }
-    //System.out.println();
-    Readers.info("Loaded audio samples in " + Readers.elapsed(ts));
+    return isShiftDown;
   }
 
-  protected void loadAudioFileNames(String dir, RiText[] words, Map sampleMap, String[] audioSets, boolean loadSamples)
+  public void setShiftDown(boolean isShiftDown)
   {
-    if (loadSamples)
-      addAudioToRiTexts(dir, words, sampleMap, audioSets);
-
-    for (int j = 0; j < words.length; j++)
-    {
-      // creating an array of sample for each word
-      // with length of the set of names of the various sets available
-      String[] samples = new String[audioSets.length];
-      for (int i = 0; i < audioSets.length; i++)
-      {
-        String wordSet = audioSets[i];
-        if (!wordSet.equals(""))
-          wordSet = wordSet + "/";
-        samples[i] = dir + wordSet + "word_" + j + ".wav";
-      }
-      sampleMap.put(words[j], samples);
-    }
+    this.isShiftDown = isShiftDown;
   }
 
-*/  private void clickOnReaders(MachineReader[] readers, int keyCode)
+  // TODO: JHC removed audio handling for ELC3
+
+  /*
+   * protected void addAudioToRiTexts(String dir, RiText[] words, String wordSet)
+   * {
+   * long ts = System.currentTimeMillis();
+   * if (!wordSet.equals(""))
+   * wordSet = wordSet + "/";
+   * samples = new RiSample[words.length];
+   * for (int i = 0; i < samples.length; i++)
+   * {
+   * samples[i] = Readers.loadSample(words[i].pApplet, dir + wordSet + "word_" + i + ".mp3");
+   * }
+   * Readers.info("Loaded audio samples in " + Readers.elapsed(ts));
+   * }
+   * 
+   * protected void addAudioToRiTexts(String dir, RiText[] words, Map sampleMap, String[] audioSets)
+   * {
+   * long ts = System.currentTimeMillis();
+   * //System.out.println("Total words: " + words.length);
+   * // iterate through words of text
+   * for (int j = 0; j < words.length; j++)
+   * {
+   * // creating an array of sample for each word
+   * // with length of the set of names of the various sets available
+   * RiSample[] samples = new RiSample[audioSets.length];
+   * for (int i = 0; i < audioSets.length; i++)
+   * {
+   * String wordSet = audioSets[i];
+   * if (!wordSet.equals(""))
+   * wordSet = wordSet + "/";
+   * // the RiTa method seems to have problems loading so many samples
+   * // needs huge memory at the moment
+   * samples[i] = Readers.loadSample(this, dir + wordSet + "word_" + j + ".wav");
+   * }
+   * sampleMap.put(words[j], samples);
+   * // just to see when and if it chokes
+   * //System.out.print(j + " ");
+   * //if ((j + 1) % 30 == 0)
+   * //System.out.println();
+   * }
+   * //System.out.println();
+   * Readers.info("Loaded audio samples in " + Readers.elapsed(ts));
+   * }
+   * 
+   * protected void loadAudioFileNames(String dir, RiText[] words, Map sampleMap, String[] audioSets, boolean loadSamples)
+   * {
+   * if (loadSamples)
+   * addAudioToRiTexts(dir, words, sampleMap, audioSets);
+   * 
+   * for (int j = 0; j < words.length; j++)
+   * {
+   * // creating an array of sample for each word
+   * // with length of the set of names of the various sets available
+   * String[] samples = new String[audioSets.length];
+   * for (int i = 0; i < audioSets.length; i++)
+   * {
+   * String wordSet = audioSets[i];
+   * if (!wordSet.equals(""))
+   * wordSet = wordSet + "/";
+   * samples[i] = dir + wordSet + "word_" + j + ".wav";
+   * }
+   * sampleMap.put(words[j], samples);
+   * }
+   * }
+   * 
+   */ private void clickOnReaders(MachineReader[] readers, int keyCode)
   {
     if (keyCode == 39)
     { // arrow
