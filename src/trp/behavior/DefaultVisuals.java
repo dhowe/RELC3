@@ -6,6 +6,8 @@ import trp.reader.MachineReader;
 
 public class DefaultVisuals extends ReaderBehavior
 {
+  static private final float FADEINFACTOR = .8f, FADEOUTFACTOR = 2f, DELAYFACTOR = 2f;
+
   public DefaultVisuals() {}
   
   public DefaultVisuals(float[] rColor)
@@ -23,7 +25,7 @@ public class DefaultVisuals extends ReaderBehavior
   
   public DefaultVisuals(float[] rColor, float rSpeed)
   {
-    this(rColor, rSpeed * .8f, rSpeed * 2, rSpeed * 2);
+    this(rColor, rSpeed * FADEINFACTOR, rSpeed * FADEOUTFACTOR, rSpeed * DELAYFACTOR);
   }
 
   public DefaultVisuals(float[] rColor, float fadeIn, float fadeOut, float delay, float delayIn)
@@ -56,5 +58,12 @@ public class DefaultVisuals extends ReaderBehavior
   {
     // System.out.println("DefaultVisuals.exitWord("+mr+","+word+")");
     word.showBounds(false);
+  }
+
+  public void adjustForReaderSpeed(float readerSpeed)
+  {
+    setFadeInTime(readerSpeed * FADEINFACTOR);
+    setFadeOutTime(readerSpeed * FADEOUTFACTOR);
+    setDelayBeforeFadeBack(readerSpeed * DELAYFACTOR);
   }
 }

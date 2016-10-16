@@ -160,7 +160,8 @@ public class ELC3Multi extends MultiPageApplet
         rd.getGrid().reset(); // rest the current grid on reader change
 
         // System.out.println("click: "+clicked.value()+", "+currentReaderIdx);
-        rd.setSpeed((float) SPEED_MAP.get(speedSelect.value()), true); // alsoResetOriginalSpeed
+        readerSpeed = (float) SPEED_MAP.get(speedSelect.value());
+        rd.setSpeed(readerSpeed, true); // alsoResetOriginalSpeed
         rd.setCurrentCell(rt);
         rd.pause(false);
 
@@ -174,6 +175,7 @@ public class ELC3Multi extends MultiPageApplet
       {
         readerSpeed = (float) SPEED_MAP.get(clicked.value());
         getCurrentReader(currentReaderIdx).setSpeed(readerSpeed, true); // alsoResetOriginalSpeed
+        BEHAVIORS[currentReaderIdx].adjustForReaderSpeed(readerSpeed);
       }
 
       // VISUALS
@@ -368,9 +370,9 @@ public class ELC3Multi extends MultiPageApplet
     ((NeighborFadingVisual) neighborFadingNT).setFadeLeadingNeighbors(false);
     ((NeighborFadingVisual) neighborFadingNT).setFadeTrailingNeighbors(false);
 
-    defaultVisuals = new DefaultVisuals(MOCHRE, (float) SPEED_MAP.get("Steady"));
+    defaultVisuals = new DefaultVisuals(MOCHRE, readerSpeed);
 
-    tendrilsDGray = new DefaultVisuals(DGRAY, .5f, (float) SPEED_MAP.get("Steady"));
+    tendrilsDGray = new DefaultVisuals(DGRAY, .5f, readerSpeed);
     // earlier failed? attempt to make tendrils faster by multiplying speed by
     // 1.7
 
@@ -405,6 +407,7 @@ public class ELC3Multi extends MultiPageApplet
 
     getCurrentReader(currentReaderIdx).setBehavior(BEHAVIORS[currentReaderIdx]);
     BEHAVIORS[currentReaderIdx].setReaderColor(color);
+    BEHAVIORS[currentReaderIdx].adjustForReaderSpeed(readerSpeed);
 
     if (isSpawner)
     {

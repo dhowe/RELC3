@@ -38,12 +38,15 @@ public class MesosticDefault extends DefaultVisuals
     	}
     }
 
-    // adjust fade time: min. of 10 plus twice the reader speed
-    setFadeOutTime(10 + (2 * mr.getSpeed()));
-
     super.enterWord(mr, rt);
 
     if (meso.isUpdatingTitleLetters())
       meso.doTitleUpdate(meso.isTitleUpperCase());
+  }
+  
+  public void adjustForReaderSpeed(float readerSpeed)
+  {
+    // adjust fade time: minimum of 4 plus twice the reader speed
+    setFadeOutTime(4 + (2 * readerSpeed));
   }
 }

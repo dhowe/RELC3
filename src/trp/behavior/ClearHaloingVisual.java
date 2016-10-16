@@ -9,6 +9,8 @@ import trp.reader.MachineReader;
 
 public class ClearHaloingVisual extends DefaultVisuals
 {
+  static private final float FADEINFACTOR = .75f, FADEOUTFACTOR = 2f, DELAYFACTOR = 2f;
+
   // private members
   private float[] innerFadeToColor, outerFadeToColor, gridColor;
   private float readerSpeed;
@@ -40,10 +42,7 @@ public class ClearHaloingVisual extends DefaultVisuals
   public ClearHaloingVisual(float[] rColor, float[] gColor, float rSpeed)
   {
     readerColor = rColor;
-    readerSpeed = rSpeed;
-    fadeInTime = readerSpeed * .75f; // must be less than step time
-    fadeOutTime = readerSpeed * 2f;
-    delayBeforeFadeBack = fadeOutTime;
+    adjustForReaderSpeed(rSpeed);
     gridColor = gColor;
     innerFadeToColor = gridColor.clone();
     innerFadeToColor[3] = (innerFadeToColor[3] / 2); // half alpha
@@ -184,4 +183,10 @@ public class ClearHaloingVisual extends DefaultVisuals
     this.fadeTrailingNeigbors = fadeTrailingNeigbors;
   }
 
+  public void adjustForReaderSpeed(float readerSpeed)
+  {
+    setFadeInTime(readerSpeed * FADEINFACTOR);
+    setFadeOutTime(readerSpeed * FADEOUTFACTOR);
+    setDelayBeforeFadeBack(readerSpeed * DELAYFACTOR);
+  }
 }

@@ -76,4 +76,11 @@ public class SpawnDirectionalPRs extends Spawning
     }
   }
 
+  @Override
+  public void adjustForReaderSpeed(float readerSpeed)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
 }// end

@@ -139,5 +139,7 @@ public abstract class ReaderBehavior implements ReaderConstants
   {
     Readers.verify(b);
   }
+  
+  public abstract void adjustForReaderSpeed(float readerSpeed);
 
 }// end

@@ -5,8 +5,8 @@ import java.util.Map;
 
 import processing.core.PApplet;
 import rita.*;
+import trp.behavior.ClearHaloingVisual;
 import trp.behavior.DefaultVisuals;
-import trp.behavior.HaloingVisualBehavior;
 import trp.behavior.MesosticDefault;
 import trp.behavior.NeighborFadingVisual;
 import trp.reader.LookaheadPosReader;
@@ -105,7 +105,7 @@ public class MultiPageApplet extends ReadersPApplet
     MachineReader reader2 = new UnconPerigramReader(recto, perigrams);
     // rdr4.setBehavior(new SpawnOnDirection(perigrams, S, SE, N, NW));
     reader2.setSpeed(1.5f, true);
-    reader2.setBehavior(new HaloingVisualBehavior(Readers.unhex(COLORS[2]), reader2.getSpeed()));
+    reader2.setBehavior(new ClearHaloingVisual(Readers.unhex(COLORS[2]), recto.template().fill(), reader2.getSpeed()));
     //reader2.addBehavior(new MappedAudioBehavior(this, sampleMap, UPR_VOICE, LOADSAMPLES));
     reader2.setPrintToConsole(false);
     reader2.setTestMode(false);

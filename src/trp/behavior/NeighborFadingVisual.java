@@ -18,9 +18,10 @@ import trp.reader.MachineReader;
 public class NeighborFadingVisual extends DefaultVisuals
 {
 
+  static private final float FADEINFACTOR = .8f, FADEOUTFACTOR = 10f, DELAYFACTOR = 2.5f;
+
   // private members
   private float[] leadingFadeToColor, trailingFadeToColor, gridColor;
-  private float readerSpeed; // for convenience
   private ArrayList leadingFadingNeighbors = new ArrayList();
   private ArrayList trailingFadingNeighbors = new ArrayList();
   private ArrayList recentlyReadCells = new ArrayList();
@@ -30,10 +31,7 @@ public class NeighborFadingVisual extends DefaultVisuals
   {
     if (theColor != null)
       readerColor = theColor;
-    readerSpeed = rSpeed;
-    fadeInTime = readerSpeed * .8f; // shld be less that step speed
-    fadeOutTime = readerSpeed * 10f;
-    delayBeforeFadeBack = readerSpeed * 2.5f;
+    adjustForReaderSpeed(rSpeed);
     gridColor = gCol;
 
     leadingFadeToColor = gridColor.clone();
@@ -174,4 +172,10 @@ public class NeighborFadingVisual extends DefaultVisuals
     this.fadeTrailingNeighbors = fadeTrailingNeighbors;
   }
 
+  public void adjustForReaderSpeed(float readerSpeed)
+  {
+    setFadeInTime(readerSpeed * FADEINFACTOR);
+    setFadeOutTime(readerSpeed * FADEOUTFACTOR);
+    setDelayBeforeFadeBack(readerSpeed * DELAYFACTOR);
+  }
 }
