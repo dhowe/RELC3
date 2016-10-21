@@ -13,7 +13,6 @@ public class ClearHaloingVisual extends DefaultVisuals
 
   // private members
   private float[] innerFadeToColor, outerFadeToColor, gridColor;
-  private float readerSpeed;
   private ArrayList innerFadingNeighbors = new ArrayList();
   private ArrayList outerFadingNeighbors = new ArrayList();
   private ArrayList recentlyReadCells = new ArrayList();

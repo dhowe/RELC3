@@ -74,6 +74,14 @@ public interface ReaderConstants
   float[] LIGHT_PINK = Readers.unhex(0xFFB6C1);
   float[] PALE_BLUE = Readers.unhex(0x66CCFF);
 
+  // typical reader speeds
+  float FLUENT = 0.4f;
+  float STEADY = 0.8f;
+  float SLOW = 1.2f;
+  float  SLOWER = 1.6f;
+  float SLOWEST = 2.0f;
+  float FAST = 0.2f;
+
   int FOCUS_CHECK_INTERVAL = 200;
   int CLIENT_MAX_WORD_LIST_LENGTH = 20;
   int HTTP_PORT = 8080;
@@ -81,7 +89,7 @@ public interface ReaderConstants
 
   // SpotLight modes
   int SPOTLIGHT_NONE = 0, SPOTLIGHT_FOCUS = 1, SPOTLIGHT_ALL = 2;
-
+  
   String HTTP_PRE = "http://";
   // String LOCALHOST = "localhost";
   String ENCODING = "UTF-8";

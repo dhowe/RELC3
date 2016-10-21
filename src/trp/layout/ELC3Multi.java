@@ -18,7 +18,6 @@ public class ELC3Multi extends MultiPageApplet
   static final String[] READER_NAMES = { "Perigram", "Less Directed Perigram", "Simple Spawner",
       "Perigram Spawner", "Less Directed Spawner", "Mesostic Jumper" };
   static final String[] TEXT_NAMES = { "POETIC CAPTION", "MISSPELT LANDINGS", "THE IMAGE" };
-  static final String[] VISUAL_NAMES = { "Traces", "Haloes" };
   static final String[] MESOSTICS = { "reading as writing through",
       "reaching out falling through circling over landing on turning within spelling as",
       "comes in is over goes out is done lolls in stays there is had no more", "reading as writing through" };
@@ -28,9 +27,10 @@ public class ELC3Multi extends MultiPageApplet
   static PerigramLookup[] PERIGRAMS;
   static PFont[] FONTS;
 
-  ReaderBehavior neighborFading, spawningVB, defaultVisuals, tendrilsDGray, neighborFadingNT, haloing,
-      mesostic, mesoHaloing;
-  ButtonSelect textSelect, readerSelect, speedSelect, visualSelect, colorSelect;
+  ReaderBehavior neighborFading, defaultVisuals, tendrilsDGray, neighborFadingNT, haloing, mesostic,
+      mesoHaloing;
+  SpawnDirectionalPRs spawningSE, spawningNE, spawningVB;
+  ButtonSelect textSelect, readerSelect, speedSelect, spawnSelect, visualSelect, colorSelect;
   float readerColor[] = OATMEAL, readerSpeed = 0.5f;
   RiTextGrid verso, recto;
   PFont info;
@@ -170,6 +170,13 @@ public class ELC3Multi extends MultiPageApplet
         pManager.onUpdateFocusedReader(rd);
       }
 
+      // COLOR - of reader
+      else if (clicked == colorSelect)
+      {
+        readerColor = (float[]) COLOR_MAP.get(clicked.value());
+        BEHAVIORS[currentReaderIdx].setReaderColor(readerColor);
+      }
+
       // SPEED
       else if (clicked == speedSelect)
       {
@@ -179,17 +186,11 @@ public class ELC3Multi extends MultiPageApplet
       }
 
       // VISUALS
-      else if (clicked == visualSelect)
+      else if (clicked == spawnSelect || clicked == visualSelect)
       {
         setVisuals(clicked.value(), readerColor, isSpawner(currentReaderIdx));
       }
 
-      // COLOR - of reader
-      else if (clicked == colorSelect)
-      {
-        readerColor = (float[]) COLOR_MAP.get(clicked.value());
-        BEHAVIORS[currentReaderIdx].setReaderColor(readerColor);
-      }
     }
   }
 
@@ -231,12 +232,12 @@ public class ELC3Multi extends MultiPageApplet
 
     SPEED_MAP = new LinkedHashMap(); // must be LinkedHashMap to preserve
                                      // keySet() orders below
-    SPEED_MAP.put("Fluent", 0.4f);
-    SPEED_MAP.put("Steady", 0.8f);
-    SPEED_MAP.put("Slow", 1.2f);
-    SPEED_MAP.put("Slower", 1.6f);
-    SPEED_MAP.put("Slowest", 2.0f);
-    SPEED_MAP.put("Fast", 0.2f);
+    SPEED_MAP.put("Fluent", FLUENT);
+    SPEED_MAP.put("Steady", STEADY);
+    SPEED_MAP.put("Slow", SLOW);
+    SPEED_MAP.put("Slower", SLOWER);
+    SPEED_MAP.put("Slowest", SLOWEST);
+    SPEED_MAP.put("Fast", FAST);
 
     ButtonSelect.TEXT_FILL = BLACK;
     ButtonSelect.STROKE_WEIGHT = 0;
@@ -244,9 +245,11 @@ public class ELC3Multi extends MultiPageApplet
     int buttonY = 697;
     textSelect = new ButtonSelect(this, 0, buttonY, "Text", TEXT_NAMES);
     readerSelect = new ButtonSelect(this, 0, buttonY, "Reader", READER_NAMES);
-    speedSelect = new ButtonSelect(this, 0, buttonY, "Speed", (String[]) SPEED_MAP.keySet().toArray(new String[0]));
-    visualSelect = new ButtonSelect(this, 0, buttonY, "Visual", VISUAL_NAMES);
     colorSelect = new ButtonSelect(this, 0, buttonY, "Color", (String[]) COLOR_MAP.keySet().toArray(new String[0]));
+    speedSelect = new ButtonSelect(this, 0, buttonY, "Speed", (String[]) SPEED_MAP.keySet().toArray(new String[0]));
+    spawnSelect = new ButtonSelect(this, 0, buttonY, "Spawning", new String[] { "NE & SE", "South-East",
+        "North-East" });
+    visualSelect = new ButtonSelect(this, 0, buttonY, "Visual", new String[] { "Traces", "Haloes" });
 
     int widestButton = 0, totalWidth = 0;
     for (int i = 0; i < ButtonSelect.instances.size(); i++)
@@ -260,7 +263,7 @@ public class ELC3Multi extends MultiPageApplet
     // ButtonSelect.instances.get(i).setWidth(widestButton);
     // }
 
-    int nextX = width / 2 + 40; // width - totalWidth - 160;
+    int nextX = width / 2 + 20; // width - totalWidth - 160;
     for (int i = 0; i < ButtonSelect.instances.size(); i++)
     {
       ButtonSelect bs = ButtonSelect.instances.get(i);
@@ -275,7 +278,7 @@ public class ELC3Multi extends MultiPageApplet
 
     currentReaderIdx = 0; // reset back to first reader
 
-    readerSpeed = (float) SPEED_MAP.get("Fluent");
+    readerSpeed = FLUENT;
     verso = pManager.getVerso();
     recto = pManager.getRecto();
 
@@ -290,7 +293,7 @@ public class ELC3Multi extends MultiPageApplet
 
       MachineReader.delete(readers[0]);
       readers[0] = new PerigramReader(verso, perigrams);
-      readers[0].setSpeed(readerSpeed); // was 0.5f
+      readers[0].setSpeed(readerSpeed);
       readers[0].setBehavior(neighborFading);
     }
 
@@ -300,17 +303,17 @@ public class ELC3Multi extends MultiPageApplet
 
       MachineReader.delete(readers[1]);
       readers[1] = new UnconPerigramReader(verso, perigrams);
-      readers[1].setSpeed(readerSpeed); // was 0.5f
+      readers[1].setSpeed(readerSpeed);
       readers[1].setBehavior(neighborFadingNT);
     }
 
     if (readers.length > 2)
     {
 
-      // SIMPLE READING SPAWNER - nb: has different default speed
+      // SIMPLE READING SPAWNER
       MachineReader.delete(readers[2]);
       readers[2] = new SimpleReader(verso);
-      readers[2].setSpeed((float) SPEED_MAP.get("Steady")); // was 1.7f
+      readers[2].setSpeed(readerSpeed);
       readers[2].setBehavior(defaultVisuals);
       readers[2].addBehavior(spawningVB);
     }
@@ -321,7 +324,7 @@ public class ELC3Multi extends MultiPageApplet
       // PERIGRAM SPAWNER
       MachineReader.delete(readers[3]);
       readers[3] = new PerigramReader(verso, perigrams);
-      readers[3].setSpeed(readerSpeed); // was 0.6f
+      readers[3].setSpeed(readerSpeed);
       readers[3].setBehavior(neighborFadingNT);
       readers[3].addBehavior(spawningVB);
     }
@@ -340,10 +343,10 @@ public class ELC3Multi extends MultiPageApplet
     if (readers.length > 5)
     {
 
-      // MESOSTIC JUMPER - nb: has different default speed
+      // MESOSTIC JUMPER
       MachineReader.delete(readers[5]);
       readers[5] = new MesoPerigramJumper(verso, MESOSTICS[textIndex], perigrams);
-      readers[5].setSpeed((float) SPEED_MAP.get("Steady"));
+      readers[5].setSpeed(readerSpeed);
       readers[5].setBehavior(mesostic);
     }
 
@@ -372,17 +375,16 @@ public class ELC3Multi extends MultiPageApplet
 
     defaultVisuals = new DefaultVisuals(MOCHRE, readerSpeed);
 
-    tendrilsDGray = new DefaultVisuals(DGRAY, .5f, readerSpeed);
-    // earlier failed? attempt to make tendrils faster by multiplying speed by
-    // 1.7
+    tendrilsDGray = new DefaultVisuals(DGRAY, FAST, FLUENT); // is a delay *before spawned reader fadein*
 
-    // NB ugh: tendrilsDGray has to be non-null at this point:
-    spawningVB = new SpawnDirectionalPRs(perigrams, tendrilsDGray, NE, N, NW, SW, S, SE);
+    spawningVB = new SpawnDirectionalPRs(perigrams, tendrilsDGray, SE, NE);
+    spawningSE = new SpawnDirectionalPRs(perigrams, tendrilsDGray, SE);
+    spawningNE = new SpawnDirectionalPRs(perigrams, tendrilsDGray, NE);
 
     mesostic = new MesosticDefault(10f, MYELLOW);
 
     mesoHaloing = new MesosticHaloingVisual(MOCHRE, verso.template().fill(), readerSpeed);
-    
+
     haloing = new ClearHaloingVisual(MOCHRE, verso.template().fill(), readerSpeed);
 
     // these appear to be the default behaviors, at least when not haloing?
@@ -411,7 +413,20 @@ public class ELC3Multi extends MultiPageApplet
 
     if (isSpawner)
     {
-      getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
+      switch (spawnSelect.value())
+      {
+        case "South-East":
+          getCurrentReader(currentReaderIdx).addBehavior(spawningSE);
+          break;
+
+        case "North-East":
+          getCurrentReader(currentReaderIdx).addBehavior(spawningNE);
+          break;
+
+        default:
+          getCurrentReader(currentReaderIdx).addBehavior(spawningVB);
+          break;
+      }
     }
   }
 

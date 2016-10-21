@@ -8,8 +8,10 @@ import trp.util.Direction;
 import trp.util.PerigramLookup;
 import trp.util.Readers;
 
-public class SpawnDirectionalPRs extends Spawning
+public class SpawnDirectionalPRs extends ReaderBehavior
 {
+  static private final float SPAWNEDSPEED = FLUENT;
+
   static boolean spawnInThread = true;
 
   private PerigramLookup spawningPerigrams; // was static with dch remark: yuk
@@ -29,7 +31,7 @@ public class SpawnDirectionalPRs extends Spawning
     }
   }
 
-  public void enterWord(/* final */MachineReader mr, /* final */RiText rt)
+  public void enterWord(MachineReader mr, RiText rt)
   {
     // System.out.println("SpawnOnDirection.enterWord(lastDir="+mr.getLastDirection()+")");
 
@@ -43,7 +45,7 @@ public class SpawnDirectionalPRs extends Spawning
         continue;
       prevCell = mr.getPreviouslyReadCell(1);
       if (spawningPerigrams.isPerigram(-1, prevCell, currCell, spurCell))
-        spawnReader(mr, currCell, spawningDirections[i]);
+        spawnReader(mr, spurCell, spawningDirections[i]);
     }
   }
 
@@ -55,17 +57,13 @@ public class SpawnDirectionalPRs extends Spawning
 
     MachineReader spawned = null;
     RiTextGrid rtg = spawner.getGrid();
-    float spawnSpeed = spawner.getSpeed();
 
     // info("Spawning PerigramDirectionalReader " + dir + " at cell [" + spawningCell.getText() + "]\rbased on perigram: " + prevCell.getText() + " " + spawningCell.getText() + " " + spurCell.getText());
     spawned = new PerigramDirectionalReader(rtg, spawningPerigrams, dir);
 
     if (spawned != null)
     {
-      spawned.setSpeed(spawnSpeed/* * 1.7f*/); // SET speed of spawned reader here
-//      ReaderBehavior vb1 = new NeighborFadingVisual(MRED, rtg.template().getColor(), spawned.getSpeed());
-//      ((NeighborFadingVisual) vb1).setFadeLeadingNeighbors(false);
-//      ((NeighborFadingVisual) vb1).setFadeTrailingNeighbors(false);
+      spawned.setSpeed(SPAWNEDSPEED);
       spawned.setBehavior(spawnedVB);
       spawned.setCurrentCell(spawningCell);
       spawned.setHasMoved(true);
@@ -80,7 +78,6 @@ public class SpawnDirectionalPRs extends Spawning
   public void adjustForReaderSpeed(float readerSpeed)
   {
     // TODO Auto-generated method stub
-    
   }
 
 }// end

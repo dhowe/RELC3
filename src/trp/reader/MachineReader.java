@@ -16,14 +16,14 @@ import trp.util.*;
 
 public abstract class MachineReader implements ReaderConstants
 {
-  public static boolean PRODUCTION_MODE = false, USE_SERVER = false;
-  public static String SERVER_HOST = "lab-lamp.scm.cityu.edu.hk";// "rednoise.org"//"localhost";
+  // Statics --------------------------------------
 
   private static final int DEFAULT_HISTORY_SIZE = 10;
 
-  // Statics --------------------------------------
-
+  public static boolean PRODUCTION_MODE = false, USE_SERVER = false;
+  public static String SERVER_HOST = "lab-lamp.scm.cityu.edu.hk";// "rednoise.org"//"localhost";
   public static List instances = new ArrayList();
+  
   private static boolean firstUpdate = true;
 
   // Members --------------------------------------
