@@ -49,8 +49,7 @@ public class ELC3Multi extends MultiPageApplet {
 	public void draw() {
 
 		background(LAYOUT_BACKGROUND_COLOR);
-
-		// bit of KLUDGE: +14 is for labels:
+		// bit of a KLUDGE: + 14 is for labels:
 		if ((mouseY < height) && (mouseY > (height - (textSelect.height + 14)))) {
 			ButtonSelect.drawAll(mouseX, mouseY);
 
@@ -274,6 +273,7 @@ public class ELC3Multi extends MultiPageApplet {
 
 		// SIMPLE READING SPAWNER
 		if (readers.length > 2) {
+
 			MachineReader.delete(readers[2]);
 			readers[2] = new SimpleReader(verso);
 			readers[2].setSpeed(readerSpeed);
@@ -292,6 +292,7 @@ public class ELC3Multi extends MultiPageApplet {
 
 		// LESS DIRECTED SPAWNER
 		if (readers.length > 4) {
+
 			MachineReader.delete(readers[4]);
 			readers[4] = new UnconPerigramReader(verso, perigrams);
 			readers[4].setSpeed((float) SPEED_MAP.get("Steady"));
@@ -301,6 +302,7 @@ public class ELC3Multi extends MultiPageApplet {
 
 		// MESOSTIC JUMPER
 		if (readers.length > 5) {
+
 			MachineReader.delete(readers[5]);
 			readers[5] = new MesoPerigramJumper(verso, MESOSTICS[textIndex], perigrams);
 			readers[5].setSpeed(readerSpeed);
@@ -330,8 +332,9 @@ public class ELC3Multi extends MultiPageApplet {
 
 		defaultVisuals = new DefaultVisuals(MOCHRE, readerSpeed);
 
-		// FAST is a delay before fadein:
+
 		tendrilsDGray = new DefaultVisuals(DGRAY, FAST, FLUENT);
+		// FAST is a delay before fadein
 
 		spawningVB = new SpawnDirectionalPRs(perigrams, tendrilsDGray, SE, NE);
 		spawningSE = new SpawnDirectionalPRs(perigrams, tendrilsDGray, SE);
@@ -349,8 +352,8 @@ public class ELC3Multi extends MultiPageApplet {
 		// "Perigram Spawner", "Less Directed Spawner", "Mesostic Jumper" }
 		TRAILS = new ReaderBehavior[] { neighborFading, neighborFading, defaultVisuals, neighborFadingNT, neighborFadingNT, mesostic };
 		HALOING = new ReaderBehavior[] { haloing, haloing, haloing, haloing, haloing, mesoHaloing };
-		// NB (not brilliant): number of behaviors in this array must match number
-		// of READER_NAMES
+		// NB (not brilliant): number of behaviors in this array
+		// must match number of READER_NAMES
 		BEHAVIORS = TRAILS;
 		if (READER_NAMES.length != BEHAVIORS.length) Readers.warn("Number of behaviors does nto match number of readers.");
 	}
@@ -385,11 +388,9 @@ public class ELC3Multi extends MultiPageApplet {
 
 	private void showCurrentWord(String word) {
 
-		// what about showing the last x words (perhaps with a fade for older ones)
-		// ?
+		// what about showing the last x words (perhaps with a fade for older ones)?
 		// would be nice for mesostic at least, but would also give a better sense
 		// of the generation
-		//
 		// idea above def worth exploring but I think we should continue to allow
 		// the human reader
 		// to have a 'clean' view of the sketch without buttons or word monitor
