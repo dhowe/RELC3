@@ -51,8 +51,7 @@ public class ELC3Multi extends MultiPageApplet {
 		background(LAYOUT_BACKGROUND_COLOR);
 
 		// bit of KLUDGE: +14 is for labels:
-		if ((mouseY < height) && (mouseY > (height - (textSelect.height + 14))))
-		{
+		if ((mouseY < height) && (mouseY > (height - (textSelect.height + 14)))) {
 			ButtonSelect.drawAll(mouseX, mouseY);
 
 			String word = MachineReader.stripPunctuation(getCurrentReader(currentReaderIdx).getCurrentCell().text());
@@ -95,9 +94,8 @@ public class ELC3Multi extends MultiPageApplet {
 		resetButtons();
 
 		if (pManager == null) {
-			pManager = PageManager.create(this, 40, 40, 38, 38); // bottom marg was
-																														// 30, adjust for
-																														// Beckett
+			pManager = PageManager.create(this, 40, 40, 38, 38);
+			// bottom marg was 30, adjust for Beckett
 			pManager.showPageNumbers(false);
 			pManager.setApplicationId("elc3");
 			pManager.decreaseGutterBy(20);
@@ -121,8 +119,8 @@ public class ELC3Multi extends MultiPageApplet {
 
 			// TEXT
 			if (clicked == textSelect) {
-				// MachineReader.destroyAll(); TODO: I thought this would do it but it
-				// doesn't
+				// MachineReader.destroyAll();
+				// TODO: I thought this would do it but it doesn't
 				// look at the output from this. Why don't the instances get deleted??
 				for (int i = 0; i < MachineReader.instances.size(); i++) {
 					Readers.info(MachineReader.instances.get(i).toString());
@@ -203,8 +201,8 @@ public class ELC3Multi extends MultiPageApplet {
 		COLOR_MAP.put("Yellow", MYELLOW);
 
 		// grid color setup
-		LAYOUT_BACKGROUND_COLOR = BLACK_INT; // CHANGE THIS TO INVERT; > 127 dark on
-																					// light
+		LAYOUT_BACKGROUND_COLOR = BLACK_INT;
+		// CHANGE THIS TO INVERT; > 127 dark on light
 		int gridcol = (LAYOUT_BACKGROUND_COLOR > 127) ? 0 : 255;
 		GRID_ALPHA = 40; // EDIT could also be set from preferences in production
 		RiTextGrid.defaultColor(gridcol, gridcol, gridcol - GRID_ALPHA, GRID_ALPHA);
@@ -212,8 +210,8 @@ public class ELC3Multi extends MultiPageApplet {
 
 	private void buttonSetup() {
 
-		SPEED_MAP = new LinkedHashMap(); // must be LinkedHashMap to preserve
-																			// keySet() orders below
+		SPEED_MAP = new LinkedHashMap();
+		// must be LinkedHashMap to preserve keySet() orders below
 		SPEED_MAP.put("Fluent", FLUENT);
 		SPEED_MAP.put("Steady", STEADY);
 		SPEED_MAP.put("Slow", SLOW);
