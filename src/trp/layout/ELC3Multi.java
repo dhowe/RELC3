@@ -144,6 +144,19 @@ public class ELC3Multi extends MultiPageApplet
       // TEXT
       if (clicked == textSelect)
       {
+        // MachineReader.destroyAll(); TODO: I thought this would do it but it doesn't
+        // look at the output from this. Why don't the instances get deleted??
+        for (int i = 0; i < MachineReader.instances.size(); i++)
+        {
+          Readers.info(MachineReader.instances.get(i).toString());
+          ((MachineReader) MachineReader.instances.get(i)).pause(true);
+          MachineReader.delete((MachineReader) MachineReader.instances.get(i));
+        }
+        Readers.info("no instances? " + (MachineReader.instances.size() == 0));
+        for (int i = 0; i < MachineReader.instances.size(); i++)
+        {
+          Readers.info(MachineReader.instances.get(i).toString());
+        }
         doLayout(textIdxFromName(clicked.value()));
       }
 
@@ -290,8 +303,6 @@ public class ELC3Multi extends MultiPageApplet
     // PERIGRAM
     if (readers.length > 0)
     {
-
-      MachineReader.delete(readers[0]);
       readers[0] = new PerigramReader(verso, perigrams);
       readers[0].setSpeed(readerSpeed);
       readers[0].setBehavior(neighborFading);
@@ -300,57 +311,49 @@ public class ELC3Multi extends MultiPageApplet
     // UNCONSTRAINED PERIGRAM
     if (readers.length > 1)
     {
-
-      MachineReader.delete(readers[1]);
       readers[1] = new UnconPerigramReader(verso, perigrams);
       readers[1].setSpeed(readerSpeed);
       readers[1].setBehavior(neighborFadingNT);
     }
 
+    // SIMPLE READING SPAWNER
     if (readers.length > 2)
     {
-
-      // SIMPLE READING SPAWNER
-      MachineReader.delete(readers[2]);
       readers[2] = new SimpleReader(verso);
       readers[2].setSpeed(readerSpeed);
       readers[2].setBehavior(defaultVisuals);
       readers[2].addBehavior(spawningVB);
     }
 
+    // PERIGRAM SPAWNER
     if (readers.length > 3)
     {
-
-      // PERIGRAM SPAWNER
-      MachineReader.delete(readers[3]);
       readers[3] = new PerigramReader(verso, perigrams);
       readers[3].setSpeed(readerSpeed);
       readers[3].setBehavior(neighborFadingNT);
       readers[3].addBehavior(spawningVB);
     }
 
+    // LESS DIRECTED SPAWNER
     if (readers.length > 4)
     {
-
-      // LESS DIRECTED SPAWNER
-      MachineReader.delete(readers[4]);
       readers[4] = new UnconPerigramReader(verso, perigrams);
       readers[4].setSpeed((float) SPEED_MAP.get("Steady"));
       readers[4].setBehavior(neighborFadingNT);
       readers[4].addBehavior(spawningVB);
     }
 
+    // MESOSTIC JUMPER
     if (readers.length > 5)
     {
-
-      // MESOSTIC JUMPER
-      MachineReader.delete(readers[5]);
       readers[5] = new MesoPerigramJumper(verso, MESOSTICS[textIndex], perigrams);
       readers[5].setSpeed(readerSpeed);
       readers[5].setBehavior(mesostic);
     }
 
     // currentReaderIdx = 6; // Mesostic default
+
+    pManager.onUpdateFocusedReader(getCurrentReader(currentReaderIdx));
 
     for (int i = 0; i < readers.length; i++)
     {
@@ -359,7 +362,6 @@ public class ELC3Multi extends MultiPageApplet
       readers[i].pause(currentReaderIdx != i);
     }
 
-    pManager.onUpdateFocusedReader(getCurrentReader(currentReaderIdx));
   }
 
   public void constructBehaviorsFor(PerigramLookup perigrams)
