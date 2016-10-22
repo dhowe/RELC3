@@ -120,6 +120,7 @@ public class ELC3Multi extends MultiPageApplet {
 		pManager.doLayout();
 
 		constructReadersFor(PERIGRAMS[textIndex], textIndex);
+		spawnSelect.disabled = !isSpawner(currentReaderIdx);
 	}
 
 	public void mouseClicked() {
@@ -322,6 +323,7 @@ public class ELC3Multi extends MultiPageApplet {
 		}
 
 		pManager.onUpdateFocusedReader(getCurrentReader(currentReaderIdx));
+		
 	}
 
 	public void constructBehaviorsFor(PerigramLookup perigrams) {
