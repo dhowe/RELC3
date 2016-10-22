@@ -28,7 +28,7 @@ public class ELC3Multi extends MultiPageApplet {
 	float readerColor[] = OATMEAL, readerSpeed = 0.5f;
 	RiTextGrid verso, recto;
 	PFont info;
-	
+
 	private String[] textContents;
 
 	public void settings() {
@@ -50,15 +50,8 @@ public class ELC3Multi extends MultiPageApplet {
 
 		background(LAYOUT_BACKGROUND_COLOR);
 
-		// draw buttons only if not flipping
-		// if (!pManager.isFlipping())
-		// {
-		if ((mouseY < height) && (mouseY > (height - (textSelect.height + 14)))) // KLUDGE:
-																																							// +
-																																							// 14
-																																							// for
-																																							// label
-		{
+		// bit of a KLUDGE: + 14 is for labels:
+		if ((mouseY < height) && (mouseY > (height - (textSelect.height + 14)))) {
 			ButtonSelect.drawAll(mouseX, mouseY);
 
 			String word = MachineReader.stripPunctuation(getCurrentReader(currentReaderIdx).getCurrentCell().text());
@@ -71,10 +64,6 @@ public class ELC3Multi extends MultiPageApplet {
 
 			drawDog_ear();
 		}
-
-		// }
-		// else
-		// drawDog_ear();
 
 		pManager.draw(g);
 	}
@@ -105,9 +94,8 @@ public class ELC3Multi extends MultiPageApplet {
 		resetButtons();
 
 		if (pManager == null) {
-			pManager = PageManager.create(this, 40, 40, 38, 38); // bottom marg was
-																														// 30, adjust for
-																														// Beckett
+			pManager = PageManager.create(this, 40, 40, 38, 38);
+			// bottom marg was 30, adjust for Beckett
 			pManager.showPageNumbers(false);
 			pManager.setApplicationId("elc3");
 			pManager.decreaseGutterBy(20);
@@ -201,8 +189,8 @@ public class ELC3Multi extends MultiPageApplet {
 		COLOR_MAP.put("Yellow", MYELLOW);
 
 		// grid color setup
-		LAYOUT_BACKGROUND_COLOR = BLACK_INT; // CHANGE THIS TO INVERT; > 127 dark on
-																					// light
+		LAYOUT_BACKGROUND_COLOR = BLACK_INT;
+		// CHANGE THIS TO INVERT; > 127 dark on light
 		int gridcol = (LAYOUT_BACKGROUND_COLOR > 127) ? 0 : 255;
 		GRID_ALPHA = 40; // EDIT could also be set from preferences in production
 		RiTextGrid.defaultColor(gridcol, gridcol, gridcol - GRID_ALPHA, GRID_ALPHA);
@@ -210,8 +198,8 @@ public class ELC3Multi extends MultiPageApplet {
 
 	private void buttonSetup() {
 
-		SPEED_MAP = new LinkedHashMap(); // must be LinkedHashMap to preserve
-																			// keySet() orders below
+		SPEED_MAP = new LinkedHashMap();
+		// must be LinkedHashMap to preserve keySet() orders below
 		SPEED_MAP.put("Fluent", FLUENT);
 		SPEED_MAP.put("Steady", STEADY);
 		SPEED_MAP.put("Slow", SLOW);
@@ -274,9 +262,9 @@ public class ELC3Multi extends MultiPageApplet {
 			readers[1].setBehavior(neighborFadingNT);
 		}
 
+		// SIMPLE READING SPAWNER
 		if (readers.length > 2) {
 
-			// SIMPLE READING SPAWNER
 			MachineReader.delete(readers[2]);
 			readers[2] = new SimpleReader(verso);
 			readers[2].setSpeed(readerSpeed);
@@ -284,9 +272,8 @@ public class ELC3Multi extends MultiPageApplet {
 			readers[2].addBehavior(spawningVB);
 		}
 
+		// PERIGRAM SPAWNER
 		if (readers.length > 3) {
-
-			// PERIGRAM SPAWNER
 			MachineReader.delete(readers[3]);
 			readers[3] = new PerigramReader(verso, perigrams);
 			readers[3].setSpeed(readerSpeed);
@@ -294,9 +281,9 @@ public class ELC3Multi extends MultiPageApplet {
 			readers[3].addBehavior(spawningVB);
 		}
 
+		// LESS DIRECTED SPAWNER
 		if (readers.length > 4) {
 
-			// LESS DIRECTED SPAWNER
 			MachineReader.delete(readers[4]);
 			readers[4] = new UnconPerigramReader(verso, perigrams);
 			readers[4].setSpeed((float) SPEED_MAP.get("Steady"));
@@ -304,9 +291,9 @@ public class ELC3Multi extends MultiPageApplet {
 			readers[4].addBehavior(spawningVB);
 		}
 
+		// MESOSTIC JUMPER
 		if (readers.length > 5) {
 
-			// MESOSTIC JUMPER
 			MachineReader.delete(readers[5]);
 			readers[5] = new MesoPerigramJumper(verso, MESOSTICS[textIndex], perigrams);
 			readers[5].setSpeed(readerSpeed);
@@ -336,9 +323,8 @@ public class ELC3Multi extends MultiPageApplet {
 
 		defaultVisuals = new DefaultVisuals(MOCHRE, readerSpeed);
 
-		tendrilsDGray = new DefaultVisuals(DGRAY, FAST, FLUENT); // is a delay
-																															// *before spawned
-																															// reader fadein*
+		tendrilsDGray = new DefaultVisuals(DGRAY, FAST, FLUENT);
+		// FAST is a delay before fadein
 
 		spawningVB = new SpawnDirectionalPRs(perigrams, tendrilsDGray, SE, NE);
 		spawningSE = new SpawnDirectionalPRs(perigrams, tendrilsDGray, SE);
@@ -356,8 +342,8 @@ public class ELC3Multi extends MultiPageApplet {
 		// "Perigram Spawner", "Less Directed Spawner", "Mesostic Jumper" }
 		TRAILS = new ReaderBehavior[] { neighborFading, neighborFading, defaultVisuals, neighborFadingNT, neighborFadingNT, mesostic };
 		HALOING = new ReaderBehavior[] { haloing, haloing, haloing, haloing, haloing, mesoHaloing };
-		// NB (not brilliant): number of behaviors in this array must match number
-		// of READER_NAMES
+		// NB (not brilliant): number of behaviors in this array
+		// must match number of READER_NAMES
 		BEHAVIORS = TRAILS;
 		if (READER_NAMES.length != BEHAVIORS.length) Readers.warn("Number of behaviors does nto match number of readers.");
 	}
@@ -392,11 +378,9 @@ public class ELC3Multi extends MultiPageApplet {
 
 	private void showCurrentWord(String word) {
 
-		// what about showing the last x words (perhaps with a fade for older ones)
-		// ?
+		// what about showing the last x words (perhaps with a fade for older ones)?
 		// would be nice for mesostic at least, but would also give a better sense
 		// of the generation
-		//
 		// idea above def worth exploring but I think we should continue to allow
 		// the human reader
 		// to have a 'clean' view of the sketch without buttons or word monitor
