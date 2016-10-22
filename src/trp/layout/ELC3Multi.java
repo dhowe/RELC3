@@ -50,14 +50,8 @@ public class ELC3Multi extends MultiPageApplet {
 
 		background(LAYOUT_BACKGROUND_COLOR);
 
-		// draw buttons only if not flipping
-		// if (!pManager.isFlipping())
-		// {
-		if ((mouseY < height) && (mouseY > (height - (textSelect.height + 14)))) // KLUDGE:
-																																							// +
-																																							// 14
-																																							// for
-																																							// label
+		// bit of KLUDGE: +14 is for labels:
+		if ((mouseY < height) && (mouseY > (height - (textSelect.height + 14))))
 		{
 			ButtonSelect.drawAll(mouseX, mouseY);
 
@@ -71,10 +65,6 @@ public class ELC3Multi extends MultiPageApplet {
 
 			drawDog_ear();
 		}
-
-		// }
-		// else
-		// drawDog_ear();
 
 		pManager.draw(g);
 	}
@@ -342,7 +332,8 @@ public class ELC3Multi extends MultiPageApplet {
 
 		defaultVisuals = new DefaultVisuals(MOCHRE, readerSpeed);
 
-		tendrilsDGray = new DefaultVisuals(DGRAY, FAST, FLUENT); // FAST is a delay *before fadein*
+		// FAST is a delay before fadein:
+		tendrilsDGray = new DefaultVisuals(DGRAY, FAST, FLUENT);
 
 		spawningVB = new SpawnDirectionalPRs(perigrams, tendrilsDGray, SE, NE);
 		spawningSE = new SpawnDirectionalPRs(perigrams, tendrilsDGray, SE);
