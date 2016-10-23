@@ -25,7 +25,7 @@ public class ELC3Multi extends MultiPageApplet {
 	ReaderBehavior neighborFading, defaultVisuals, tendrilsDGray, neighborFadingNT, haloing, mesostic, mesoHaloing;
 	SpawnDirectionalPRs spawningSE, spawningNE, spawningVB;
 	ButtonSelect textSelect, readerSelect, speedSelect, spawnSelect, visualSelect, colorSelect;
-	float readerColor[] = OATMEAL, readerSpeed = 0.5f;
+	float readerColor[] = OATMEAL, readerSpeed = FLUENT;
 	RiTextGrid verso, recto;
 	PFont info;
 
@@ -43,7 +43,10 @@ public class ELC3Multi extends MultiPageApplet {
 		colorSetup();
 		buttonSetup();
 		loadTextData();
+		resetButtons();
 		doLayout(0); // 0: Poetic Caption
+		constructReadersFor(PERIGRAMS[0], 0);
+		spawnSelect.disabled = !isSpawner(currentReaderIdx);
 	}
 
 	public void draw() {
@@ -89,9 +92,6 @@ public class ELC3Multi extends MultiPageApplet {
 
 	private void doLayout(int textIndex) {
 
-		pauseReaders();
-		resetButtons();
-
 		if (pManager == null) {
 			pManager = PageManager.create(this, 40, 40, 38, 38);
 			// bottom marg was 30, adjust for Beckett
@@ -106,7 +106,6 @@ public class ELC3Multi extends MultiPageApplet {
 		pManager.addTextFromFile(TEXTS[textIndex]);
 		pManager.doLayout();
 
-		constructReadersFor(PERIGRAMS[textIndex], textIndex);
 	}
 
 	public void mouseClicked() {
@@ -130,7 +129,16 @@ public class ELC3Multi extends MultiPageApplet {
 				for (int i = 0; i < MachineReader.instances.size(); i++) {
 					Readers.info(MachineReader.instances.get(i).toString());
 				}
-				doLayout(textIdxFromName(clicked.value()));
+
+				pauseReaders();
+				int textIndex = textIdxFromName(clicked.value());
+				doLayout(textIndex);
+				constructReadersFor(PERIGRAMS[textIndex], textIndex);
+				setVisuals(visualSelect.value(), readerColor, isSpawner(currentReaderIdx));
+				spawnSelect.disabled = !isSpawner(currentReaderIdx);
+				readerSpeed = (float) SPEED_MAP.get(speedSelect.value());
+				getCurrentReader(currentReaderIdx).setSpeed(readerSpeed, true); // alsoResetOriginalSpeed
+				BEHAVIORS[currentReaderIdx].adjustForReaderSpeed(readerSpeed);
 			}
 
 			// READER
@@ -245,9 +253,6 @@ public class ELC3Multi extends MultiPageApplet {
 
 	public void constructReadersFor(PerigramLookup perigrams, int textIndex) {
 
-		currentReaderIdx = 0; // reset back to first reader
-
-		readerSpeed = FLUENT;
 		verso = pManager.getVerso();
 		recto = pManager.getRecto();
 
@@ -318,6 +323,9 @@ public class ELC3Multi extends MultiPageApplet {
 			readers[i].start(); // original speeds are set when the readers start
 			readers[i].pause(currentReaderIdx != i);
 		}
+
+		pManager.onUpdateFocusedReader(getCurrentReader(currentReaderIdx));
+
 	}
 
 	public void constructBehaviorsFor(PerigramLookup perigrams) {
