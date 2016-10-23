@@ -163,6 +163,21 @@ public class ELC3Multi extends MultiPageApplet {
 				readerSpeed = (float) SPEED_MAP.get(clicked.value());
 				getCurrentReader(currentReaderIdx).setSpeed(readerSpeed, true); // alsoResetOriginalSpeed
 				BEHAVIORS[currentReaderIdx].adjustForReaderSpeed(readerSpeed);
+				if (isSpawner(currentReaderIdx)) {
+					switch (spawnSelect.value()) {
+						case "South-East":
+							spawningSE.adjustForReaderSpeed(readerSpeed);
+							break;
+
+						case "North-East":
+							spawningNE.adjustForReaderSpeed(readerSpeed);
+							break;
+
+						default:
+							spawningVB.adjustForReaderSpeed(readerSpeed);
+							break;
+					}
+				}
 			}
 
 			// VISUALS

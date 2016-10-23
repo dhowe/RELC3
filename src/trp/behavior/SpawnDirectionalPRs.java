@@ -10,12 +10,10 @@ import trp.util.Readers;
 
 public class SpawnDirectionalPRs extends ReaderBehavior
 {
-  static private final float SPAWNEDSPEED = FLUENT;
-
   static boolean spawnInThread = true;
 
-  private PerigramLookup spawningPerigrams; // was static with dch remark: yuk
-
+  private PerigramLookup spawningPerigrams;
+  private float spawnedSpeed = FLUENT;
   private Direction[] spawningDirections;
   private RiText prevCell, currCell, spurCell;
   private ReaderBehavior spawnedVB;
@@ -63,7 +61,7 @@ public class SpawnDirectionalPRs extends ReaderBehavior
 
     if (spawned != null)
     {
-      spawned.setSpeed(SPAWNEDSPEED);
+      spawned.setSpeed(spawnedSpeed);
       spawned.setBehavior(spawnedVB);
       spawned.setCurrentCell(spawningCell);
       spawned.setHasMoved(true);
@@ -77,7 +75,24 @@ public class SpawnDirectionalPRs extends ReaderBehavior
   @Override
   public void adjustForReaderSpeed(float readerSpeed)
   {
-    // TODO Auto-generated method stub
+  	if (readerSpeed <= FLUENT && readerSpeed > FAST)
+  		setSpawnedSpeed(FAST);
+  	else if (readerSpeed <= FAST)
+  		setSpawnedSpeed(FAST / 2);
+  	else
+  		setSpawnedSpeed(FLUENT);
   }
+
+	
+	public float getSpawnedSpeed() {
+	
+		return spawnedSpeed;
+	}
+
+	
+	public void setSpawnedSpeed(float spawnedSpeed) {
+	
+		this.spawnedSpeed = spawnedSpeed;
+	}
 
 }// end
