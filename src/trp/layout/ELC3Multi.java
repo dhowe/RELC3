@@ -124,6 +124,9 @@ public class ELC3Multi extends MultiPageApplet {
 				constructReadersFor(PERIGRAMS[textIndex], textIndex);
 				setVisuals(visualSelect.value(), readerColor, isSpawner(currentReaderIdx));
 				spawnSelect.disabled = !isSpawner(currentReaderIdx);
+				readerSpeed = (float) SPEED_MAP.get(speedSelect.value());
+				getCurrentReader(currentReaderIdx).setSpeed(readerSpeed, true); // alsoResetOriginalSpeed
+				BEHAVIORS[currentReaderIdx].adjustForReaderSpeed(readerSpeed);
 			}
 
 			// READER
