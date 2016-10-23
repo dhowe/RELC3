@@ -171,13 +171,4 @@ public class MultiPageApplet extends ReadersPApplet
     // if (frameCount%10==9) println("fps="+frameRate);
   }
 
-  public static void main(String[] args)
-  {
-    String[] options = { MultiPageApplet.class.getName() };
-    if (FULL_SCREEN)
-      options = new String[] { "--present", "--hide-stop",
-          MultiPageApplet.class.getName() };
-    PApplet.main(options);
-  }
-
 }// end
