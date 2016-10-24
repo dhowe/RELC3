@@ -177,6 +177,12 @@ public class ELC3Multi extends MultiPageApplet {
 							spawningVB.adjustForReaderSpeed(readerSpeed);
 							break;
 					}
+					if (readerSpeed == FAST)
+						tendrilsDGray.adjustForReaderSpeed(FAST / 2);
+					if (readerSpeed == FLUENT)
+						tendrilsDGray.adjustForReaderSpeed(FAST);
+					else
+						tendrilsDGray.adjustForReaderSpeed(FLUENT);
 				}
 			}
 
