@@ -1414,7 +1414,7 @@ public class RiTextGrid {
 		for (Iterator it = iterator(); it.hasNext();) {
 			RiText rt = (RiText) it.next();
 			RiTextGrid.resetTextFor(rt);
-			// TODO: Daniel? complete behaviors not yet written?
+			// TODO: Daniel? completeBehaviors() not yet written - could you
 			// if (stopBehaviors) rt.completeBehaviors();
 			rt.fill(template.fill());
 			rt.boundingFill(template.boundingFill());

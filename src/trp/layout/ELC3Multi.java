@@ -140,10 +140,12 @@ public class ELC3Multi extends MultiPageApplet {
 				setGridFill(gridAlpha);
 				pManager.showAll();
 				resetText(textIdxFromName(titleSelect.value()));
-//				verso = getCurrentReader(currentReaderIdx).getGrid();
-//				verso.reset();
-//				constructBehaviorsFor(PERIGRAMS[textIdxFromName(titleSelect.value())]);
-//				setVisuals(visualSelect.value(), readerColor, isSpawner(currentReaderIdx));
+				// with a verso.reset(true) we could maintain position in the text, something like this:
+				// verso = getCurrentReader(currentReaderIdx).getGrid();
+				// verso.reset(true);
+				// constructBehaviorsFor(PERIGRAMS[textIdxFromName(titleSelect.value())]);
+				// setVisuals(visualSelect.value(), readerColor,
+				// isSpawner(currentReaderIdx));
 			}
 
 			// READER
