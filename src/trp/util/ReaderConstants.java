@@ -56,7 +56,7 @@ public interface ReaderConstants
   float[] RED = Readers.unhex(0xf80300);
   float[] BLUE = Readers.unhex(0x0093FF);
   float[] CYAN = { 0, 180, 180, 255 };
-  float[] YELLOW = Readers.unhex(0xFFCC00);
+  float[] YELLOW = Readers.unhex(0xFFD000);
   float[] BLACK = { 0, 0, 0, 255 };
   float[] DGRAY = Readers.unhex(0x666666);
   float[] GRAY = Readers.unhex(0x999999);

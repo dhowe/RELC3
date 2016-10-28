@@ -24,8 +24,9 @@ public class ELC3Multi extends MultiPageApplet {
 
 	ReaderBehavior neighborFading, defaultVisuals, tendrilsDGray, neighborFadingNT, haloing, mesostic, mesoHaloing;
 	SpawnDirectionalPRs spawningSE, spawningNE, spawningVB;
-	ButtonSelect textSelect, readerSelect, speedSelect, spawnSelect, visualSelect, colorSelect;
+	ButtonSelect titleSelect, textSelect, readerSelect, speedSelect, spawnSelect, visualSelect, colorSelect;
 	float readerColor[] = OATMEAL, readerSpeed = FLUENT;
+	int gridFillInt = WHITE_INT, gridAlpha = 40;
 	RiTextGrid verso, recto;
 	PFont info;
 
@@ -54,7 +55,7 @@ public class ELC3Multi extends MultiPageApplet {
 		background(LAYOUT_BACKGROUND_COLOR);
 
 		// bit of a KLUDGE: + 14 is for labels:
-		if ((mouseY < height) && (mouseY > (height - (textSelect.height + 14)))) {
+		if ((mouseY < height) && (mouseY > (height - (titleSelect.height + 14)))) {
 			ButtonSelect.drawAll(mouseX, mouseY);
 
 			String word = MachineReader.stripPunctuation(getCurrentReader(currentReaderIdx).getCurrentCell().text());
@@ -116,17 +117,33 @@ public class ELC3Multi extends MultiPageApplet {
 		ButtonSelect clicked = ButtonSelect.click(mouseX, mouseY, isShiftDown());
 		if (clicked != null) {
 
-			// TEXT
-			if (clicked == textSelect) {
-				pauseReaders();
-				int textIndex = textIdxFromName(clicked.value());
-				doLayout(textIndex);
-				constructReadersFor(PERIGRAMS[textIndex], textIndex);
-				setVisuals(visualSelect.value(), readerColor, isSpawner(currentReaderIdx));
-				spawnSelect.disabled = !isSpawner(currentReaderIdx);
-				readerSpeed = (float) SPEED_MAP.get(speedSelect.value());
-				getCurrentReader(currentReaderIdx).setSpeed(readerSpeed, true); // alsoResetOriginalSpeed
-				BEHAVIORS[currentReaderIdx].adjustForReaderSpeed(readerSpeed);
+			// TITLE
+			if (clicked == titleSelect) {
+				resetText(textIdxFromName(clicked.value()));
+			}
+
+			// TEXT (fill)
+			else if (clicked == textSelect) {
+				switch (textSelect.value()) {
+					case "Gray":
+						gridAlpha = 80;
+						break;
+
+					case "Dark":
+						gridAlpha = 0;
+						break;
+
+					default:
+						gridAlpha = 40;
+						break;
+				}
+				setGridFill(gridAlpha);
+				pManager.showAll();
+				resetText(textIdxFromName(titleSelect.value()));
+//				verso = getCurrentReader(currentReaderIdx).getGrid();
+//				verso.reset();
+//				constructBehaviorsFor(PERIGRAMS[textIdxFromName(titleSelect.value())]);
+//				setVisuals(visualSelect.value(), readerColor, isSpawner(currentReaderIdx));
 			}
 
 			// READER
@@ -177,8 +194,7 @@ public class ELC3Multi extends MultiPageApplet {
 							spawningVB.adjustForReaderSpeed(readerSpeed);
 							break;
 					}
-					if (readerSpeed == FAST)
-						tendrilsDGray.adjustForReaderSpeed(FAST / 2);
+					if (readerSpeed == FAST) tendrilsDGray.adjustForReaderSpeed(FAST / 2);
 					if (readerSpeed == FLUENT)
 						tendrilsDGray.adjustForReaderSpeed(FAST);
 					else
@@ -192,6 +208,18 @@ public class ELC3Multi extends MultiPageApplet {
 			}
 
 		}
+	}
+
+	protected void resetText(int titleIndex) {
+
+		pauseReaders();
+		doLayout(titleIndex);
+		constructReadersFor(PERIGRAMS[titleIndex], titleIndex);
+		setVisuals(visualSelect.value(), readerColor, isSpawner(currentReaderIdx));
+		spawnSelect.disabled = !isSpawner(currentReaderIdx);
+		readerSpeed = (float) SPEED_MAP.get(speedSelect.value());
+		getCurrentReader(currentReaderIdx).setSpeed(readerSpeed, true); // alsoResetOriginalSpeed
+		BEHAVIORS[currentReaderIdx].adjustForReaderSpeed(readerSpeed);
 	}
 
 	private boolean isSpawner(int readerIndex) {
@@ -211,17 +239,22 @@ public class ELC3Multi extends MultiPageApplet {
 	private void colorSetup() {
 
 		COLOR_MAP = new LinkedHashMap();
-		COLOR_MAP.put("Oatmeal", OATMEAL);
+		COLOR_MAP.put("White", OATMEAL);
+		COLOR_MAP.put("Yellow", YELLOW);
+		COLOR_MAP.put("Orange", MYELLOW);
 		COLOR_MAP.put("Ochre", MOCHRE);
 		COLOR_MAP.put("Brown", MBROWN);
-		COLOR_MAP.put("Yellow", MYELLOW);
 
 		// grid color setup
-		LAYOUT_BACKGROUND_COLOR = BLACK_INT;
-		// CHANGE THIS TO INVERT; > 127 dark on light
-		int gridcol = (LAYOUT_BACKGROUND_COLOR > 127) ? 0 : 255;
-		GRID_ALPHA = 40; // EDIT could also be set from preferences in production
-		RiTextGrid.defaultColor(gridcol, gridcol, gridcol - GRID_ALPHA, GRID_ALPHA);
+		LAYOUT_BACKGROUND_COLOR = BLACK_INT; // this sketch always has a black
+																					// background
+		gridFillInt = (LAYOUT_BACKGROUND_COLOR > 127) ? BLACK_INT : WHITE_INT;
+		setGridFill(gridAlpha);
+	}
+
+	private void setGridFill(int gridAlpha) {
+
+		RiTextGrid.defaultColor(gridFillInt, gridFillInt, gridFillInt, gridAlpha);
 	}
 
 	private void buttonSetup() {
@@ -239,7 +272,8 @@ public class ELC3Multi extends MultiPageApplet {
 		ButtonSelect.STROKE_WEIGHT = 0;
 
 		int buttonY = 697;
-		textSelect = new ButtonSelect(this, 0, buttonY, "Text", TEXT_NAMES);
+		titleSelect = new ButtonSelect(this, 0, buttonY, "Title", TEXT_NAMES);
+		textSelect = new ButtonSelect(this, 0, buttonY, "Text", new String[] { "Faint", "Dark", "Gray" });
 		readerSelect = new ButtonSelect(this, 0, buttonY, "Reader", READER_NAMES);
 		colorSelect = new ButtonSelect(this, 0, buttonY, "Color", (String[]) COLOR_MAP.keySet().toArray(new String[0]));
 		speedSelect = new ButtonSelect(this, 0, buttonY, "Speed", (String[]) SPEED_MAP.keySet().toArray(new String[0]));
@@ -252,7 +286,7 @@ public class ELC3Multi extends MultiPageApplet {
 			widestButton = buttonWidth > widestButton ? buttonWidth : widestButton;
 		}
 
-		int nextX = width / 2 + 20;
+		int nextX = width / 2 + 10;
 		for (int i = 0; i < ButtonSelect.instances.size(); i++) {
 			ButtonSelect bs = ButtonSelect.instances.get(i);
 			bs.x = nextX;
