@@ -1412,10 +1412,11 @@ public class RiTextGrid {
 	public void reset(boolean stopBehaviors) {
 
 		for (Iterator it = iterator(); it.hasNext();) {
+			
 			RiText rt = (RiText) it.next();
+			if (stopBehaviors) rt.stopBehaviors();
+			
 			RiTextGrid.resetTextFor(rt);
-			// TODO: Daniel? completeBehaviors() not yet written - could you
-			// if (stopBehaviors) rt.completeBehaviors();
 			rt.fill(template.fill());
 			rt.boundingFill(template.boundingFill());
 			rt.showBounds(template.showBounds());
