@@ -139,13 +139,15 @@ public class ELC3Multi extends MultiPageApplet {
 				}
 				setGridFill(gridAlpha);
 				pManager.showAll();
-				resetText(textIdxFromName(titleSelect.value()));
-				// with a verso.reset(true) we could maintain position in the text, something like this:
-				// verso = getCurrentReader(currentReaderIdx).getGrid();
-				// verso.reset(true);
-				// constructBehaviorsFor(PERIGRAMS[textIdxFromName(titleSelect.value())]);
-				// setVisuals(visualSelect.value(), readerColor,
-				// isSpawner(currentReaderIdx));
+				// The following would change template fill of background text and send
+				// reader to text start:
+				// resetText(textIdxFromName(titleSelect.value()));
+				// The following changes template fill of background text maintain
+				// reader position:
+				verso = getCurrentReader(currentReaderIdx).getGrid();
+				verso.reset(true);
+				constructBehaviorsFor(PERIGRAMS[textIdxFromName(titleSelect.value())]);
+				setVisuals(visualSelect.value(), readerColor, isSpawner(currentReaderIdx));
 			}
 
 			// READER
@@ -262,7 +264,7 @@ public class ELC3Multi extends MultiPageApplet {
 	private void buttonSetup() {
 
 		SPEED_MAP = new LinkedHashMap();
-		
+
 		// must be LinkedHashMap to preserve keySet() orders below
 		SPEED_MAP.put("Fluent", FLUENT);
 		SPEED_MAP.put("Steady", STEADY);
