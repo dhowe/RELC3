@@ -262,6 +262,7 @@ public class ELC3Multi extends MultiPageApplet {
 	private void buttonSetup() {
 
 		SPEED_MAP = new LinkedHashMap();
+		
 		// must be LinkedHashMap to preserve keySet() orders below
 		SPEED_MAP.put("Fluent", FLUENT);
 		SPEED_MAP.put("Steady", STEADY);
@@ -288,7 +289,7 @@ public class ELC3Multi extends MultiPageApplet {
 			widestButton = buttonWidth > widestButton ? buttonWidth : widestButton;
 		}
 
-		int nextX = width / 2 + 10;
+		int nextX = width / 2;
 		for (int i = 0; i < ButtonSelect.instances.size(); i++) {
 			ButtonSelect bs = ButtonSelect.instances.get(i);
 			bs.x = nextX;

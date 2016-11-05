@@ -72,7 +72,7 @@ public class ButtonSelect implements ReaderConstants {
 
 	public void draw(int mx, int my) {
 
-		if (hidden || disabled) return;
+		if (hidden) return;
 
 		setProps();
 		drawLabel(LABELFILL);
@@ -83,7 +83,7 @@ public class ButtonSelect implements ReaderConstants {
 	private void drawLabel(float[] labelFill) {
 
 		p.textFont(labelFont);
-		p.fill(labelFill[0], labelFill[1], labelFill[2], labelFill[3]);
+		p.fill(labelFill[0], labelFill[1], labelFill[2], disabled ? labelFill[3]/2 : labelFill[3]);
 		p.text(label(), x + width / 2f, (y - height / 2f) + 2); // KLUDGE: + 2
 	}
 
@@ -96,7 +96,7 @@ public class ButtonSelect implements ReaderConstants {
 
 		textFill = WHITE; // KLUDGE
 
-		p.fill(textFill[0], textFill[1], textFill[2], textFill[3]);
+		p.fill(textFill[0], textFill[1], textFill[2], disabled ? textFill[3]/2 : textFill[3]);
 		p.text(value(), x + width / 2f, y + height / 2f);
 	}
 
@@ -144,11 +144,11 @@ public class ButtonSelect implements ReaderConstants {
 		// draw stroke-rect
 		p.noFill();
 		p.strokeWeight(strokeWeight);
-		p.stroke(stroke[0], stroke[1], stroke[2], stroke[3]);
+		p.stroke(stroke[0], stroke[1], stroke[2], disabled ? 32 : stroke[3]);
 		p.rect(x, y, width, height);
-
+		
 		// draw fill-rect
-		if (contains(mx, my)) {
+		if (!disabled && contains(mx, my)) {
 			p.fill(hoverFill[0], hoverFill[1], hoverFill[2], hoverFill[3]);
 		}
 		else if (getFill() != null) {
